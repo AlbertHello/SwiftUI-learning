@@ -1,0 +1,416 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SwiftUI基础视图详解 - 《SwiftUI从入门到精通》</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Helvetica Neue', 'PingFang SC', 'Microsoft YaHei', sans-serif;
+        }
+        body {
+            background: linear-gradient(135deg, #f5f7fa 0%, #e4edf5 100%);
+            color: #333;
+            line-height: 1.6;
+            padding: 20px;
+            min-height: 100vh;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        .double-border-box {
+            border: 8px solid #ffcc80; /* 中小学生风格橙色 */
+            border-radius: 20px;
+            padding: 30px;
+            background-color: white;
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.1);
+            position: relative;
+            margin-bottom: 40px;
+        }
+        .double-border-box::before {
+            content: '';
+            position: absolute;
+            top: -15px;
+            left: -15px;
+            right: -15px;
+            bottom: -15px;
+            border: 4px solid #81d4fa; /* 中小学生风格蓝色 */
+            border-radius: 30px;
+            pointer-events: none;
+            z-index: -1;
+        }
+        header {
+            text-align: center;
+            margin-bottom: 40px;
+            padding-bottom: 20px;
+            border-bottom: 3px dashed #a5d6a7; /* 中小学生风格绿色 */
+        }
+        h1 {
+            color: #ff7043; /* 中小学生风格珊瑚色 */
+            font-size: 2.8rem;
+            margin-bottom: 15px;
+            text-shadow: 2px 2px 0 #ffcc80;
+        }
+        .subtitle {
+            color: #5c6bc0; /* 中小学生风格靛蓝色 */
+            font-size: 1.4rem;
+            font-weight: 300;
+        }
+        h2 {
+            color: #42a5f5;
+            border-left: 6px solid #ffb74d;
+            padding-left: 15px;
+            margin: 30px 0 20px;
+            font-size: 1.8rem;
+        }
+        h3 {
+            color: #66bb6a;
+            margin: 25px 0 15px;
+            font-size: 1.4rem;
+        }
+        p {
+            margin-bottom: 15px;
+            font-size: 1.05rem;
+        }
+        .component-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 25px;
+            margin: 30px 0;
+        }
+        .component-card {
+            background: #f1f8e9;
+            border-radius: 15px;
+            padding: 20px;
+            border: 3px solid #c8e6c9;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+        .component-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+        }
+        .component-card h4 {
+            color: #388e3c;
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .icon {
+            width: 24px;
+            height: 24px;
+            display: inline-block;
+            vertical-align: middle;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 25px 0;
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.05);
+        }
+        th {
+            background-color: #bbdefb;
+            color: #1565c0;
+            padding: 15px;
+            text-align: left;
+        }
+        td {
+            padding: 15px;
+            border-bottom: 1px solid #e0e0e0;
+        }
+        tr:nth-child(even) {
+            background-color: #f5f5f5;
+        }
+        tr:hover {
+            background-color: #e3f2fd;
+        }
+        pre {
+            background: linear-gradient(to right, #fef9e7, #fef5e7);
+            border-left: 5px solid #f9a825;
+            padding: 20px;
+            border-radius: 10px;
+            overflow-x: auto;
+            margin: 20px 0;
+            font-family: 'Menlo', 'Monaco', 'Courier New', monospace;
+            font-size: 0.95rem;
+            line-height: 1.5;
+            color: #2c3e50;
+        }
+        code {
+            background-color: #fff3e0;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-family: 'Menlo', 'Monaco', 'Courier New', monospace;
+            font-size: 0.9rem;
+            color: #e65100;
+        }
+        ul, ol {
+            padding-left: 30px;
+            margin: 15px 0;
+        }
+        li {
+            margin-bottom: 8px;
+        }
+        .architecture-svg {
+            width: 100%;
+            max-width: 800px;
+            margin: 30px auto;
+            display: block;
+            background: #f9fbe7;
+            padding: 20px;
+            border-radius: 15px;
+            border: 3px solid #dce775;
+        }
+        .tip-box {
+            background: #e8f5e9;
+            border-left: 6px solid #4caf50;
+            padding: 20px;
+            margin: 25px 0;
+            border-radius: 0 10px 10px 0;
+        }
+        footer {
+            text-align: center;
+            margin-top: 50px;
+            padding: 25px;
+            color: #5d4037;
+            font-size: 1.1rem;
+            border-top: 3px double #ffab91;
+            background-color: #fff8e1;
+            border-radius: 10px;
+        }
+        .footer-text {
+            font-weight: bold;
+            color: #e64a19;
+        }
+        @media (max-width: 768px) {
+            .component-grid {
+                grid-template-columns: 1fr;
+            }
+            h1 {
+                font-size: 2.2rem;
+            }
+            .double-border-box {
+                padding: 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="double-border-box">
+            <header>
+                <h1>SwiftUI 基础视图组件详解</h1>
+                <p class="subtitle">《SwiftUI从入门到精通》 · 第二章：构建界面的基石</p>
+            </header>
+
+            <section>
+                <h2>📚 本章概述</h2>
+                <p>SwiftUI 通过声明式语法，让我们能够以简洁、直观的方式构建用户界面。本章将深入讲解最核心的基础视图组件，它们是构建任何SwiftUI应用的基石。理解并熟练运用这些组件，是掌握SwiftUI的第一步。</p>
+
+                <div class="tip-box">
+                    <strong>学习目标：</strong> 学完本章，你将能够独立使用Text、Image、Button等基础视图构建简单的界面，并理解布局辅助组件的作用。
+                </div>
+
+                <svg class="architecture-svg" viewBox="0 0 800 200" xmlns="http://www.w3.org/2000/svg">
+                    <rect x="50" y="80" width="120" height="60" rx="10" fill="#FFCC80" stroke="#FF9800" stroke-width="3"/>
+                    <text x="110" y="115" text-anchor="middle" fill="#5D4037" font-weight="bold">Text</text>
+
+                    <rect x="200" y="80" width="120" height="60" rx="10" fill="#81D4FA" stroke="#039BE5" stroke-width="3"/>
+                    <text x="260" y="115" text-anchor="middle" fill="#0D47A1" font-weight="bold">Image</text>
+
+                    <rect x="350" y="80" width="120" height="60" rx="10" fill="#A5D6A7" stroke="#43A047" stroke-width="3"/>
+                    <text x="410" y="115" text-anchor="middle" fill="#1B5E20" font-weight="bold">Button</text>
+
+                    <rect x="500" y="80" width="120" height="60" rx="10" fill="#FFAB91" stroke="#FF5722" stroke-width="3"/>
+                    <text x="560" y="115" text-anchor="middle" fill="#BF360C" font-weight="bold">Label</text>
+
+                    <rect x="650" y="80" width="120" height="60" rx="10" fill="#CE93D8" stroke="#8E24AA" stroke-width="3"/>
+                    <text x="710" y="115" text-anchor="middle" fill="#4A148C" font-weight="bold">布局组件</text>
+
+                    <line x1="170" y1="110" x2="200" y2="110" stroke="#78909C" stroke-width="2" stroke-dasharray="5,5"/>
+                    <line x1="320" y1="110" x2="350" y2="110" stroke="#78909C" stroke-width="2" stroke-dasharray="5,5"/>
+                    <line x1="470" y1="110" x2="500" y2="110" stroke="#78909C" stroke-width="2" stroke-dasharray="5,5"/>
+                    <line x1="620" y1="110" x2="650" y2="110" stroke="#78909C" stroke-width="2" stroke-dasharray="5,5"/>
+
+                    <text x="400" y="40" text-anchor="middle" fill="#5C6BC0" font-size="18" font-weight="bold">SwiftUI 基础视图组件关系图</text>
+                </svg>
+            </section>
+
+            <section>
+                <h2>🧱 核心视图组件详解</h2>
+                <p>以下组件是SwiftUI中最常用、最基本的部分。每个组件都有其特定的用途和丰富的修饰符（Modifier）可供定制。</p>
+
+                <div class="component-grid">
+                    <div class="component-card">
+                        <h4><svg class="icon" viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="14" rx="2" fill="#42A5F5"/><text x="12" y="15" text-anchor="middle" fill="white" font-size="10" font-family="Arial">T</text></svg> Text - 文本视图</h4>
+                        <p>用于显示只读文本。是SwiftUI中最基础的视图。</p>
+                        <ul>
+                            <li><strong>核心功能：</strong>显示字符串、日期、数字等。</li>
+                            <li><strong>常用修饰符：</strong><code>.font()</code>, <code>.foregroundColor()</code>, <code>.multilineTextAlignment()</code></li>
+                        </ul>
+                        <pre><code>Text("Hello, SwiftUI!")
+    .font(.largeTitle)
+    .fontWeight(.bold)
+    .foregroundColor(.blue)
+    .padding()</code></pre>
+                    </div>
+
+                    <div class="component-card">
+                        <h4><svg class="icon" viewBox="0 0 24 24"><rect x="2" y="2" width="20" height="20" rx="3" fill="#66BB6A"/><circle cx="12" cy="9" r="3" fill="white"/><path d="M12 14c-3 0-6 2-6 5v2h12v-2c0-3-3-5-6-5z" fill="white"/></svg> Image - 图像视图</h4>
+                        <p>用于显示图片资源、系统图标或可缩放矢量图形。</p>
+                        <ul>
+                            <li><strong>初始化：</strong>使用<code>Image("name")</code>或<code>Image(systemName: "star.fill")</code></li>
+                            <li><strong>常用修饰符：</strong><code>.resizable()</code>, <code>.aspectRatio()</code>, <code>.clipShape()</code></li>
+                        </ul>
+                        <pre><code>Image(systemName: "heart.fill")
+    .font(.system(size: 40))
+    .foregroundColor(.red)
+
+Image("landscape")
+    .resizable()
+    .scaledToFit()
+    .frame(width: 200, height: 150)</code></pre>
+                    </div>
+
+                    <div class="component-card">
+                        <h4><svg class="icon" viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="5" fill="#FF7043"/><rect x="7" y="7" width="10" height="8" rx="2" fill="white"/></svg> Button - 按钮视图</h4>
+                        <p>用于创建可交互的按钮，响应用户的点击操作。</p>
+                        <ul>
+                            <li><strong>核心构造：</strong>包含动作（action）和标签（label）。</li>
+                            <li><strong>样式：</strong>可通过修饰符或<code>ButtonStyle</code>协议自定义。</li>
+                        </ul>
+                        <pre><code>Button(action: {
+    print("按钮被点击了！")
+}) {
+    HStack {
+        Image(systemName: "play.circle")
+        Text("开始播放")
+    }
+    .padding()
+    .background(Color.blue)
+    .foregroundColor(.white)
+    .cornerRadius(10)
+}</code></pre>
+                    </div>
+
+                    <div class="component-card">
+                        <h4><svg class="icon" viewBox="0 0 24 24"><rect x="2" y="2" width="20" height="20" rx="4" fill="#AB47BC"/><circle cx="8" cy="12" r="3" fill="white"/><rect x="13" y="9" width="8" height="6" rx="2" fill="white"/></svg> Label - 标签视图</h4>
+                        <p>将图标和文本组合在一起的视图，常用于列表项和工具栏。</p>
+                        <ul>
+                            <li><strong>优势：</strong>自动适配环境（如侧边栏中只显示图标）。</li>
+                            <li><strong>构造：</strong><code>Label("标题", systemImage: "gear")</code></li>
+                        </ul>
+                        <pre><code>Label("设置", systemImage: "gear")
+    .font(.headline)
+    .labelStyle(.automatic) // 自动、标题和图标、仅图标等样式
+
+VStack {
+    Label("邮件", systemImage: "envelope")
+    Label("电话", systemImage: "phone")
+    Label("位置", systemImage: "location")
+}</code></pre>
+                    </div>
+                </div>
+            </section>
+
+            <section>
+                <h2>📐 布局与辅助组件</h2>
+                <p>这些组件本身可能不直接显示内容，但对构建灵活、美观的界面布局至关重要。</p>
+
+                <table>
+                    <thead>
+                        <tr>
+                            <th>组件名称</th>
+                            <th>主要用途</th>
+                            <th>关键特性/修饰符</th>
+                            <th>代码示例</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><strong>Spacer</strong></td>
+                            <td>占据可用空间，将其他视图“推开”，用于填充布局。</td>
+                            <td>自适应填充、可设置最小长度<code>.minLength()</code></td>
+                            <td><code>HStack { Text("左"); Spacer(); Text("右") }</code></td>
+                        </tr>
+                        <tr>
+                            <td><strong>Divider</strong></td>
+                            <td>创建一条视觉分隔线，用于区分内容区块。</td>
+                            <td>可设置颜色、粗细，默认水平方向。</td>
+                            <td><code>VStack { Text("上"); Divider(); Text("下") }</code></td>
+                        </tr>
+                        <tr>
+                            <td><strong>Color</strong></td>
+                            <td>作为视图使用，填充纯色区域或作为背景。</td>
+                            <td>可直接使用系统颜色或自定义RGB/HSB颜色。</td>
+                            <td><code>Color.blue.frame(width:100, height:50)</code></td>
+                        </tr>
+                        <tr>
+                            <td><strong>EmptyView</strong></td>
+                            <td>不绘制任何内容的视图，常用于条件渲染的占位。</td>
+                            <td>零大小，不参与布局（某些情况下）。</td>
+                            <td><code>if condition { Text("有内容") } else { EmptyView() }</code></td>
+                        </tr>
+                    </tbody>
+                </table>
+
+                <h3>布局示例：组合使用</h3>
+                <pre><code>VStack(spacing: 20) {
+    Text("用户信息")
+        .font(.title)
+        .foregroundColor(.purple)
+
+    Divider() // 分隔线
+
+    HStack {
+        Image(systemName: "person.circle.fill")
+            .font(.largeTitle)
+            .foregroundColor(.green)
+        VStack(alignment: .leading) {
+            Text("小明")
+                .font(.headline)
+            Text("iOS开发者")
+                .font(.subheadline)
+                .foregroundColor(.gray)
+        }
+        Spacer() // 将内容推到左边
+        Button("编辑") { /* 编辑动作 */ }
+            .buttonStyle(.bordered)
+    }
+    .padding()
+    .background(Color(.systemGray6))
+    .cornerRadius(10)
+}
+.padding()</code></pre>
+            </section>
+
+            <section>
+                <h2>🎯 最佳实践与总结</h2>
+                <div class="tip-box">
+                    <strong>核心要点：</strong>
+                    <ol>
+                        <li><strong>声明式思维：</strong>描述UI“应该是什么样子”，而不是一步步指挥如何绘制。</li>
+                        <li><strong>修饰符链：</strong>视图的样式和行为通过修饰符链式调用来定义，顺序有时会影响结果。</li>
+                        <li><strong>组合优于继承：</strong>通过组合简单视图来构建复杂界面，这是SwiftUI的设计哲学。</li>
+                        <li><strong>善用Spacer和Divider：</strong>它们是实现灵活布局的神器。</li>
+                        <li><strong>系统图标：</strong>优先使用<code>Image(systemName:)</code>获取SF Symbols图标，保证一致性和可缩放性。</li>
+                    </ol>
+                </div>
+                <p>掌握这些基础视图组件，你就已经拿到了打开SwiftUI世界大门的钥匙。接下来，我们将学习如何将它们组织到更复杂的布局容器（如HStack, VStack, ZStack）中，并引入状态管理，让界面动起来！</p>
+            </section>
+
+            <footer>
+                <p>更多精彩内容、实战项目与独家资料，请关注</p>
+                <p class="footer-text">公众号: 蓝海资料掘金营，微信 deep3321</p>
+                <p>持续更新SwiftUI、iOS开发与前沿技术教程</p>
+            </footer>
+        </div>
+    </div>
+</body>
+</html>

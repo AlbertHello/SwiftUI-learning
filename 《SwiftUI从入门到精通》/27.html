@@ -1,0 +1,452 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SwiftUI从入门到精通 - Widget小组件开发</title>
+    <style>
+        :root {
+            --primary: #6EC1E4; /* 天蓝 */
+            --secondary: #FFD166; /* 明黄 */
+            --accent: #7BC950; /* 草绿 */
+            --light: #F8F5F2; /* 米白 */
+            --dark: #2A2D34; /* 深灰 */
+            --border-color: #A3D5FF;
+        }
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', 'PingFang SC', 'Microsoft YaHei', sans-serif;
+        }
+        body {
+            background: linear-gradient(135deg, var(--light) 0%, #E6F7FF 100%);
+            color: var(--dark);
+            line-height: 1.6;
+            padding: 20px;
+            min-height: 100vh;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background-color: white;
+            border-radius: 24px;
+            box-shadow: 0 15px 35px rgba(42, 45, 52, 0.1);
+            overflow: hidden;
+            border: 8px double var(--border-color);
+        }
+        .header {
+            background: linear-gradient(90deg, var(--primary), var(--accent));
+            color: white;
+            padding: 40px 30px;
+            text-align: center;
+            border-bottom: 6px solid var(--secondary);
+        }
+        .header h1 {
+            font-size: 2.8rem;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.2);
+        }
+        .header .subtitle {
+            font-size: 1.4rem;
+            opacity: 0.95;
+        }
+        .content {
+            padding: 40px;
+        }
+        .section {
+            margin-bottom: 50px;
+            padding: 25px;
+            border-radius: 18px;
+            background-color: #F9FDFF;
+            border-left: 6px solid var(--primary);
+            box-shadow: 0 5px 15px rgba(110, 193, 228, 0.1);
+        }
+        h2 {
+            color: var(--primary);
+            border-bottom: 3px dashed var(--secondary);
+            padding-bottom: 12px;
+            margin-bottom: 20px;
+            font-size: 1.8rem;
+        }
+        h3 {
+            color: var(--accent);
+            margin: 25px 0 15px 0;
+            font-size: 1.4rem;
+        }
+        p {
+            margin-bottom: 16px;
+            font-size: 1.05rem;
+        }
+        ul, ol {
+            padding-left: 30px;
+            margin-bottom: 20px;
+        }
+        li {
+            margin-bottom: 10px;
+            padding-left: 8px;
+        }
+        .highlight {
+            background-color: #FFF9E6;
+            padding: 20px;
+            border-radius: 12px;
+            border: 2px solid var(--secondary);
+            margin: 20px 0;
+        }
+        .code-block {
+            background-color: #2A2D34;
+            color: #F8F5F2;
+            padding: 20px;
+            border-radius: 12px;
+            overflow-x: auto;
+            margin: 20px 0;
+            border: 2px solid var(--primary);
+            font-family: 'Menlo', 'Monaco', 'Courier New', monospace;
+        }
+        pre {
+            white-space: pre-wrap;
+            word-wrap: break-word;
+        }
+        .architecture {
+            display: flex;
+            justify-content: center;
+            margin: 30px 0;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 25px 0;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.05);
+        }
+        th {
+            background-color: var(--primary);
+            color: white;
+            padding: 18px 15px;
+            text-align: left;
+        }
+        td {
+            padding: 15px;
+            border-bottom: 1px solid #E0F0FF;
+        }
+        tr:nth-child(even) {
+            background-color: #F0FAFF;
+        }
+        .footer {
+            text-align: center;
+            padding: 30px;
+            background: linear-gradient(90deg, var(--dark), #3A4A5F);
+            color: white;
+            border-top: 6px solid var(--accent);
+            font-size: 1.1rem;
+            letter-spacing: 1px;
+        }
+        .footer a {
+            color: var(--secondary);
+            text-decoration: none;
+            font-weight: bold;
+        }
+        .svg-diagram {
+            background-color: white;
+            border-radius: 12px;
+            padding: 20px;
+            border: 3px solid var(--accent);
+            margin: 25px auto;
+            max-width: 800px;
+        }
+        .tip {
+            background-color: #E6F7E6;
+            border-left: 5px solid var(--accent);
+            padding: 15px 20px;
+            margin: 20px 0;
+            border-radius: 0 12px 12px 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header class="header">
+            <h1>第27章：Widget小组件开发</h1>
+            <div class="subtitle">使用WidgetKit为App创建桌面小组件</div>
+        </header>
+
+        <main class="content">
+            <section class="section">
+                <h2>📱 课程简介</h2>
+                <p>Widget（小组件）是iOS 14及以上版本引入的一项强大功能，它允许用户在主屏幕或今日视图上直接查看App的核心信息，无需打开应用。本章将深入讲解如何使用SwiftUI和WidgetKit框架，为你的App创建美观、实用且响应迅速的小组件。</p>
+                <div class="tip">
+                    <strong>学习目标：</strong> 掌握WidgetKit的核心概念，能够独立设计并实现三种尺寸（小、中、大）的小组件，并理解时间线更新机制。
+                </div>
+            </section>
+
+            <section class="section">
+                <h2>🏗️ WidgetKit 架构概览</h2>
+                <p>Widget的运作依赖于几个核心组件，它们共同决定了小组件的外观、数据和行为。</p>
+                <div class="architecture">
+                    <div class="svg-diagram">
+                        <svg width="100%" height="300" viewBox="0 0 800 300" xmlns="http://www.w3.org/2000/svg">
+                            <rect x="50" y="50" width="200" height="60" rx="10" fill="#6EC1E4" stroke="#2A2D34" stroke-width="2"/>
+                            <text x="150" y="85" text-anchor="middle" fill="white" font-weight="bold" font-size="16">Widget Configuration</text>
+                            <text x="150" y="105" text-anchor="middle" fill="white" font-size="14">(配置入口)</text>
+
+                            <rect x="300" y="50" width="200" height="60" rx="10" fill="#FFD166" stroke="#2A2D34" stroke-width="2"/>
+                            <text x="400" y="85" text-anchor="middle" fill="#2A2D34" font-weight="bold" font-size="16">TimelineProvider</text>
+                            <text x="400" y="105" text-anchor="middle" fill="#2A2D34" font-size="14">(时间线提供者)</text>
+
+                            <rect x="550" y="50" width="200" height="60" rx="10" fill="#7BC950" stroke="#2A2D34" stroke-width="2"/>
+                            <text x="650" y="85" text-anchor="middle" fill="white" font-weight="bold" font-size="16">SwiftUI View</text>
+                            <text x="650" y="105" text-anchor="middle" fill="white" font-size="14">(视图渲染)</text>
+
+                            <rect x="175" y="150" width="450" height="60" rx="10" fill="#A3D5FF" stroke="#2A2D34" stroke-width="2"/>
+                            <text x="400" y="185" text-anchor="middle" fill="#2A2D34" font-weight="bold" font-size="16">Timeline Entry (时间线条目)</text>
+                            <text x="400" y="205" text-anchor="middle" fill="#2A2D34" font-size="14">date + view data</text>
+
+                            <line x1="250" y1="110" x2="300" y2="80" stroke="#2A2D34" stroke-width="2" marker-end="url(#arrowhead)"/>
+                            <line x1="500" y1="110" x2="550" y2="80" stroke="#2A2D34" stroke-width="2" marker-end="url(#arrowhead)"/>
+                            <line x1="300" y1="150" x2="300" y2="120" stroke="#2A2D34" stroke-width="2" marker-end="url(#arrowhead)"/>
+                            <line x1="500" y1="150" x2="500" y2="120" stroke="#2A2D34" stroke-width="2" marker-end="url(#arrowhead)"/>
+                            <defs>
+                                <marker id="arrowhead" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
+                                    <polygon points="0 0, 10 3.5, 0 7" fill="#2A2D34"/>
+                                </marker>
+                            </defs>
+                        </svg>
+                    </div>
+                </div>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>组件</th>
+                            <th>作用</th>
+                            <th>SwiftUI对应协议/类</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><strong>Widget Configuration</strong></td>
+                            <td>定义小组件的静态配置，如显示名称、描述、支持的尺寸等。</td>
+                            <td><code>WidgetConfiguration</code>, <code>StaticConfiguration</code></td>
+                        </tr>
+                        <tr>
+                            <td><strong>TimelineProvider</strong></td>
+                            <td>小组件的“大脑”，负责在特定时间点生成要显示的数据和视图。</td>
+                            <td><code>TimelineProvider</code></td>
+                        </tr>
+                        <tr>
+                            <td><strong>Timeline Entry</strong></td>
+                            <td>包含一个日期和该日期下小组件要显示的数据模型。</td>
+                            <td>自定义结构体，遵循协议要求</td>
+                        </tr>
+                        <tr>
+                            <td><strong>SwiftUI View</strong></td>
+                            <td>使用SwiftUI声明式语法定义小组件的外观。</td>
+                            <td><code>View</code></td>
+                        </tr>
+                    </tbody>
+                </table>
+            </section>
+
+            <section class="section">
+                <h2>🚀 开发步骤详解</h2>
+                <h3>第一步：创建Widget Extension</h3>
+                <ol>
+                    <li>在Xcode项目中，选择 <strong>File → New → Target...</strong></li>
+                    <li>搜索并选择 <strong>"Widget Extension"</strong>。</li>
+                    <li>输入产品名称（如 `MyAppWidget`），确保勾选“Include Configuration Intent”（如果你需要用户可配置的小组件）。</li>
+                    <li>点击“Finish”，Xcode会自动创建Widget所需的所有基础文件。</li>
+                </ol>
+
+                <h3>第二步：定义时间线条目 (Timeline Entry)</h3>
+                <p>条目是数据和时间的结合体，它告诉Widget在什么时间显示什么内容。</p>
+                <div class="code-block">
+<pre>
+import WidgetKit
+
+// 1. 定义数据模型
+struct Task {
+    let title: String
+    let isCompleted: Bool
+    let dueDate: Date
+}
+
+// 2. 定义时间线条目
+struct SimpleEntry: TimelineEntry {
+    let date: Date // 必须包含date属性
+    let task: Task? // 你的自定义数据
+    let relevance: TimelineEntryRelevance? // 可选，用于智能堆栈排序
+}
+</pre>
+                </div>
+
+                <h3>第三步：实现时间线提供者 (TimelineProvider)</h3>
+                <p>提供者负责生成未来一系列时间点的条目。</p>
+                <div class="code-block">
+<pre>
+struct Provider: TimelineProvider {
+    // 1. 定义占位符（当Widget首次加载或数据未就绪时显示）
+    func placeholder(in context: Context) -> SimpleEntry {
+        SimpleEntry(date: Date(), task: Task(title: "加载中...", isCompleted: false, dueDate: Date()))
+    }
+
+    // 2. 定义快照（用于在Widget库中预览）
+    func getSnapshot(in context: Context, completion: @escaping (SimpleEntry) -> ()) {
+        let entry = SimpleEntry(date: Date(), task: Task(title: "示例任务", isCompleted: true, dueDate: Date()))
+        completion(entry)
+    }
+
+    // 3. 核心：生成时间线
+    func getTimeline(in context: Context, completion: @escaping (Timeline&lt;SimpleEntry&gt;) -> ()) {
+        var entries: [SimpleEntry] = []
+        let currentDate = Date()
+        
+        // 生成未来5个小时，每小时一个条目
+        for hourOffset in 0 ..&lt; 5 {
+            let entryDate = Calendar.current.date(byAdding: .hour, value: hourOffset, to: currentDate)!
+            // 这里应该从你的App或网络获取真实数据
+            let task = Task(title: "任务 \(hourOffset+1)", isCompleted: hourOffset % 2 == 0, dueDate: entryDate)
+            let entry = SimpleEntry(date: entryDate, task: task)
+            entries.append(entry)
+        }
+        
+        // 创建时间线，并设定下次更新的策略（例如在最后一个条目的时间点更新）
+        let timeline = Timeline(entries: entries, policy: .after(entries.last!.date))
+        completion(timeline)
+    }
+}
+</pre>
+                </div>
+
+                <h3>第四步：构建SwiftUI视图</h3>
+                <p>使用SwiftUI构建小组件界面。注意，小组件视图类型有限，且交互仅为深层链接（deep link）。</p>
+                <div class="code-block">
+<pre>
+struct MyWidgetEntryView : View {
+    var entry: Provider.Entry // 接收来自Provider的条目
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 10) {
+            HStack {
+                Image(systemName: entry.task?.isCompleted ?? false ? "checkmark.circle.fill" : "circle")
+                    .foregroundColor(entry.task?.isCompleted ?? false ? .green : .orange)
+                Text("待办事项")
+                    .font(.headline)
+                    .foregroundColor(.blue)
+                Spacer()
+            }
+            
+            if let task = entry.task {
+                Text(task.title)
+                    .font(.title3)
+                    .bold()
+                    .lineLimit(2)
+                
+                Text(task.dueDate, style: .relative)
+                    .font(.caption)
+                    .foregroundColor(.secondary)
+            } else {
+                Text("暂无任务")
+                    .foregroundColor(.gray)
+            }
+            
+            Spacer()
+        }
+        .padding()
+        // 为整个Widget添加背景和点击区域
+        .widgetURL(URL(string: "myapp://task")) // 点击Widget打开App
+    }
+}
+</pre>
+                </div>
+
+                <h3>第五步：组装与注册Widget</h3>
+                <div class="code-block">
+<pre>
+@main
+struct MyWidget: Widget {
+    let kind: String = "MyWidget" // 唯一标识符
+
+    var body: some WidgetConfiguration {
+        StaticConfiguration(kind: kind, provider: Provider()) { entry in
+            MyWidgetEntryView(entry: entry)
+        }
+        .configurationDisplayName("我的任务清单")
+        .description("快速查看您的下一个待办事项。")
+        .supportedFamilies([.systemSmall, .systemMedium]) // 支持的尺寸
+    }
+}
+</pre>
+                </div>
+            </section>
+
+            <section class="section">
+                <h2>🎨 设计要点与最佳实践</h2>
+                <div class="highlight">
+                    <h3>📐 尺寸适配</h3>
+                    <ul>
+                        <li><strong>.systemSmall</strong>: 提供快速、一目了然的信息。避免过多文字和复杂布局。</li>
+                        <li><strong>.systemMedium</strong>: 可以展示更多细节或一组相关信息。</li>
+                        <strong>.systemLarge</strong>: 适合展示列表、详细数据或复杂信息图。</li>
+                    </ul>
+                </div>
+                <div class="highlight">
+                    <h3>⚡ 性能与更新</h3>
+                    <ul>
+                        <li><strong>时间线策略</strong>: 合理使用 `.atEnd`, `.after(Date)`, `.never` 来控制更新频率，节省电量。</li>
+                        <li><strong>数据获取</strong>: 在 `getTimeline` 中高效获取数据，考虑使用App Groups共享数据。</li>
+                        <li><strong>视图轻量化</strong>: 避免使用过于复杂的动画和视图层次。</li>
+                    </ul>
+                </div>
+                <div class="tip">
+                    <strong>提示：</strong> 使用 `WidgetCenter.shared.reloadTimelines(ofKind:)` 可以在你的主App中主动触发Widget重新加载时间线，实现数据实时更新。
+                </div>
+            </section>
+
+            <section class="section">
+                <h2>📋 核心API速查表</h2>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>API / 属性</th>
+                            <th>说明</th>
+                            <th>示例/常用值</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><code>WidgetFamily</code></td>
+                            <td>小组件尺寸枚举</td>
+                            <td><code>.systemSmall</code>, <code>.systemMedium</code>, <code>.systemLarge</code></td>
+                        </tr>
+                        <tr>
+                            <td><code>TimelineEntryRelevance</code></td>
+                            <td>条目相关性，用于智能堆栈排序</td>
+                            <td><code>TimelineEntryRelevance(score: 10.0)</code></td>
+                        </tr>
+                        <tr>
+                            <td><code>.widgetURL(_:)</code></td>
+                            <td>视图修饰符，为整个Widget添加深层链接</td>
+                            <td><code>.widgetURL(URL(string: "myapp://home"))</code></td>
+                        </tr>
+                        <tr>
+                            <td><code>AppIntentConfiguration</code></td>
+                            <td>可配置小组件的配置类型</td>
+                            <td>需配合<code>IntentDefinition</code>文件使用</td>
+                        </tr>
+                        <tr>
+                            <td><code>WidgetCenter</code></td>
+                            <td>管理Widget重载的中心类</td>
+                            <td><code>WidgetCenter.shared.reloadAllTimelines()</code></td>
+                        </tr>
+                    </tbody>
+                </table>
+            </section>
+        </main>
+
+        <footer class="footer">
+            <p>公众号: 蓝海资料掘金营，微信 deep3321</p>
+            <p>© 2026 SwiftUI从入门到精通课程 · 让创意跃然屏上</p>
+        </footer>
+    </div>
+</body>
+</html>

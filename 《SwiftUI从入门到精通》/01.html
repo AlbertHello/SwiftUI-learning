@@ -1,0 +1,468 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SwiftUI初探 - 《SwiftUI从入门到精通》</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Helvetica Neue', 'PingFang SC', 'Microsoft YaHei', sans-serif;
+        }
+        body {
+            background: linear-gradient(135deg, #f5f7fa 0%, #e4edf5 100%);
+            color: #333;
+            line-height: 1.6;
+            padding: 20px;
+            min-height: 100vh;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        .double-border-box {
+            border: 8px solid #ffcc80; /* 中小学生风格橙色边框 */
+            border-radius: 20px;
+            padding: 30px;
+            background-color: white;
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.1);
+            position: relative;
+            margin-bottom: 30px;
+        }
+        .double-border-box::before {
+            content: '';
+            position: absolute;
+            top: -15px;
+            left: -15px;
+            right: -15px;
+            bottom: -15px;
+            border: 4px solid #4fc3f7; /* 中小学生风格蓝色边框 */
+            border-radius: 30px;
+            pointer-events: none;
+            z-index: -1;
+        }
+        header {
+            text-align: center;
+            margin-bottom: 40px;
+            padding-bottom: 20px;
+            border-bottom: 3px dashed #81c784; /* 中小学生风格绿色 */
+        }
+        h1 {
+            color: #1565c0; /* 深蓝色 */
+            font-size: 2.8rem;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 0 #bbdefb;
+        }
+        .subtitle {
+            color: #ff8a65; /* 橙色 */
+            font-size: 1.4rem;
+            font-weight: 300;
+        }
+        h2 {
+            color: #0288d1; /* 蓝色 */
+            border-left: 6px solid #ffb74d; /* 橙色 */
+            padding-left: 15px;
+            margin: 30px 0 20px;
+            font-size: 1.8rem;
+        }
+        h3 {
+            color: #43a047; /* 绿色 */
+            margin: 25px 0 15px;
+            font-size: 1.4rem;
+        }
+        p {
+            margin-bottom: 15px;
+            text-align: justify;
+            font-size: 1.05rem;
+        }
+        ul, ol {
+            margin-left: 25px;
+            margin-bottom: 20px;
+        }
+        li {
+            margin-bottom: 8px;
+            padding-left: 5px;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 25px 0;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.05);
+            border-radius: 10px;
+            overflow: hidden;
+        }
+        th {
+            background-color: #4fc3f7; /* 蓝色 */
+            color: white;
+            font-weight: bold;
+            padding: 15px;
+            text-align: left;
+        }
+        td {
+            padding: 15px;
+            border-bottom: 1px solid #e0f2f1;
+            background-color: #f9f9f9;
+        }
+        tr:nth-child(even) td {
+            background-color: #e3f2fd;
+        }
+        tr:hover td {
+            background-color: #fff9c4; /* 浅黄色 */
+        }
+        .code-block {
+            background: linear-gradient(to right, #263238, #37474f);
+            color: #eceff1;
+            padding: 20px;
+            border-radius: 10px;
+            margin: 25px 0;
+            overflow-x: auto;
+            border-left: 5px solid #ff9800;
+        }
+        pre {
+            white-space: pre-wrap;
+            font-family: 'Courier New', monospace;
+            font-size: 0.95rem;
+            line-height: 1.5;
+        }
+        .svg-container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin: 30px 0;
+            flex-wrap: wrap;
+            gap: 30px;
+        }
+        .architecture-svg {
+            max-width: 100%;
+            height: auto;
+            border-radius: 10px;
+            background: #f8f9fa;
+            padding: 20px;
+            box-shadow: 0 8px 16px rgba(0,0,0,0.1);
+        }
+        .highlight {
+            background-color: #fff9c4;
+            padding: 3px 6px;
+            border-radius: 4px;
+            font-weight: bold;
+            color: #d84315;
+        }
+        footer {
+            text-align: center;
+            margin-top: 50px;
+            padding: 25px;
+            color: #5d4037;
+            font-size: 1.1rem;
+            border-top: 3px double #ffb74d;
+            background-color: #e8f5e9; /* 浅绿色背景 */
+            border-radius: 15px;
+            font-weight: bold;
+        }
+        .footer-text {
+            color: #1565c0;
+            font-size: 1.2rem;
+        }
+        .tag {
+            display: inline-block;
+            background-color: #ffcc80;
+            color: #bf360c;
+            padding: 5px 12px;
+            border-radius: 20px;
+            font-size: 0.9rem;
+            margin-right: 10px;
+            margin-bottom: 10px;
+            font-weight: bold;
+        }
+        .timeline {
+            position: relative;
+            padding-left: 30px;
+            margin: 30px 0;
+        }
+        .timeline::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 0;
+            bottom: 0;
+            width: 6px;
+            background: linear-gradient(to bottom, #4fc3f7, #81c784);
+            border-radius: 3px;
+        }
+        .timeline-item {
+            position: relative;
+            margin-bottom: 25px;
+            padding-left: 25px;
+        }
+        .timeline-item::before {
+            content: '';
+            position: absolute;
+            left: -33px;
+            top: 5px;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background-color: #ff9800;
+            border: 4px solid white;
+            box-shadow: 0 0 0 3px #ff9800;
+        }
+        .timeline-year {
+            font-weight: bold;
+            color: #1565c0;
+            font-size: 1.1rem;
+        }
+        .timeline-content {
+            background: #f1f8e9;
+            padding: 15px;
+            border-radius: 10px;
+            border: 1px solid #c8e6c9;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="double-border-box">
+            <header>
+                <h1>SwiftUI 初探</h1>
+                <p class="subtitle">SwiftUI简介、发展历程、核心思想、应用场景与开发环境搭建（Xcode）</p>
+                <p><em>《SwiftUI从入门到精通》第一课</em></p>
+                <div style="margin-top: 15px;">
+                    <span class="tag">声明式语法</span>
+                    <span class="tag">跨平台</span>
+                    <span class="tag">实时预览</span>
+                    <span class="tag">Xcode</span>
+                    <span class="tag">iOS开发</span>
+                </div>
+            </header>
+
+            <section>
+                <h2>一、SwiftUI 简介</h2>
+                <p><span class="highlight">SwiftUI</span> 是苹果公司于2019年WWDC（全球开发者大会）上推出的一个革命性的 <strong>UI框架</strong>。它用于为所有苹果平台（包括iOS, iPadOS, macOS, watchOS 和 tvOS）构建用户界面。与传统的UIKit/AppKit不同，SwiftUI采用了一种全新的<strong>声明式语法</strong>，让开发者能够用更少的代码、更直观的方式描述UI应该是什么样子，而不是一步步指挥它如何构建。</p>
+                <p>其核心理念是：<strong>“What you see is what you code”</strong>。你所见即你所编。通过强大的实时预览（Live Preview）功能，修改代码能立即在预览画布上看到效果，极大地提升了开发效率和体验。</p>
+
+                <div class="svg-container">
+                    <svg class="architecture-svg" width="500" height="300" viewBox="0 0 500 300" xmlns="http://www.w3.org/2000/svg">
+                        <rect x="10" y="10" width="480" height="280" rx="15" fill="#E3F2FD" stroke="#1565C0" stroke-width="2"/>
+                        <text x="250" y="40" text-anchor="middle" font-family="Arial" font-size="20" font-weight="bold" fill="#0D47A1">SwiftUI 应用架构简图</text>
+                        <rect x="50" y="70" width="120" height="50" rx="8" fill="#FFCC80" stroke="#FF9800" stroke-width="2"/>
+                        <text x="110" y="100" text-anchor="middle" font-family="Arial" font-size="14" fill="#BF360C">视图 (View)</text>
+                        <rect x="200" y="70" width="120" height="50" rx="8" fill="#C8E6C9" stroke="#4CAF50" stroke-width="2"/>
+                        <text x="260" y="100" text-anchor="middle" font-family="Arial" font-size="14" fill="#1B5E20">状态 (State)</text>
+                        <rect x="350" y="70" width="120" height="50" rx="8" fill="#BBDEFB" stroke="#2196F3" stroke-width="2"/>
+                        <text x="410" y="100" text-anchor="middle" font-family="Arial" font-size="14" fill="#0D47A1">数据模型 (Model)</text>
+                        <path d="M110 120 L110 160 L260 160 L260 120" stroke="#9E9E9E" stroke-width="2" fill="none" marker-end="url(#arrowhead)"/>
+                        <path d="M410 120 L410 160 L260 160" stroke="#9E9E9E" stroke-width="2" fill="none" marker-end="url(#arrowhead)"/>
+                        <path d="M185 160 L185 210 L260 210 L260 160" stroke="#FF9800" stroke-width="2" fill="none" stroke-dasharray="5,5"/>
+                        <path d="M335 160 L335 210 L260 210" stroke="#FF9800" stroke-width="2" fill="none" stroke-dasharray="5,5"/>
+                        <rect x="200" y="210" width="120" height="50" rx="8" fill="#F8BBD0" stroke="#E91E63" stroke-width="2"/>
+                        <text x="260" y="240" text-anchor="middle" font-family="Arial" font-size="14" fill="#880E4F">绑定 (Binding)</text>
+                        <text x="250" y="280" text-anchor="middle" font-family="Arial" font-size="12" fill="#5D4037">声明式UI：状态驱动视图更新</text>
+                        <defs>
+                            <marker id="arrowhead" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
+                                <polygon points="0 0, 10 3.5, 0 7" fill="#9E9E9E"/>
+                            </marker>
+                        </defs>
+                    </svg>
+                </div>
+            </section>
+
+            <section>
+                <h2>二、发展历程</h2>
+                <div class="timeline">
+                    <div class="timeline-item">
+                        <div class="timeline-year">2014年</div>
+                        <div class="timeline-content">Swift编程语言发布，为现代UI框架奠定基础。</div>
+                    </div>
+                    <div class="timeline-item">
+                        <div class="timeline-year">2019年6月</div>
+                        <div class="timeline-content">WWDC上，SwiftUI 1.0 随iOS 13、macOS Catalina一同发布，支持声明式语法和实时预览。</div>
+                    </div>
+                    <div class="timeline-item">
+                        <div class="timeline-year">2020年6月</div>
+                        <div class="timeline-content">SwiftUI 2.0 发布，引入 <code>@StateObject</code>, <code>App</code> 协议，<code>LazyVGrid</code> 等，并提升稳定性和性能。</div>
+                    </div>
+                    <div class="timeline-item">
+                        <div class="timeline-year">2021年6月</div>
+                        <div class="timeline-content">SwiftUI 3.0 发布，带来 <code>AsyncImage</code>, 下拉刷新、<code>searchable</code>修饰符等，并进一步深化对macOS和iPadOS的支持。</div>
+                    </div>
+                    <div class="timeline-item">
+                        <div class="timeline-year">2022年及以后</div>
+                        <div class="timeline-content">持续迭代，增强图形、动画、导航和跨平台能力，成为苹果生态UI开发的首选和未来。</div>
+                    </div>
+                </div>
+            </section>
+
+            <section>
+                <h2>三、核心思想</h2>
+                <h3>1. 声明式语法</h3>
+                <p>与命令式（告诉计算机每一步怎么做）相反，声明式只需描述最终UI的状态。例如，描述“有一个标题为‘你好’的按钮”，而不是“创建按钮对象，设置标题属性，添加到父视图”。</p>
+                <div class="code-block">
+                    <pre>// 声明式SwiftUI代码示例
+import SwiftUI
+
+struct ContentView: View {
+    var body: some View {
+        VStack {
+            Text("欢迎学习SwiftUI！")
+                .font(.largeTitle)
+                .foregroundColor(.blue)
+            Button(action: {
+                print("按钮被点击！")
+            }) {
+                Text("点击我")
+                    .padding()
+                    .background(Color.orange)
+                    .foregroundColor(.white)
+                    .cornerRadius(10)
+            }
+        }
+    }
+}</pre>
+                </div>
+
+                <h3>2. 单一数据源 (Single Source of Truth)</h3>
+                <p>UI的状态由唯一的数据源驱动。当数据改变时，依赖该数据的UI部分会自动更新。这通过 <code>@State</code>, <code>@Binding</code>, <code>@ObservedObject</code> 等属性包装器实现。</p>
+
+                <h3>3. 组合优于继承</h3>
+                <p>通过将小而简单的视图组合起来，构建复杂界面。每个视图都是一个遵守 <code>View</code> 协议的结构体。</p>
+
+                <h3>4. 跨平台一致性</h3>
+                <p>同一套SwiftUI代码，通过条件编译或平台特定修饰符，可以适配iPhone、iPad、Mac、Apple Watch和Apple TV。</p>
+            </section>
+
+            <section>
+                <h2>四、应用场景</h2>
+                <table>
+                    <thead>
+                        <tr>
+                            <th width="20%">平台</th>
+                            <th width="40%">适用应用类型</th>
+                            <th width="40%">优势</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><strong>iOS / iPadOS</strong></td>
+                            <td>社交应用、工具类应用、游戏UI、内容阅读类应用</td>
+                            <td>实时预览、代码简洁、完美适配不同尺寸设备</td>
+                        </tr>
+                        <tr>
+                            <td><strong>macOS</strong></td>
+                            <td>桌面生产力工具、创意软件、系统工具</td>
+                            <td>原生Mac体验、支持菜单栏、窗口管理等</td>
+                        </tr>
+                        <tr>
+                            <td><strong>watchOS</strong></td>
+                            <td>健康监测、快捷工具、信息提醒</td>
+                            <td>为小屏幕量身定制的组件和交互模式</td>
+                        </tr>
+                        <tr>
+                            <td><strong>tvOS</strong></td>
+                            <td>视频流媒体、家庭娱乐、游戏</td>
+                            <td>专注于遥控器交互和电视大屏显示优化</td>
+                        </tr>
+                        <tr>
+                            <td><strong>跨平台项目</strong></td>
+                            <td>希望一套代码覆盖多端的应用</td>
+                            <td>最大化的代码复用，降低开发和维护成本</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </section>
+
+            <section>
+                <h2>五、开发环境搭建 (Xcode)</h2>
+                <p>开发SwiftUI应用，你需要一台Mac电脑并安装Xcode。</p>
+                <h3>步骤详解：</h3>
+                <ol>
+                    <li><strong>获取Xcode</strong>：从Mac App Store搜索“Xcode”并免费下载安装。确保安装最新版本以支持最新的SwiftUI特性。</li>
+                    <li><strong>创建新项目</strong>：
+                        <ul>
+                            <li>打开Xcode，选择 “Create a new Xcode project”。</li>
+                            <li>在模板选择器中，选择 “iOS” -> “App”，点击Next。</li>
+                            <li>在项目配置中，<strong>确保“Interface”选项选择“SwiftUI”</strong>，“Life Cycle”选择“SwiftUI App”。</li>
+                        </ul>
+                    </li>
+                    <li><strong>认识工作区</strong>：
+                        <ul>
+                            <li><strong>导航器区域</strong>：左侧文件列表。</li>
+                            <li><strong>编辑器区域</strong>：中间代码编辑和UI设计区。</li>
+                            <li><strong>检查器区域</strong>：右侧属性设置。</li>
+                            <li><strong>画布 (Canvas)</strong>：实时预览区域，点击 “Resume” 或使用快捷键 <code>Cmd+Option+P</code> 激活预览。</li>
+                        </ul>
+                    </li>
+                    <li><strong>运行你的第一个App</strong>：点击左上角的播放按钮（或Cmd+R），选择模拟器或连接真机进行运行。</li>
+                </ol>
+                <div class="code-block">
+                    <pre>// 一个最简单的SwiftUI App入口示例
+import SwiftUI
+
+@main // 应用入口标识
+struct MyFirstApp: App {
+    var body: some Scene {
+        WindowGroup {
+            ContentView() // 你的主视图
+        }
+    }
+}</pre>
+                </div>
+                <p><span class="highlight">提示</span>：建议使用macOS 11 Big Sur或更高版本，以及Xcode 12或更高版本，以获得最佳的SwiftUI开发体验。</p>
+            </section>
+
+            <section>
+                <h2>六、快速开始：你的第一个SwiftUI视图</h2>
+                <p>让我们用几行代码创建一个带有计数器的简单界面，体验SwiftUI的声明式和响应式魅力。</p>
+                <div class="code-block">
+                    <pre>import SwiftUI
+
+struct CounterView: View {
+    @State private var count: Int = 0 // @State 标记为视图的私有状态
+
+    var body: some View {
+        VStack(spacing: 30) {
+            Text("当前计数: \(count)")
+                .font(.system(size: 40, weight: .bold))
+                .foregroundColor(count > 5 ? .red : .primary)
+
+            HStack(spacing: 20) {
+                Button("增加") {
+                    count += 1 // 修改状态，视图自动更新
+                }
+                .buttonStyle(.borderedProminent)
+                .tint(.green)
+
+                Button("减少") {
+                    count -= 1
+                }
+                .buttonStyle(.bordered)
+                .disabled(count <= 0) // 当count小于等于0时按钮禁用
+            }
+
+            Button("重置") {
+                count = 0
+            }
+            .foregroundColor(.orange)
+        }
+        .padding()
+    }
+}
+
+// 在预览画布中显示
+struct CounterView_Previews: PreviewProvider {
+    static var previews: some View {
+        CounterView()
+    }
+}</pre>
+                </div>
+                <p>将上述代码复制到Xcode项目的 <code>ContentView.swift</code> 中，即可在画布中看到一个交互式的计数器。点击按钮，文字和按钮状态会自动更新——这就是SwiftUI数据驱动的威力！</p>
+            </section>
+        </div> <!-- 结束 double-border-box -->
+
+        <footer>
+            <p class="footer-text">公众号: 蓝海资料掘金营，微信 deep3321</p>
+            <p>《SwiftUI从入门到精通》课程 · 第一课 · 探索不止，代码不息</p>
+        </footer>
+    </div> <!-- 结束 container -->
+</body>
+</html>

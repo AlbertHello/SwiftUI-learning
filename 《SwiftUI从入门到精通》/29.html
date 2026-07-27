@@ -1,0 +1,378 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>29、性能优化：识别并解决SwiftUI中的性能瓶颈 | SwiftUI从入门到精通</title>
+    <style>
+        :root {
+            --primary: #4CAF50; /* 中小学生风格绿色 */
+            --secondary: #2196F3; /* 中小学生风格蓝色 */
+            --accent: #FF9800; /* 中小学生风格橙色 */
+            --light-bg: #F9FBE7; /* 浅黄绿背景 */
+            --card-bg: #FFFFFF;
+            --text: #333333;
+            --border: #C8E6C9;
+        }
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', 'Microsoft YaHei', sans-serif;
+        }
+        body {
+            background-color: var(--light-bg);
+            color: var(--text);
+            line-height: 1.6;
+            padding: 20px;
+            max-width: 1200px;
+            margin: 0 auto;
+            border: double 8px var(--primary);
+            border-radius: 20px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+        }
+        header {
+            text-align: center;
+            padding: 30px 20px;
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            color: white;
+            border-radius: 12px 12px 0 0;
+            margin-bottom: 30px;
+        }
+        h1 {
+            font-size: 2.8rem;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.2);
+        }
+        .subtitle {
+            font-size: 1.2rem;
+            opacity: 0.9;
+        }
+        main {
+            padding: 0 20px;
+        }
+        section {
+            background-color: var(--card-bg);
+            border: double 5px var(--border);
+            border-radius: 15px;
+            padding: 25px;
+            margin-bottom: 30px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.05);
+        }
+        h2 {
+            color: var(--secondary);
+            border-bottom: 3px solid var(--accent);
+            padding-bottom: 10px;
+            margin-bottom: 20px;
+            font-size: 1.8rem;
+        }
+        h3 {
+            color: var(--primary);
+            margin-top: 20px;
+            margin-bottom: 10px;
+            font-size: 1.4rem;
+        }
+        p {
+            margin-bottom: 15px;
+            text-align: justify;
+        }
+        ul, ol {
+            padding-left: 30px;
+            margin-bottom: 20px;
+        }
+        li {
+            margin-bottom: 8px;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 25px 0;
+            border: double 3px var(--border);
+        }
+        th, td {
+            border: 1px solid var(--border);
+            padding: 12px 15px;
+            text-align: left;
+        }
+        th {
+            background-color: var(--primary);
+            color: white;
+            font-weight: bold;
+        }
+        tr:nth-child(even) {
+            background-color: #F1F8E9;
+        }
+        pre {
+            background-color: #2d2d2d;
+            color: #f8f8f2;
+            padding: 20px;
+            border-radius: 10px;
+            overflow-x: auto;
+            margin: 20px 0;
+            border: solid 2px var(--accent);
+            font-family: 'Courier New', monospace;
+            font-size: 0.95rem;
+            line-height: 1.5;
+        }
+        code {
+            font-family: 'Courier New', monospace;
+            background-color: #E8F5E9;
+            padding: 2px 6px;
+            border-radius: 4px;
+            color: #d63384;
+        }
+        .svg-container {
+            display: flex;
+            justify-content: center;
+            margin: 25px 0;
+        }
+        svg {
+            max-width: 100%;
+            height: auto;
+        }
+        .tip-box {
+            background-color: #E3F2FD;
+            border-left: 6px solid var(--secondary);
+            padding: 15px;
+            margin: 20px 0;
+            border-radius: 0 8px 8px 0;
+        }
+        footer {
+            text-align: center;
+            padding: 25px;
+            margin-top: 30px;
+            background: linear-gradient(135deg, var(--secondary), var(--primary));
+            color: white;
+            border-radius: 0 0 12px 12px;
+            font-size: 1.1rem;
+            font-weight: bold;
+            border-top: double 5px white;
+        }
+        .footer-text {
+            letter-spacing: 1px;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>第29课：SwiftUI性能优化</h1>
+        <p class="subtitle">识别并解决视图重绘、列表性能等瓶颈</p>
+    </header>
+
+    <main>
+        <section>
+            <h2>引言：为什么需要性能优化？</h2>
+            <p>SwiftUI 通过声明式语法和自动的视图更新机制极大地提升了开发效率。然而，不恰当的使用会导致不必要的视图重绘、内存增长和界面卡顿，严重影响用户体验。本课将深入探讨常见的性能瓶颈及其解决方案。</p>
+            <div class="svg-container">
+                <svg width="600" height="200" viewBox="0 0 600 200">
+                    <rect x="10" y="50" width="180" height="100" rx="10" fill="#4CAF50" stroke="#2E7D32" stroke-width="3"/>
+                    <text x="100" y="110" text-anchor="middle" fill="white" font-size="18" font-weight="bold">声明式UI</text>
+                    <path d="M200 100 L250 100" stroke="#FF9800" stroke-width="4" marker-end="url(#arrow)"/>
+                    <rect x="260" y="50" width="180" height="100" rx="10" fill="#2196F3" stroke="#1565C0" stroke-width="3"/>
+                    <text x="350" y="110" text-anchor="middle" fill="white" font-size="18" font-weight="bold">视图更新</text>
+                    <path d="M440 100 L490 100" stroke="#FF9800" stroke-width="4" marker-end="url(#arrow)"/>
+                    <rect x="500" y="50" width="90" height="100" rx="10" fill="#f44336" stroke="#c62828" stroke-width="3"/>
+                    <text x="545" y="110" text-anchor="middle" fill="white" font-size="18" font-weight="bold">卡顿</text>
+                    <defs>
+                        <marker id="arrow" markerWidth="10" markerHeight="10" refX="9" refY="3" orient="auto" markerUnits="strokeWidth">
+                            <path d="M0,0 L0,6 L9,3 z" fill="#FF9800"/>
+                        </marker>
+                    </defs>
+                </svg>
+            </div>
+        </section>
+
+        <section>
+            <h2>一、核心性能瓶颈识别</h2>
+            <p>SwiftUI 的性能问题通常源于以下几个方面：</p>
+            <ul>
+                <li><strong>不必要的视图重绘（Re-rendering）</strong>：状态变化导致整个视图树无效更新。</li>
+                <li><strong>低效的列表（List）与滚动视图</strong>：大量数据项未优化，导致滚动卡顿。</li>
+                <li><strong>内存泄漏与循环引用</strong>：Combine 管道或闭包使用不当。</li>
+                <li><strong>昂贵的视图主体计算</strong>：视图的 <code>body</code> 属性内包含复杂逻辑。</li>
+                <li><strong>图片与资源处理</strong>：未缓存或未正确缩放图片。</li>
+            </ul>
+
+            <h3>性能问题对照表</h3>
+            <table>
+                <thead>
+                    <tr>
+                        <th>现象</th>
+                        <th>可能原因</th>
+                        <th>检测工具</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>界面卡顿，滚动不流畅</td>
+                        <td>列表项视图过于复杂，未使用 Identifiable 或 Hashable</td>
+                        <td>Xcode Instruments (Time Profiler, Core Animation)</td>
+                    </tr>
+                    <tr>
+                        <td>CPU 占用率持续偏高</td>
+                        <td>视图频繁重绘，定时器未正确管理</td>
+                        <td>Xcode Debug Navigator (CPU)</td>
+                    </tr>
+                    <tr>
+                        <td>内存使用量不断增长</td>
+                        <td>循环引用，未取消订阅 Combine 管道</td>
+                        <td>Xcode Debug Navigator (Memory), Instruments (Leaks)</td>
+                    </tr>
+                    <tr>
+                        <td>启动时间过长</td>
+                        <td>初始视图加载过多数据或资源</td>
+                        <td>Xcode Organizer (Launch Time)</td>
+                    </tr>
+                </tbody>
+            </table>
+        </section>
+
+        <section>
+            <h2>二、优化策略与实战代码</h2>
+
+            <h3>1. 减少视图重绘：使用 EquatableView 与自定义相等判断</h3>
+            <p>默认情况下，SwiftUI 在状态变化时会重新计算视图的 body。通过让视图遵守 <code>Equatable</code> 协议，可以自定义相等性比较，避免不必要的刷新。</p>
+<pre><code>struct UserProfileView: View, Equatable {
+    let user: User
+    let lastUpdated: Date
+
+    var body: some View {
+        VStack {
+            Text(user.name)
+                .font(.title)
+            Text("更新于: \(lastUpdated, formatter: dateFormatter)")
+        }
+    }
+
+    static func == (lhs: UserProfileView, rhs: UserProfileView) -> Bool {
+        // 仅当用户ID和最后更新时间相同时才认为相等，避免重绘
+        return lhs.user.id == rhs.user.id && lhs.lastUpdated == rhs.lastUpdated
+    }
+}
+
+// 使用时包装在 EquatableView 中
+EquatableView(UserProfileView(user: demoUser, lastUpdated: Date()))</code></pre>
+
+            <h3>2. 列表性能优化：使用 Identifiable 与差异化数据</h3>
+            <p>对于大型列表，确保数据模型遵守 <code>Identifiable</code> 和 <code>Hashable</code>，以便 SwiftUI 高效识别和更新项。</p>
+<pre><code>struct Book: Identifiable, Hashable {
+    let id = UUID()
+    let title: String
+    let author: String
+    let pageCount: Int
+}
+
+struct BookListView: View {
+    let books: [Book]
+
+    var body: some View {
+        List(books) { book in
+            BookRow(book: book)
+                .listRowBackground(Color.clear)
+        }
+        .listStyle(PlainListStyle())
+    }
+}
+
+struct BookRow: View {
+    let book: Book
+
+    var body: some View {
+        VStack(alignment: .leading) {
+            Text(book.title)
+                .font(.headline)
+            Text(book.author)
+                .font(.subheadline)
+                .foregroundColor(.secondary)
+        }
+        .padding(.vertical, 8)
+    }
+}</code></pre>
+
+            <div class="tip-box">
+                <strong>提示：</strong> 对于超长列表，考虑使用 <code>LazyVStack</code> 或 <code>LazyHStack</code> 配合 <code>ScrollView</code>，实现按需加载。但需注意，List 自带复用机制，而 LazyStack 需要手动管理复用。
+            </div>
+
+            <h3>3. 状态与绑定优化：精细控制依赖</h3>
+            <p>避免使用高阶状态（如整个对象）作为依赖，应提取最小必要属性。</p>
+<pre><code>// 不推荐：整个对象变化都会触发重绘
+@StateObject var userManager = UserManager()
+
+// 推荐：仅观察必要属性
+@State private var userName: String = ""
+@State private var isActive: Bool = false
+
+// 使用 .onReceive 监听特定发布者
+.onReceive(userManager.$name) { newName in
+    userName = newName
+}</code></pre>
+        </section>
+
+        <section>
+            <h2>三、SwiftUI 渲染架构与优化点</h2>
+            <div class="svg-container">
+                <svg width="650" height="350" viewBox="0 0 650 350">
+                    <rect x="50" y="20" width="550" height="310" rx="15" fill="none" stroke="#4CAF50" stroke-width="2" stroke-dasharray="5,5"/>
+                    <text x="325" y="50" text-anchor="middle" fill="#2196F3" font-size="22" font-weight="bold">SwiftUI 渲染与优化架构图</text>
+                    <!-- 数据层 -->
+                    <rect x="100" y="80" width="150" height="60" rx="8" fill="#FFECB3" stroke="#FFA000" stroke-width="2"/>
+                    <text x="175" y="115" text-anchor="middle" fill="#5D4037" font-size="16" font-weight="bold">数据模型</text>
+                    <text x="175" y="135" text-anchor="middle" fill="#795548" font-size="12">Identifiable, Hashable</text>
+                    <!-- 状态层 -->
+                    <rect x="300" y="80" width="150" height="60" rx="8" fill="#C8E6C9" stroke="#388E3C" stroke-width="2"/>
+                    <text x="375" y="115" text-anchor="middle" fill="#1B5E20" font-size="16" font-weight="bold">状态管理</text>
+                    <text x="375" y="135" text-anchor="middle" fill="#2E7D32" font-size="12">@State, @StateObject</text>
+                    <!-- 视图层 -->
+                    <rect x="100" y="180" width="150" height="60" rx="8" fill="#BBDEFB" stroke="#1976D2" stroke-width="2"/>
+                    <text x="175" y="215" text-anchor="middle" fill="#0D47A1" font-size="16" font-weight="bold">视图声明</text>
+                    <text x="175" y="235" text-anchor="middle" fill="#1565C0" font-size="12">EquatableView, Lazy</text>
+                    <!-- 渲染层 -->
+                    <rect x="300" y="180" width="150" height="60" rx="8" fill="#E1BEE7" stroke="#7B1FA2" stroke-width="2"/>
+                    <text x="375" y="215" text-anchor="middle" fill="#4A148C" font-size="16" font-weight="bold">渲染引擎</text>
+                    <text x="375" y="235" text-anchor="middle" fill="#6A1B9A" font-size="12">差异化更新</text>
+                    <!-- 连接线 -->
+                    <path d="M250 110 L300 110" stroke="#9E9E9E" stroke-width="2" marker-end="url(#arrow2)"/>
+                    <path d="M250 220 L300 220" stroke="#9E9E9E" stroke-width="2" marker-end="url(#arrow2)"/>
+                    <path d="M175 140 L175 180" stroke="#9E9E9E" stroke-width="2" marker-end="url(#arrow2)"/>
+                    <path d="M375 140 L375 180" stroke="#9E9E9E" stroke-width="2" marker-end="url(#arrow2)"/>
+                    <!-- 优化点 -->
+                    <circle cx="500" cy="120" r="40" fill="#FF8A65" stroke="#D84315" stroke-width="2"/>
+                    <text x="500" y="125" text-anchor="middle" fill="white" font-size="14" font-weight="bold">优化点</text>
+                    <text x="500" y="145" text-anchor="middle" fill="white" font-size="10">减少依赖</text>
+                    <circle cx="500" cy="220" r="40" fill="#FF8A65" stroke="#D84315" stroke-width="2"/>
+                    <text x="500" y="225" text-anchor="middle" fill="white" font-size="14" font-weight="bold">优化点</text>
+                    <text x="500" y="245" text-anchor="middle" fill="white" font-size="10">按需加载</text>
+                    <defs>
+                        <marker id="arrow2" markerWidth="10" markerHeight="10" refX="9" refY="3" orient="auto" markerUnits="strokeWidth">
+                            <path d="M0,0 L0,6 L9,3 z" fill="#9E9E9E"/>
+                        </marker>
+                    </defs>
+                </svg>
+            </div>
+            <p>上图展示了 SwiftUI 从数据到渲染的核心流程，并标出了关键优化点。理解此流程有助于我们针对性地实施优化策略。</p>
+        </section>
+
+        <section>
+            <h2>四、检查清单与最佳实践</h2>
+            <ol>
+                <li><strong>视图结构扁平化</strong>：避免过深的视图嵌套，减少布局计算。</li>
+                <li><strong>使用 <code>@ViewBuilder</code> 构建复杂条件视图</strong>：将条件逻辑移至 <code>@ViewBuilder</code> 属性或方法中。</li>
+                <li><strong>图片与动画优化</strong>：
+                    <ul>
+                        <li>使用 <code>resizable(capInsets:resizingMode:)</code> 和 <code>aspectRatio(contentMode:)</code> 调整图片。</li>
+                        <li>对于重复使用的图片，考虑缓存到 <code>NSCache</code> 或使用第三方库。</li>
+                        <li>使用 <code>withAnimation</code> 精确控制动画范围。</li>
+                    </ul>
+                </li>
+                <li><strong>利用 Instruments 定期分析</strong>：使用 Time Profiler 和 Allocations 工具定位热点。</li>
+                <li><strong>在真机上测试性能</strong>：模拟器无法完全反映真实设备的性能表现。</li>
+            </ol>
+        </section>
+    </main>
+
+    <footer>
+        <p class="footer-text">公众号: 蓝海资料掘金营，微信 deep3321</p>
+        <p style="margin-top: 10px; font-size: 0.9rem; opacity: 0.8;">SwiftUI从入门到精通 · 性能优化专题</p>
+    </footer>
+</body>
+</html>

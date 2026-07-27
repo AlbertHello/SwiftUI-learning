@@ -1,0 +1,485 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>第26课：多平台适配 - SwiftUI从入门到精通</title>
+    <style>
+        :root {
+            --primary-color: #4CAF50; /* 青草绿 */
+            --secondary-color: #FF9800; /* 活力橙 */
+            --accent-color: #2196F3; /* 天空蓝 */
+            --light-color: #FFF9C4; /* 淡鹅黄 */
+            --background-color: #F5F5F5; /* 浅灰背景 */
+            --text-color: #333333;
+            --border-color: #BDBDBD;
+        }
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', 'PingFang SC', 'Microsoft YaHei', sans-serif;
+        }
+        body {
+            background-color: var(--background-color);
+            color: var(--text-color);
+            line-height: 1.6;
+            padding: 20px;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        .double-border-container {
+            border: 8px double var(--primary-color);
+            border-radius: 20px;
+            padding: 30px;
+            background: linear-gradient(135deg, #ffffff 0%, var(--light-color) 100%);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            position: relative;
+            overflow: hidden;
+        }
+        .double-border-container::before {
+            content: '';
+            position: absolute;
+            top: 5px;
+            left: 5px;
+            right: 5px;
+            bottom: 5px;
+            border: 2px solid var(--accent-color);
+            border-radius: 15px;
+            pointer-events: none;
+        }
+        header {
+            text-align: center;
+            margin-bottom: 40px;
+            padding-bottom: 20px;
+            border-bottom: 3px dashed var(--secondary-color);
+        }
+        h1 {
+            color: var(--primary-color);
+            font-size: 2.8em;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 0px rgba(0,0,0,0.05);
+        }
+        .subtitle {
+            color: var(--accent-color);
+            font-size: 1.4em;
+            font-weight: 300;
+        }
+        h2 {
+            color: var(--secondary-color);
+            border-left: 6px solid var(--accent-color);
+            padding-left: 15px;
+            margin: 30px 0 15px;
+            font-size: 1.8em;
+        }
+        h3 {
+            color: var(--primary-color);
+            margin: 20px 0 10px;
+            font-size: 1.4em;
+        }
+        p {
+            margin-bottom: 15px;
+            text-align: justify;
+        }
+        .highlight-box {
+            background-color: rgba(255, 248, 225, 0.8);
+            border-left: 5px solid var(--secondary-color);
+            padding: 15px;
+            margin: 20px 0;
+            border-radius: 0 10px 10px 0;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 25px 0;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.05);
+            border-radius: 10px;
+            overflow: hidden;
+        }
+        th, td {
+            border: 1px solid var(--border-color);
+            padding: 15px;
+            text-align: left;
+        }
+        th {
+            background-color: var(--primary-color);
+            color: white;
+            font-weight: 600;
+        }
+        tr:nth-child(even) {
+            background-color: rgba(76, 175, 80, 0.05);
+        }
+        ul, ol {
+            margin-left: 25px;
+            margin-bottom: 20px;
+        }
+        li {
+            margin-bottom: 8px;
+        }
+        code, pre {
+            font-family: 'Courier New', monospace;
+            background-color: #f8f8f8;
+            border-radius: 5px;
+            padding: 2px 6px;
+            color: #d63384;
+        }
+        pre {
+            display: block;
+            padding: 20px;
+            margin: 20px 0;
+            border-left: 5px solid var(--accent-color);
+            background-color: #2d2d2d;
+            color: #f8f8f2;
+            overflow-x: auto;
+            white-space: pre-wrap;
+            border-radius: 0 10px 10px 0;
+        }
+        .svg-container {
+            display: flex;
+            justify-content: center;
+            margin: 30px 0;
+        }
+        .platform-icons {
+            display: flex;
+            justify-content: space-around;
+            flex-wrap: wrap;
+            margin: 30px 0;
+        }
+        .platform-icon {
+            text-align: center;
+            width: 150px;
+            margin: 10px;
+        }
+        .icon-circle {
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            margin: 0 auto 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            color: white;
+            font-size: 1.5em;
+        }
+        .ios { background-color: #007AFF; }
+        .ipados { background-color: #5856D6; }
+        .macos { background-color: #34C759; }
+        .watchos { background-color: #FF9500; }
+        footer {
+            text-align: center;
+            margin-top: 50px;
+            padding-top: 20px;
+            border-top: 2px solid var(--border-color);
+            color: #666;
+            font-size: 0.9em;
+        }
+        .footer-text {
+            background-color: var(--light-color);
+            display: inline-block;
+            padding: 10px 25px;
+            border-radius: 50px;
+            font-weight: bold;
+            color: var(--primary-color);
+            border: 2px dotted var(--secondary-color);
+        }
+        .checklist {
+            list-style-type: none;
+            margin-left: 0;
+        }
+        .checklist li:before {
+            content: '✓ ';
+            color: var(--primary-color);
+            font-weight: bold;
+            margin-right: 10px;
+        }
+        .note {
+            background-color: #E3F2FD;
+            border: 1px solid var(--accent-color);
+            padding: 15px;
+            border-radius: 10px;
+            margin: 20px 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="double-border-container">
+        <header>
+            <h1>第26课：多平台适配</h1>
+            <p class="subtitle">如何让一个SwiftUI项目适配iOS、iPadOS、macOS、watchOS</p>
+        </header>
+
+        <section>
+            <h2>课程概述</h2>
+            <p>SwiftUI 是苹果推出的声明式 UI 框架，其核心优势之一就是能够用一套代码为苹果的所有平台（iOS、iPadOS、macOS、watchOS，甚至 tvOS）构建应用程序。本课将深入讲解如何利用 SwiftUI 的特性，高效地进行多平台适配，打造真正的通用应用程序。</p>
+
+            <div class="svg-container">
+                <svg width="600" height="200" viewBox="0 0 600 200">
+                    <rect x="0" y="0" width="600" height="200" rx="15" fill="#E8F5E9"/>
+                    <text x="300" y="50" text-anchor="middle" font-size="24" font-weight="bold" fill="#2E7D32">SwiftUI 多平台适配架构</text>
+                    <circle cx="100" cy="120" r="40" fill="#007AFF"/>
+                    <text x="100" y="125" text-anchor="middle" fill="white" font-weight="bold">iOS</text>
+                    <circle cx="220" cy="120" r="40" fill="#5856D6"/>
+                    <text x="220" y="125" text-anchor="middle" fill="white" font-weight="bold">iPadOS</text>
+                    <circle cx="340" cy="120" r="40" fill="#34C759"/>
+                    <text x="340" y="125" text-anchor="middle" fill="white" font-weight="bold">macOS</text>
+                    <circle cx="460" cy="120" r="40" fill="#FF9500"/>
+                    <text x="460" y="125" text-anchor="middle" fill="white" font-weight="bold">watchOS</text>
+                    <circle cx="300" cy="120" r="60" fill="none" stroke="#FF9800" stroke-width="4" stroke-dasharray="5,5"/>
+                    <text x="300" y="40" text-anchor="middle" font-size="18" fill="#FF9800">共享的 SwiftUI 代码核心</text>
+                    <line x1="300" y1="60" x2="300" y2="110" stroke="#FF9800" stroke-width="2" stroke-dasharray="5,5"/>
+                </svg>
+            </div>
+
+            <div class="highlight-box">
+                <p><strong>核心思想：</strong>SwiftUI 鼓励你首先构建应用程序的核心逻辑和共享 UI，然后针对每个平台的独特功能和交互模式进行优化，而不是为每个平台编写完全独立的代码。</p>
+            </div>
+        </section>
+
+        <section>
+            <h2>一、项目设置与目标平台</h2>
+            <p>在 Xcode 中创建新项目时，选择 <strong>“Multiplatform”</strong> 模板下的 <strong>“App”</strong>。这将自动为你创建支持 iOS、iPadOS、macOS 等平台的项目结构。</p>
+
+            <h3>项目结构概览</h3>
+            <ul class="checklist">
+                <li><strong>共享代码 (Shared):</strong> 存放所有平台通用的模型、视图、视图模型和工具类。</li>
+                <li><strong>平台特定代码 (iOS, macOS, watchOS):</strong> 存放仅适用于特定平台的视图、应用入口和资源。</li>
+                <li><strong>资源 (Assets):</strong> 可以包含通用资源和平台特定资源。</li>
+            </ul>
+
+            <div class="platform-icons">
+                <div class="platform-icon">
+                    <div class="icon-circle ios">iOS</div>
+                    <p>手机交互<br>紧凑布局</p>
+                </div>
+                <div class="platform-icon">
+                    <div class="icon-circle ipados">iPadOS</div>
+                    <p>大屏分栏<br>指针交互</p>
+                </div>
+                <div class="platform-icon">
+                    <div class="icon-circle macos">macOS</div>
+                    <p>菜单栏<br>窗口管理</p>
+                </div>
+                <div class="platform-icon">
+                    <div class="icon-circle watchos">watchOS</div>
+                    <p>小屏简约<br>数字表冠</p>
+                </div>
+            </div>
+        </section>
+
+        <section>
+            <h2>二、平台差异与条件编译</h2>
+            <p>使用条件编译指令 <code>#if os()</code> 来区分不同平台的代码。这是进行平台适配的基础。</p>
+
+            <pre>import SwiftUI
+
+struct ContentView: View {
+    var body: some View {
+        VStack {
+            #if os(iOS)
+            Text("这是在 iPhone 或 iPad 上运行")
+                .font(.title)
+            #elseif os(macOS)
+            Text("这是在 Mac 上运行")
+                .font(.largeTitle)
+            #elseif os(watchOS)
+            Text("这是在 Apple Watch 上运行")
+                .font(.caption)
+            #endif
+
+            // 共享的视图部分
+            Image(systemName: "applelogo")
+                .foregroundColor(.blue)
+        }
+    }
+}</pre>
+
+            <table>
+                <thead>
+                    <tr>
+                        <th>编译条件</th>
+                        <th>适用平台</th>
+                        <th>常用场景</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><code>#if os(iOS)</code></td>
+                        <td>iOS, iPadOS</td>
+                        <td>适配触控交互、紧凑布局</td>
+                    </tr>
+                    <tr>
+                        <td><code>#if os(macOS)</code></td>
+                        <td>macOS</td>
+                        <td>添加菜单命令、调整窗口样式</td>
+                    </tr>
+                    <tr>
+                        <td><code>#if os(watchOS)</code></td>
+                        <td>watchOS</td>
+                        <td>简化界面、适配圆形屏幕</td>
+                    </tr>
+                    <tr>
+                        <td><code>#if targetEnvironment(macCatalyst)</code></td>
+                        <td>Mac Catalyst (iPad应用转Mac)</td>
+                        <td>优化Mac端特有交互</td>
+                    </tr>
+                </tbody>
+            </table>
+        </section>
+
+        <section>
+            <h2>三、自适应布局与尺寸类别</h2>
+            <p>SwiftUI 提供了强大的布局工具，如 <code>VStack</code>, <code>HStack</code>, <code>Grid</code>，以及环境值 <code>@Environment(\.horizontalSizeClass)</code> 来创建自适应的界面。</p>
+
+            <h3>使用 SizeClass 适配</h3>
+            <pre>struct AdaptiveView: View {
+    @Environment(\.horizontalSizeClass) var horizontalSizeClass
+
+    var body: some View {
+        if horizontalSizeClass == .compact {
+            // 紧凑宽度（如iPhone竖屏）
+            VStack {
+                // 垂直排列内容
+                DetailView()
+                ListView()
+            }
+        } else {
+            // 常规宽度（如iPad、Mac、iPhone横屏）
+            HStack {
+                // 水平分栏
+                ListView()
+                    .frame(width: 250)
+                DetailView()
+            }
+        }
+    }
+}</pre>
+
+            <div class="note">
+                <p><strong>提示：</strong>对于 watchOS，屏幕尺寸非常有限，应优先考虑使用 <code>ScrollView</code> 和简单的垂直堆栈，并尽量减少页面层级。</p>
+            </div>
+        </section>
+
+        <section>
+            <h2>四、平台特定功能与修饰符</h2>
+            <p>不同平台支持不同的交互方式和系统功能。SwiftUI 通过修饰符和场景API来处理这些差异。</p>
+
+            <h3>1. 导航差异</h3>
+            <pre>// 在iOS/iPadOS上使用 NavigationStack
+#if os(iOS)
+NavigationStack {
+    List(items) { item in
+        NavigationLink(value: item) {
+            Text(item.name)
+        }
+    }
+    .navigationDestination(for: Item.self) { item in
+        DetailView(item: item)
+    }
+}
+#endif
+
+// 在macOS上通常使用侧边栏+详情页的导航样式
+#if os(macOS)
+NavigationSplitView {
+    List(items, selection: $selectedItem) { item in
+        Text(item.name)
+            .tag(item)
+    }
+} detail: {
+    if let selectedItem {
+        DetailView(item: selectedItem)
+    } else {
+        Text("请选择一项")
+    }
+}
+#endif</pre>
+
+            <h3>2. 窗口与场景管理 (macOS)</h3>
+            <pre>// 在 macOS 的 App 入口中定义窗口和菜单
+@main
+struct MyMacApp: App {
+    var body: some Scene {
+        WindowGroup {
+            ContentView()
+        }
+        .commands {
+            // 添加应用菜单
+            CommandMenu("编辑") {
+                Button("复制") {
+                    // 复制操作
+                }
+                .keyboardShortcut("c")
+            }
+        }
+
+        #if os(macOS)
+        Settings {
+            SettingsView() // macOS 特有的设置窗口
+        }
+        #endif
+    }
+}</pre>
+        </section>
+
+        <section>
+            <h2>五、资源与图标的适配</h2>
+            <p>在 Asset Catalog 中，可以为不同平台提供不同的图片、颜色和图标资源。</p>
+            <ul>
+                <li><strong>应用图标：</strong> 每个目标都有独立的 <code>AppIcon</code> 资源集，需分别配置。</li>
+                <li><strong>图片资源：</strong> 使用 <code>Image("name")</code>，SwiftUI 会自动选择当前平台可用的最佳资源。</li>
+                <li><strong>符号图标 (SF Symbols)：</strong> 优先使用，它们在不同平台上表现一致且可自动适配。</li>
+            </ul>
+        </section>
+
+        <section>
+            <h2>六、最佳实践总结</h2>
+            <table>
+                <thead>
+                    <tr>
+                        <th>实践原则</th>
+                        <th>具体做法</th>
+                        <th>收益</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><strong>最大化共享代码</strong></td>
+                        <td>将数据模型、网络逻辑、业务核心放在 Shared 目录</td>
+                        <td>减少重复，维护单一信源</td>
+                    </tr>
+                    <tr>
+                        <td><strong>渐进式平台优化</strong></td>
+                        <td>先构建通用版本，再使用条件编译添加平台增强功能</td>
+                        <td>快速上线，迭代优化</td>
+                    </tr>
+                    <tr>
+                        <td><strong>尊重平台习惯</strong></td>
+                        <td>iOS用导航栏，macOS用菜单和窗口，watchOS用垂直滚动</td>
+                        <td>符合用户直觉，提升体验</td>
+                    </tr>
+                    <tr>
+                        <td><strong>利用 SwiftUI 抽象</strong></td>
+                        <td>使用 <code>ViewBuilder</code>, <code>ViewModifier</code> 封装平台差异</td>
+                        <td>代码更清晰，复用性高</td>
+                    </tr>
+                    <tr>
+                        <td><strong>充分测试</strong></strong></td>
+                        <td>在每种目标设备和模拟器上运行测试</td>
+                        <td>确保各平台功能与UI正常</td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <div class="highlight-box">
+                <p><strong>最终目标：</strong> 不是追求 100% 的代码共享，而是在代码复用和提供最佳原生体验之间找到完美的平衡点。让你的应用在每个平台上都感觉“像家一样”，而不是一个简单的移植品。</p>
+            </div>
+        </section>
+
+        <footer>
+            <p class="footer-text">公众号: 蓝海资料掘金营，微信 deep3321</p>
+            <p>© 《SwiftUI从入门到精通》课程系列 - 第26课</p>
+        </footer>
+    </div>
+</body>
+</html>

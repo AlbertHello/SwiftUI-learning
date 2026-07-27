@@ -1,0 +1,364 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SwiftUI从入门到精通 - 第10章：绘图与形状</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Helvetica Neue', 'PingFang SC', 'Microsoft YaHei', sans-serif;
+        }
+        body {
+            background: linear-gradient(135deg, #f5f7fa 0%, #e4edf5 100%);
+            color: #333;
+            line-height: 1.6;
+            padding: 20px;
+            min-height: 100vh;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background-color: rgba(255, 255, 255, 0.92);
+            border-radius: 20px;
+            border: 8px double #4a90e2;
+            box-shadow: 0 15px 35px rgba(74, 144, 226, 0.15);
+            overflow: hidden;
+            padding: 30px;
+        }
+        .header {
+            text-align: center;
+            padding: 30px 20px;
+            background: linear-gradient(90deg, #ff9a9e 0%, #fad0c4 100%);
+            margin: -30px -30px 30px -30px;
+            border-bottom: 4px solid #ff6b6b;
+        }
+        h1 {
+            color: #2c3e50;
+            font-size: 2.8rem;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 0 #ffd166;
+        }
+        .subtitle {
+            color: #555;
+            font-size: 1.3rem;
+            font-weight: 300;
+        }
+        h2 {
+            color: #06d6a0;
+            border-left: 6px solid #ffd166;
+            padding-left: 15px;
+            margin: 40px 0 20px;
+            font-size: 2rem;
+        }
+        h3 {
+            color: #118ab2;
+            margin: 25px 0 15px;
+            font-size: 1.5rem;
+        }
+        p {
+            margin-bottom: 15px;
+            font-size: 1.05rem;
+        }
+        .card {
+            background: #fff;
+            border-radius: 12px;
+            padding: 20px;
+            margin: 20px 0;
+            border: 3px solid #a2d2ff;
+            box-shadow: 0 5px 15px rgba(162, 210, 255, 0.2);
+        }
+        .code-block {
+            background: #2d3047;
+            color: #f8f9fa;
+            padding: 20px;
+            border-radius: 10px;
+            overflow-x: auto;
+            margin: 20px 0;
+            border-left: 5px solid #ff9e00;
+            font-family: 'Menlo', 'Monaco', 'Courier New', monospace;
+        }
+        pre {
+            white-space: pre-wrap;
+            word-wrap: break-word;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 25px 0;
+            border: 3px solid #ffafcc;
+            border-radius: 10px;
+            overflow: hidden;
+        }
+        th, td {
+            padding: 15px;
+            text-align: left;
+            border-bottom: 2px dashed #cdb4db;
+        }
+        th {
+            background-color: #bde0fe;
+            color: #2a2d43;
+            font-weight: bold;
+        }
+        tr:nth-child(even) {
+            background-color: #f8f9fa;
+        }
+        ul, ol {
+            padding-left: 30px;
+            margin: 15px 0;
+        }
+        li {
+            margin-bottom: 8px;
+        }
+        .svg-container {
+            text-align: center;
+            margin: 30px 0;
+            padding: 20px;
+            background: #f0f8ff;
+            border-radius: 15px;
+            border: 3px dotted #06d6a0;
+        }
+        .architecture {
+            background: #fffaf0;
+            padding: 25px;
+            border-radius: 15px;
+            border: 3px solid #ffafcc;
+            margin: 30px 0;
+        }
+        .footer {
+            text-align: center;
+            margin-top: 50px;
+            padding: 25px;
+            background: linear-gradient(90deg, #a2d2ff 0%, #cdb4db 100%);
+            color: #2c3e50;
+            font-weight: bold;
+            font-size: 1.1rem;
+            border-top: 5px double #ffafcc;
+            border-radius: 0 0 12px 12px;
+            margin: 30px -30px -30px -30px;
+        }
+        .highlight {
+            background-color: #fffacd;
+            padding: 3px 6px;
+            border-radius: 4px;
+            font-weight: bold;
+        }
+        .note {
+            background-color: #e0f7fa;
+            border-left: 5px solid #00acc1;
+            padding: 15px;
+            margin: 20px 0;
+            border-radius: 0 10px 10px 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>第10章：绘图与形状</h1>
+            <p class="subtitle">Path、Shape协议、内置形状与自定义绘图</p>
+        </div>
+
+        <div class="card">
+            <h2>本章概述</h2>
+            <p>在SwiftUI中，绘图是构建自定义UI和视觉效果的基石。本章将深入探讨SwiftUI的绘图系统，从基础的<strong>Path</strong>和<strong>Shape协议</strong>，到便捷的<strong>内置形状</strong>，最后引导你创建属于自己的<strong>自定义形状</strong>。掌握这些知识，你将能绘制出任何你能想象的界面元素。</p>
+        </div>
+
+        <h2>1. 核心概念：Path</h2>
+        <p><span class="highlight">Path</span>是SwiftUI中描述二维形状轮廓的基本结构。你可以把它想象为一支虚拟的画笔，通过一系列指令（如移动、画线、画弧）来“描绘”形状。</p>
+
+        <div class="code-block">
+            <pre><code>import SwiftUI
+
+struct PathExampleView: View {
+    var body: some View {
+        Path { path in
+            // 将画笔移动到起点 (50, 20)
+            path.move(to: CGPoint(x: 50, y: 20))
+            // 画一条线到 (200, 20)
+            path.addLine(to: CGPoint(x: 200, y: 20))
+            // 画一条线到 (125, 150)
+            path.addLine(to: CGPoint(x: 125, y: 150))
+            // 闭合路径，画一条线回起点
+            path.closeSubpath()
+        }
+        .fill(Color.blue) // 填充颜色
+        .stroke(Color.orange, lineWidth: 5) // 描边
+        .frame(width: 250, height: 200)
+    }
+}</code></pre>
+        </div>
+
+        <div class="svg-container">
+            <svg width="250" height="200" viewBox="0 0 250 200">
+                <polygon points="50,20 200,20 125,150" fill="#4a90e2" stroke="#ff9e00" stroke-width="5"/>
+                <text x="125" y="180" text-anchor="middle" fill="#333">一个由Path绘制的三角形</text>
+            </svg>
+        </div>
+
+        <h2>2. Shape协议</h2>
+        <p><span class="highlight">Shape</span>是一个协议，任何符合该协议的类型都能定义为一个可被SwiftUI视图系统识别和渲染的形状。它要求实现一个关键方法：<code>path(in rect: CGRect) -> Path</code>。</p>
+
+        <div class="architecture">
+            <h3>Shape协议架构图</h3>
+            <svg width="100%" height="180" viewBox="0 0 600 180">
+                <rect x="50" y="20" width="200" height="60" rx="10" fill="#bde0fe" stroke="#118ab2" stroke-width="3"/>
+                <text x="150" y="55" text-anchor="middle" fill="#2a2d43" font-weight="bold">Shape 协议</text>
+                <text x="150" y="75" text-anchor="middle" fill="#555" font-size="14">func path(in: CGRect) -> Path</text>
+
+                <polygon points="300,50 350,30 350,70" fill="#ffafcc"/>
+                <line x1="250" y1="50" x2="300" y2="50" stroke="#118ab2" stroke-width="2"/>
+
+                <rect x="350" y="20" width="200" height="60" rx="10" fill="#ffd166" stroke="#ff9e00" stroke-width="3"/>
+                <text x="450" y="55" text-anchor="middle" fill="#2a2d43" font-weight="bold">自定义 Shape</text>
+                <text x="450" y="75" text-anchor="middle" fill="#555" font-size="14">实现 path(in:) 方法</text>
+
+                <polygon points="550,50 600,30 600,70" fill="#06d6a0"/>
+                <line x1="550" y1="50" x2="600" y2="50" stroke="#118ab2" stroke-width="2"/>
+
+                <rect x="600" y="20" width="200" height="60" rx="10" fill="#a2d2ff" stroke="#4a90e2" stroke-width="3"/>
+                <text x="700" y="55" text-anchor="middle" fill="#2a2d43" font-weight="bold">SwiftUI 视图</text>
+                <text x="700" y="75" text-anchor="middle" fill="#555" font-size="14">.fill(), .stroke()</text>
+
+                <line x1="250" y1="120" x2="350" y2="120" stroke="#555" stroke-width="2" stroke-dasharray="5,5"/>
+                <text x="300" y="135" text-anchor="middle" fill="#555" font-size="14">符合</text>
+
+                <line x1="550" y1="120" x2="650" y2="120" stroke="#555" stroke-width="2" stroke-dasharray="5,5"/>
+                <text x="600" y="135" text-anchor="middle" fill="#555" font-size="14">作为</text>
+            </svg>
+        </div>
+
+        <h2>3. 内置形状 (Built-in Shapes)</h2>
+        <p>SwiftUI贴心地提供了一系列开箱即用的基本形状，它们都符合<strong>Shape</strong>协议，可以直接使用。</p>
+
+        <table>
+            <thead>
+                <tr>
+                    <th>形状</th>
+                    <th>说明</th>
+                    <th>示例代码</th>
+                    <th>预览</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td><strong>Circle</strong></td>
+                    <td>圆形</td>
+                    <td><code>Circle().fill(.red)</code></td>
+                    <td><svg width="60" height="60"><circle cx="30" cy="30" r="25" fill="#ff6b6b"/></svg></td>
+                </tr>
+                <tr>
+                    <td><strong>Rectangle</strong></td>
+                    <td>矩形</td>
+                    <td><code>Rectangle().fill(.blue)</code></td>
+                    <td><svg width="60" height="60"><rect x="5" y="5" width="50" height="50" fill="#4a90e2"/></svg></td>
+                </tr>
+                <tr>
+                    <td><strong>RoundedRectangle</strong></td>
+                    <td>圆角矩形</td>
+                    <td><code>RoundedRectangle(cornerRadius: 10)</code></td>
+                    <td><svg width="60" height="60"><rect x="5" y="5" width="50" height="50" rx="10" ry="10" fill="#06d6a0"/></svg></td>
+                </tr>
+                <tr>
+                    <td><strong>Capsule</strong></td>
+                    <td>胶囊形状</td>
+                    <td><code>Capsule().fill(.orange)</code></td>
+                    <td><svg width="80" height="40"><rect x="5" y="5" width="70" height="30" rx="15" ry="15" fill="#ff9e00"/></svg></td>
+                </tr>
+                <tr>
+                    <td><strong>Ellipse</strong></td>
+                    <td>椭圆</td>
+                    <td><code>Ellipse().fill(.purple)</code></td>
+                    <td><svg width="80" height="50"><ellipse cx="40" cy="25" rx="35" ry="20" fill="#cdb4db"/></svg></td>
+                </tr>
+            </tbody>
+        </table>
+
+        <div class="note">
+            <p><strong>提示：</strong> 内置形状不仅可以直接填充(<code>.fill()</code>)，还可以添加描边(<code>.stroke()</code>)、阴影(<code>.shadow()</code>)、裁剪(<code>.clipShape()</code>)等修饰符，功能非常强大。</p>
+        </div>
+
+        <h2>4. 自定义形状实战</h2>
+        <p>让我们通过创建一个<strong>五角星</strong>形状，来实践如何自定义Shape。</p>
+
+        <div class="code-block">
+            <pre><code>import SwiftUI
+
+struct StarShape: Shape {
+    // 定义角的数量和内凹比例
+    let points: Int
+    let smoothness: Double // 0.0~1.0， 值越小越尖
+
+    func path(in rect: CGRect) -> Path {
+        let center = CGPoint(x: rect.midX, y: rect.midY)
+        let outerRadius = min(rect.width, rect.height) / 2
+        let innerRadius = outerRadius * smoothness
+
+        var path = Path()
+
+        for i in 0..<points * 2 {
+            let angle = .pi / Double(points) * Double(i)
+            let radius = i % 2 == 0 ? outerRadius : innerRadius
+            let point = CGPoint(
+                x: center.x + CGFloat(cos(angle)) * radius,
+                y: center.y + CGFloat(sin(angle)) * radius
+            )
+            if i == 0 {
+                path.move(to: point)
+            } else {
+                path.addLine(to: point)
+            }
+        }
+        path.closeSubpath()
+        return path
+    }
+}
+
+struct ContentView: View {
+    var body: some View {
+        VStack {
+            StarShape(points: 5, smoothness: 0.5)
+                .fill(LinearGradient(colors: [.yellow, .orange], startPoint: .top, endPoint: .bottom))
+                .frame(width: 200, height: 200)
+                .shadow(radius: 10)
+            Text("自定义五角星")
+        }
+    }
+}</code></pre>
+        </div>
+
+        <div class="svg-container">
+            <svg width="200" height="220" viewBox="0 0 200 220">
+                <defs>
+                    <linearGradient id="starGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+                        <stop offset="0%" style="stop-color:#ffd166;stop-opacity:1" />
+                        <stop offset="100%" style="stop-color:#ff9e00;stop-opacity:1" />
+                    </linearGradient>
+                    <filter id="shadow">
+                        <feDropShadow dx="0" dy="5" stdDeviation="3"/>
+                    </filter>
+                </defs>
+                <polygon points="100,20 124,80 188,80 136,116 152,176 100,140 48,176 64,116 12,80 76,80" fill="url(#starGrad)" filter="url(#shadow)"/>
+                <text x="100" y="210" text-anchor="middle" fill="#333">自定义五角星预览</text>
+            </svg>
+        </div>
+
+        <h2>5. 关键知识点总结</h2>
+        <div class="card">
+            <ol>
+                <li><strong>Path是基础：</strong> 所有形状最终都通过Path来定义轮廓。掌握<code>move(to:)</code>, <code>addLine(to:)</code>, <code>addCurve(to:control1:control2:)</code>, <code>addArc(...)</code>等方法是关键。</li>
+                <li><strong>Shape协议是桥梁：</strong> 它让自定义的路径逻辑能够无缝集成到SwiftUI的视图体系中，享受所有视图修饰符。</li>
+                <li><strong>内置形状高效便捷：</strong> 对于常见图形，直接使用<strong>Circle</strong>, <strong>Rectangle</strong>等，省时省力。</li>
+                <li><strong>组合与修饰：</strong> 形状可以像普通视图一样使用<code>.fill()</code>, <code>.stroke()</code>, <code>.rotationEffect()</code>, <code>.scaleEffect()</code>等修饰符，创造出复杂效果。</li>
+                <li><strong>动画支持：</strong> 由于Shape符合<strong>Animatable</strong>协议，通过改变其参数（如圆角半径、控制点），可以轻松实现平滑的形状变形动画。</li>
+            </ol>
+        </div>
+
+        <div class="footer">
+            公众号: 蓝海资料掘金营，微信 deep3321
+        </div>
+    </div>
+</body>
+</html>

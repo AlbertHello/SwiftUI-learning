@@ -1,0 +1,559 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SwiftUI从入门到精通 - 项目实战</title>
+    <style>
+        :root {
+            --primary: #4CAF50; /* 青草绿 */
+            --secondary: #FF9800; /* 活力橙 */
+            --accent: #2196F3; /* 天空蓝 */
+            --light-bg: #F9FBE7; /* 米黄 */
+            --card-bg: #FFFFFF;
+            --text: #333333;
+            --border: #C8E6C9; /* 浅绿边框 */
+        }
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', 'Microsoft YaHei', sans-serif;
+        }
+        body {
+            background-color: var(--light-bg);
+            color: var(--text);
+            line-height: 1.6;
+            padding: 20px;
+            max-width: 1200px;
+            margin: 0 auto;
+            border: double 8px var(--primary);
+            border-radius: 20px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+        }
+        header {
+            text-align: center;
+            padding: 30px 20px;
+            background: linear-gradient(135deg, var(--primary), var(--accent));
+            color: white;
+            border-radius: 12px 12px 0 0;
+            margin-bottom: 30px;
+            border-bottom: double 6px white;
+        }
+        h1 {
+            font-size: 2.8rem;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.2);
+        }
+        h2 {
+            color: var(--secondary);
+            border-left: 6px solid var(--accent);
+            padding-left: 15px;
+            margin: 25px 0 15px;
+            font-size: 1.8rem;
+        }
+        h3 {
+            color: var(--primary);
+            margin: 20px 0 10px;
+            font-size: 1.4rem;
+        }
+        .container {
+            padding: 0 20px 40px;
+        }
+        .intro {
+            background-color: var(--card-bg);
+            padding: 25px;
+            border-radius: 15px;
+            margin-bottom: 30px;
+            border: double 4px var(--border);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.05);
+        }
+        .highlight {
+            background-color: #E8F5E9;
+            padding: 20px;
+            border-radius: 10px;
+            margin: 20px 0;
+            border-left: 5px solid var(--primary);
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 25px 0;
+            border: double 3px var(--accent);
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.05);
+        }
+        th, td {
+            padding: 15px;
+            text-align: left;
+            border-bottom: 1px solid var(--border);
+        }
+        th {
+            background-color: var(--primary);
+            color: white;
+            font-weight: bold;
+        }
+        tr:nth-child(even) {
+            background-color: #F1F8E9;
+        }
+        ul, ol {
+            padding-left: 30px;
+            margin: 15px 0;
+        }
+        li {
+            margin-bottom: 8px;
+        }
+        .code-block {
+            background-color: #2d2d2d;
+            color: #f8f8f2;
+            padding: 20px;
+            border-radius: 10px;
+            margin: 20px 0;
+            overflow-x: auto;
+            border: double 4px #666;
+            font-family: 'Courier New', monospace;
+        }
+        .architecture {
+            background-color: white;
+            padding: 25px;
+            border-radius: 15px;
+            margin: 30px 0;
+            text-align: center;
+            border: double 4px var(--secondary);
+        }
+        .architecture svg {
+            max-width: 100%;
+            height: auto;
+        }
+        .step-card {
+            background-color: var(--card-bg);
+            border: double 4px var(--border);
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.05);
+        }
+        .step-card h4 {
+            color: var(--accent);
+            display: flex;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+        .step-card h4 span {
+            background-color: var(--secondary);
+            color: white;
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            margin-right: 10px;
+            font-size: 0.9rem;
+        }
+        footer {
+            text-align: center;
+            padding: 25px;
+            margin-top: 40px;
+            background: linear-gradient(135deg, var(--accent), var(--primary));
+            color: white;
+            border-radius: 0 0 12px 12px;
+            border-top: double 6px white;
+            font-size: 1.1rem;
+            letter-spacing: 1px;
+        }
+        .tag {
+            display: inline-block;
+            background-color: var(--secondary);
+            color: white;
+            padding: 5px 12px;
+            border-radius: 20px;
+            font-size: 0.9rem;
+            margin-right: 8px;
+            margin-bottom: 8px;
+        }
+        .note {
+            background-color: #FFF3E0;
+            border-left: 5px solid var(--secondary);
+            padding: 15px;
+            border-radius: 0 10px 10px 0;
+            margin: 15px 0;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>SwiftUI 从入门到精通</h1>
+        <p style="font-size: 1.4rem;">第30课：项目实战 - 综合运用所学知识，从零到一开发完整应用</p>
+        <p style="margin-top: 15px; opacity: 0.9;">规划并开发一个完整的任务管理应用</p>
+    </header>
+
+    <div class="container">
+        <section class="intro">
+            <h2>🎯 课程目标</h2>
+            <p>本实战课程将引导你综合运用之前所学的所有SwiftUI知识，包括视图布局、状态管理、数据持久化、动画、手势等，独立规划并开发一个功能完整的iOS应用。我们选择开发一个<strong>“轻量级任务管理应用”</strong>，它贴近生活，能覆盖大部分核心开发场景。</p>
+            <div class="highlight">
+                <p><strong>你将学到：</strong></p>
+                <ul>
+                    <li>如何从零开始规划一个真实的应用项目。</li>
+                    <li>如何设计清晰的数据模型和架构。</li>
+                    <li>如何将复杂界面分解为可重用的SwiftUI组件。</li>
+                    <li>如何管理应用状态并实现数据持久化。</li>
+                    <li>如何为应用添加交互动画和微交互。</li>
+                    <li>如何进行简单的测试与调试。</li>
+                </ul>
+            </div>
+        </section>
+
+        <section>
+            <h2>📱 应用规划：任务管理应用 “SwiftTask”</h2>
+            <div class="step-card">
+                <h4><span>1</span> 核心功能</h4>
+                <ul>
+                    <li><strong>任务增删改查</strong>：创建、查看、编辑、删除任务。</li>
+                    <li><strong>任务分类</strong>：为任务添加标签或分类（如工作、生活、学习）。</li>
+                    <li><strong>状态管理</strong>：标记任务为待办、进行中、已完成。</li>
+                    <li><strong>优先级</strong>：设置高、中、低优先级。</li>
+                    <li><strong>日期提醒</strong>：为任务设置截止日期和提醒。</li>
+                    <li><strong>数据持久化</strong>：使用Core Data或SwiftData保存数据。</li>
+                    <li><strong>搜索与过滤</strong>：快速查找特定任务。</li>
+                </ul>
+            </div>
+            <div class="step-card">
+                <h4><span>2</span> 技术栈</h4>
+                <div style="margin-top: 10px;">
+                    <span class="tag">SwiftUI</span>
+                    <span class="tag">SwiftData / Core Data</span>
+                    <span class="tag">@State & @Binding</span>
+                    <span class="tag">@Observable & @Environment</span>
+                    <span class="tag">MVVM 架构</span>
+                    <span class="tag">自定义动画</span>
+                    <span class="tag">UserNotifications</span>
+                    <span class="tag">Localization</span>
+                </div>
+            </div>
+        </section>
+
+        <section class="architecture">
+            <h2>🏗️ 应用架构图 (MVVM)</h2>
+            <svg viewBox="0 0 800 400" xmlns="http://www.w3.org/2000/svg">
+                <rect x="50" y="50" width="200" height="80" rx="10" fill="#4CAF50" stroke="#2E7D32" stroke-width="3"/>
+                <text x="150" y="95" text-anchor="middle" fill="white" font-size="18" font-weight="bold">视图层 (View)</text>
+                <text x="150" y="120" text-anchor="middle" fill="#E8F5E9" font-size="14">TaskListView, TaskDetailView</text>
+
+                <rect x="300" y="50" width="200" height="80" rx="10" fill="#FF9800" stroke="#EF6C00" stroke-width="3"/>
+                <text x="400" y="95" text-anchor="middle" fill="white" font-size="18" font-weight="bold">视图模型层 (ViewModel)</text>
+                <text x="400" y="120" text-anchor="middle" fill="#FFF3E0" font-size="14">TaskViewModel</text>
+
+                <rect x="550" y="50" width="200" height="80" rx="10" fill="#2196F3" stroke="#1565C0" stroke-width="3"/>
+                <text x="650" y="95" text-anchor="middle" fill="white" font-size="18" font-weight="bold">模型层 (Model)</text>
+                <text x="650" y="120" text-anchor="middle" fill="#E3F2FD" font-size="14">Task, Category</text>
+
+                <rect x="100" y="200" width="600" height="80" rx="10" fill="#9C27B0" stroke="#6A1B9A" stroke-width="3"/>
+                <text x="400" y="245" text-anchor="middle" fill="white" font-size="18" font-weight="bold">数据持久层 (Persistence)</text>
+                <text x="400" y="270" text-anchor="middle" fill="#F3E5F5" font-size="14">SwiftData / Core Data Container</text>
+
+                <path d="M150 130 L150 180 L400 180 L400 130" stroke="#795548" stroke-width="2" fill="none" marker-end="url(#arrowhead)"/>
+                <path d="M650 130 L650 180 L400 180 L400 130" stroke="#795548" stroke-width="2" fill="none" marker-end="url(#arrowhead)"/>
+                <path d="M400 230 L400 280" stroke="#795548" stroke-width="2" fill="none" marker-end="url(#arrowhead)"/>
+                <path d="M500 280 L500 230 L300 230 L300 280" stroke="#795548" stroke-width="2" fill="none" marker-end="url(#arrowhead)"/>
+
+                <defs>
+                    <marker id="arrowhead" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
+                        <polygon points="0 0, 10 3.5, 0 7" fill="#795548"/>
+                    </marker>
+                </defs>
+            </svg>
+            <p class="note">采用清晰的MVVM架构，分离界面、逻辑与数据，使代码易于维护和测试。</p>
+        </section>
+
+        <section>
+            <h2>📊 数据模型设计</h2>
+            <table>
+                <thead>
+                    <tr>
+                        <th>实体名</th>
+                        <th>属性</th>
+                        <th>类型</th>
+                        <th>说明</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><strong>Task</strong></td>
+                        <td>id, title, notes, isCompleted, priority, dueDate, createDate, category</td>
+                        <td>UUID, String, String, Bool, Int, Date, Date, Category</td>
+                        <td>核心任务模型</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Category</strong></td>
+                        <td>id, name, color, icon</td>
+                        <td>UUID, String, String, String</td>
+                        <td>任务分类</td>
+                    </tr>
+                </tbody>
+            </table>
+            <h3>SwiftData 模型代码示例</h3>
+            <div class="code-block">
+<pre><code>import SwiftData
+import SwiftUI
+
+@Model
+final class TaskItem {
+    var id: UUID
+    var title: String
+    var notes: String
+    var isCompleted: Bool
+    var priority: Int // 0:低, 1:中, 2:高
+    var dueDate: Date?
+    var createDate: Date
+    @Relationship(deleteRule: .nullify) var category: Category?
+
+    init(title: String, notes: String = "", priority: Int = 1) {
+        self.id = UUID()
+        self.title = title
+        self.notes = notes
+        self.isCompleted = false
+        self.priority = priority
+        self.createDate = Date()
+    }
+}
+
+@Model
+final class Category {
+    var id: UUID
+    var name: String
+    var color: String // 存储十六进制颜色
+    var icon: String // SF Symbols 名称
+
+    init(name: String, color: String = "#4CAF50", icon: String = "folder") {
+        self.id = UUID()
+        self.name = name
+        self.color = color
+        self.icon = icon
+    }
+}</code></pre>
+            </div>
+        </section>
+
+        <section>
+            <h2>🛠️ 开发步骤分解</h2>
+            <div class="step-card">
+                <h4><span>1</span> 项目初始化与数据层搭建</h4>
+                <ul>
+                    <li>创建新的SwiftUI项目，选择包含SwiftData。</li>
+                    <li>定义上述数据模型。</li>
+                    <li>创建DataController或Persistence类，封装数据操作。</li>
+                </ul>
+            </div>
+            <div class="step-card">
+                <h4><span>2</span> 构建可复用的UI组件</h4>
+                <ul>
+                    <li><code>PriorityBadge(priority: Int)</code>：显示优先级标签。</li>
+                    <li><code>TaskRow(task: TaskItem)</code>：列表中的每一行。</li>
+                    <li><code>CategoryChip(category: Category)</code>：分类标签。</li>
+                    <li><code>FloatingActionButton(action: {})</code>：添加按钮。</li>
+                </ul>
+            </div>
+            <div class="step-card">
+                <h4><span>3</span> 实现核心视图</h4>
+                <ul>
+                    <li><strong>任务列表视图 (TaskListView)</strong>：显示所有任务，支持滑动删除、筛选。</li>
+                    <li><strong>任务详情/编辑视图 (TaskDetailView)</strong>：查看和修改任务详情。</li>
+                    <li><strong>添加任务视图 (AddTaskView)</strong>：模态弹出的添加界面。</li>
+                    <li><strong>分类管理视图 (CategoryView)</strong>：管理任务分类。</li>
+                </ul>
+            </div>
+            <div class="step-card">
+                <h4><span>4</span> 集成视图模型与状态管理</h4>
+                <ul>
+                    <li>创建<code>TaskViewModel</code>，使用<code>@Observable</code>。</li>
+                    <li>通过<code>@Environment</code>注入数据上下文。</li>
+                    <li>实现任务的增删改查、排序、过滤逻辑。</li>
+                </ul>
+            </div>
+            <div class="step-card">
+                <h4><span>5</span> 添加交互与动画</h4>
+                <ul>
+                    <li>任务完成时的打勾动画。</li>
+                    <li>列表项删除的滑动动画。</li>
+                    <li>按钮的按压反馈。</li>
+                    <li>视图切换的过渡动画。</li>
+                </ul>
+            </div>
+            <div class="step-card">
+                <h4><span>6</span> 完善与优化</h4>
+                <ul>
+                    <li>添加本地通知提醒功能。</li>
+                    <li>实现搜索栏。</li>
+                    <li>添加应用图标和启动屏。</li>
+                    <li>进行简单测试，修复Bug。</li>
+                </ul>
+            </div>
+        </section>
+
+        <section>
+            <h2>💻 关键代码片段</h2>
+            <h3>1. 任务列表行视图 (TaskRow)</h3>
+            <div class="code-block">
+<pre><code>struct TaskRow: View {
+    let task: TaskItem
+    @Binding var isEditing: Bool
+    var onToggleComplete: () -> Void
+
+    var body: some View {
+        HStack(spacing: 15) {
+            // 完成状态按钮
+            Button(action: onToggleComplete) {
+                Image(systemName: task.isCompleted ? "checkmark.circle.fill" : "circle")
+                    .foregroundColor(task.isCompleted ? .green : .gray)
+                    .font(.title2)
+                    .animation(.easeInOut, value: task.isCompleted)
+            }
+            .buttonStyle(.plain)
+
+            VStack(alignment: .leading, spacing: 5) {
+                Text(task.title)
+                    .font(.headline)
+                    .strikethrough(task.isCompleted, color: .gray)
+                    .foregroundColor(task.isCompleted ? .gray : .primary)
+
+                if let dueDate = task.dueDate {
+                    HStack {
+                        Image(systemName: "calendar")
+                            .font(.caption)
+                        Text(dueDate, style: .date)
+                            .font(.caption)
+                            .foregroundColor(dueDate < Date() ? .red : .secondary)
+                    }
+                }
+            }
+
+            Spacer()
+
+            // 优先级标签
+            PriorityBadge(priority: task.priority)
+
+            // 分类标签
+            if let category = task.category {
+                CategoryChip(category: category)
+            }
+        }
+        .padding(.vertical, 10)
+        .padding(.horizontal)
+        .background(Color(.systemBackground))
+        .cornerRadius(12)
+        .shadow(color: .black.opacity(0.05), radius: 3, x: 0, y: 2)
+    }
+}</code></pre>
+            </div>
+
+            <h3>2. 视图模型示例 (TaskViewModel)</h3>
+            <div class="code-block">
+<pre><code>import SwiftData
+import SwiftUI
+
+@Observable
+class TaskViewModel {
+    private var modelContext: ModelContext
+    var tasks: [TaskItem] = []
+    var filter: FilterType = .all
+    var searchText: String = ""
+
+    enum FilterType {
+        case all, pending, completed, highPriority
+    }
+
+    init(modelContext: ModelContext) {
+        self.modelContext = modelContext
+        fetchTasks()
+    }
+
+    func fetchTasks() {
+        let descriptor = FetchDescriptor&lt;TaskItem&gt;(
+            sortBy: [SortDescriptor(\.dueDate, order: .forward)]
+        )
+        do {
+            tasks = try modelContext.fetch(descriptor)
+        } catch {
+            print("Fetch failed: \(error)")
+        }
+    }
+
+    func addTask(title: String, priority: Int = 1) {
+        let newTask = TaskItem(title: title, priority: priority)
+        modelContext.insert(newTask)
+        saveContext()
+        fetchTasks()
+    }
+
+    func toggleComplete(for task: TaskItem) {
+        task.isCompleted.toggle()
+        saveContext()
+    }
+
+    func deleteTask(at offsets: IndexSet) {
+        for index in offsets {
+            let task = tasks[index]
+            modelContext.delete(task)
+        }
+        saveContext()
+        fetchTasks()
+    }
+
+    private func saveContext() {
+        do {
+            try modelContext.save()
+        } catch {
+            print("Save failed: \(error)")
+        }
+    }
+
+    var filteredTasks: [TaskItem] {
+        var result = tasks
+        if !searchText.isEmpty {
+            result = result.filter { $0.title.localizedCaseInsensitiveContains(searchText) }
+        }
+        switch filter {
+        case .pending:
+            return result.filter { !$0.isCompleted }
+        case .completed:
+            return result.filter { $0.isCompleted }
+        case .highPriority:
+            return result.filter { $0.priority == 2 }
+        case .all:
+            return result
+        }
+    }
+}</code></pre>
+            </div>
+        </section>
+
+        <section>
+            <h2>✅ 实战总结与挑战</h2>
+            <div class="highlight">
+                <p><strong>你已完成了一个完整SwiftUI应用的开发周期！</strong></p>
+                <ul>
+                    <li><strong>巩固知识</strong>：将分散的知识点串联起来，形成完整的开发思维。</li>
+                    <li><strong>解决问题的能力</strong>：学会了如何规划、分解和实现一个复杂功能。</li>
+                    <li><strong>代码组织能力</strong>：掌握了如何构建清晰、可维护的项目结构。</li>
+                </ul>
+            </div>
+            <h3>扩展挑战 (可选)</h3>
+            <ul>
+                <li>为应用添加<strong>iCloud同步</strong>功能，让任务在多设备间同步。</li>
+                <li>实现<strong>小组件 (WidgetKit)</strong>，在桌面上显示近期任务。</li>
+                <li>添加<strong>数据统计视图</strong>，用图表展示任务完成情况。</li>
+                <li>支持<strong>暗黑模式</strong>的完整适配。</li>
+                <li>为应用添加<strong>分享</strong>功能，可以导出任务列表。</li>
+            </ul>
+            <p class="note">记住，编程最好的学习方式就是动手实践。尝试独立完成这个项目，遇到问题积极查阅文档和社区。祝你成功！</p>
+        </section>
+    </div>
+
+    <footer>
+        公众号: 蓝海资料掘金营，微信 deep3321
+    </footer>
+</body>
+</html>

@@ -1,0 +1,429 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SwiftUI从入门到精通 - 并发与异步</title>
+    <style>
+        :root {
+            --primary: #4CAF50; /* 青草绿 */
+            --secondary: #FF9800; /* 活力橙 */
+            --accent: #2196F3; /* 天空蓝 */
+            --light: #FFF9C4; /* 淡鹅黄 */
+            --background: #F5F5F5; /* 浅灰背景 */
+            --card-bg: #FFFFFF;
+            --text: #333333;
+            --border: #BDBDBD;
+        }
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', 'Microsoft YaHei', sans-serif;
+        }
+        body {
+            background-color: var(--background);
+            color: var(--text);
+            line-height: 1.6;
+            padding: 20px;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        .double-border-container {
+            border: 3px solid var(--primary);
+            border-radius: 20px;
+            padding: 5px;
+            background-color: var(--card-bg);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+        }
+        .double-border-inner {
+            border: 2px dashed var(--secondary);
+            border-radius: 15px;
+            padding: 30px;
+        }
+        header {
+            text-align: center;
+            margin-bottom: 40px;
+            padding-bottom: 20px;
+            border-bottom: 3px solid var(--accent);
+        }
+        h1 {
+            color: var(--primary);
+            font-size: 2.8rem;
+            margin-bottom: 10px;
+        }
+        .subtitle {
+            color: var(--secondary);
+            font-size: 1.4rem;
+            font-weight: 300;
+        }
+        h2 {
+            color: var(--accent);
+            border-left: 5px solid var(--primary);
+            padding-left: 15px;
+            margin: 30px 0 15px;
+        }
+        h3 {
+            color: var(--secondary);
+            margin: 20px 0 10px;
+        }
+        p {
+            margin-bottom: 15px;
+            text-align: justify;
+        }
+        .card {
+            background: var(--light);
+            border-radius: 12px;
+            padding: 20px;
+            margin: 20px 0;
+            border: 1px solid var(--border);
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.05);
+        }
+        th, td {
+            border: 1px solid var(--border);
+            padding: 15px;
+            text-align: left;
+        }
+        th {
+            background-color: var(--primary);
+            color: white;
+            font-weight: bold;
+        }
+        tr:nth-child(even) {
+            background-color: #f9f9f9;
+        }
+        ul, ol {
+            padding-left: 30px;
+            margin: 15px 0;
+        }
+        li {
+            margin-bottom: 8px;
+        }
+        code, pre {
+            font-family: 'Courier New', monospace;
+            background-color: #2d2d2d;
+            color: #f8f8f2;
+            border-radius: 6px;
+            padding: 2px 6px;
+        }
+        pre {
+            padding: 20px;
+            overflow-x: auto;
+            margin: 20px 0;
+            border-left: 5px solid var(--secondary);
+            white-space: pre-wrap;
+        }
+        .architecture-svg {
+            width: 100%;
+            height: auto;
+            margin: 30px 0;
+            background-color: #f0f8ff;
+            border-radius: 10px;
+            padding: 20px;
+        }
+        .comparison {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 20px;
+            margin: 30px 0;
+        }
+        .comparison-item {
+            flex: 1;
+            min-width: 300px;
+            background: white;
+            padding: 20px;
+            border-radius: 12px;
+            border-top: 5px solid var(--accent);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.05);
+        }
+        footer {
+            text-align: center;
+            margin-top: 50px;
+            padding-top: 20px;
+            border-top: 2px solid var(--border);
+            color: #666;
+            font-size: 1rem;
+        }
+        .keyword {
+            color: var(--primary);
+            font-weight: bold;
+        }
+        .note {
+            background-color: #E3F2FD;
+            border-left: 4px solid var(--accent);
+            padding: 15px;
+            margin: 20px 0;
+            border-radius: 0 8px 8px 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="double-border-container">
+        <div class="double-border-inner">
+            <header>
+                <h1>SwiftUI从入门到精通</h1>
+                <p class="subtitle">第21章：并发与异步 —— 使用async/await、Task、.task修饰符在SwiftUI中处理异步操作</p>
+            </header>
+
+            <section>
+                <h2>本章概述</h2>
+                <p>在现代应用开发中，<span class="keyword">异步操作</span>是保证界面流畅和响应迅速的关键。Swift 5.5 引入的 <span class="keyword">async/await</span> 语法，结合 SwiftUI 的 <span class="keyword">Task</span> 和 <span class="keyword">.task</span> 修饰符，为处理并发任务提供了强大且直观的工具。本章将深入讲解如何在 SwiftUI 中优雅地执行网络请求、数据加载等异步操作。</p>
+
+                <div class="card">
+                    <h3>学习目标</h3>
+                    <ul>
+                        <li>理解 Swift 并发模型的基本概念</li>
+                        <li>掌握 <code>async</code>、<code>await</code> 关键字的使用</li>
+                        <li>学会使用 <code>Task</code> 在 SwiftUI 视图中启动异步任务</li>
+                        <li>熟练运用 <code>.task</code> 修饰符管理视图生命周期的异步操作</li>
+                        <li>了解如何安全地更新 UI 并处理错误</li>
+                    </ul>
+                </div>
+            </section>
+
+            <section>
+                <h2>核心概念解析</h2>
+
+                <h3>1. async/await 简介</h3>
+                <p><span class="keyword">async</span> 和 <span class="keyword">await</span> 是 Swift 并发编程的基石，它们让异步代码的编写和阅读像同步代码一样简单直观。</p>
+                <table>
+                    <thead>
+                        <tr><th>关键字</th><th>作用</th><th>示例</th></tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><code>async</code></td>
+                            <td>标记函数为异步函数，表示该函数内部可能包含挂起操作</td>
+                            <td><code>func fetchData() async -> Data</code></td>
+                        </tr>
+                        <tr>
+                            <td><code>await</code></td>
+                            <td>在调用异步函数时使用，表示此处可能挂起当前任务，等待异步操作完成</td>
+                            <td><code>let data = await fetchData()</code></td>
+                        </tr>
+                        <tr>
+                            <td><code>Task</code></td>
+                            <td>创建一个新的并发任务，用于在非异步上下文中调用异步函数</td>
+                            <td><code>Task { await load() }</code></td>
+                        </tr>
+                    </tbody>
+                </table>
+
+                <h3>2. Task 的作用与使用</h3>
+                <p><code>Task</code> 是一个结构体，代表一个异步工作的单元。在 SwiftUI 中，我们常用它来触发异步操作。</p>
+                <pre><code>import SwiftUI
+
+struct ContentView: View {
+    @State private var message = "加载中..."
+
+    var body: some View {
+        VStack {
+            Text(message)
+            Button("获取数据") {
+                // 使用 Task 包裹异步调用
+                Task {
+                    do {
+                        let result = try await fetchMessageFromServer()
+                        message = result
+                    } catch {
+                        message = "加载失败: \(error.localizedDescription)"
+                    }
+                }
+            }
+        }
+    }
+
+    // 模拟异步网络请求
+    func fetchMessageFromServer() async throws -> String {
+        // 模拟网络延迟
+        try await Task.sleep(nanoseconds: 1_000_000_000) // 1秒
+        return "Hello, SwiftUI并发!"
+    }
+}</code></pre>
+
+                <h3>3. .task 修饰符</h3>
+                <p><code>.task</code> 是 SwiftUI 提供的一个视图修饰符，它在视图出现时自动启动异步任务，并在视图消失时自动取消任务，非常适合处理数据加载。</p>
+                <pre><code>struct UserProfileView: View {
+    @State private var user: User?
+    @State private var isLoading = false
+
+    var body: some View {
+        VStack {
+            if isLoading {
+                ProgressView()
+            } else if let user = user {
+                Text("用户名: \(user.name)")
+                Text("邮箱: \(user.email)")
+            } else {
+                Text("用户数据为空")
+            }
+        }
+        .padding()
+        // 使用 .task 在视图出现时加载数据
+        .task {
+            await loadUserData()
+        }
+    }
+
+    func loadUserData() async {
+        isLoading = true
+        // 模拟异步数据获取
+        try? await Task.sleep(nanoseconds: 2_000_000_000)
+        user = User(id: 1, name: "小明", email: "xiaoming@example.com")
+        isLoading = false
+    }
+}
+
+struct User {
+    let id: Int
+    let name: String
+    let email: String
+}</code></pre>
+            </section>
+
+            <section>
+                <h2>SwiftUI 异步架构示意图</h2>
+                <svg class="architecture-svg" viewBox="0 0 800 400" xmlns="http://www.w3.org/2000/svg">
+                    <!-- 背景 -->
+                    <rect width="800" height="400" fill="#F0F8FF" rx="10"/>
+                    <!-- 标题 -->
+                    <text x="400" y="40" text-anchor="middle" font-size="20" font-weight="bold" fill="#2196F3">SwiftUI 异步数据流架构</text>
+                    <!-- SwiftUI View -->
+                    <rect x="100" y="80" width="200" height="80" rx="10" fill="#4CAF50" stroke="#2E7D32" stroke-width="2"/>
+                    <text x="200" y="125" text-anchor="middle" fill="white" font-size="16" font-weight="bold">SwiftUI View</text>
+                    <text x="200" y="145" text-anchor="middle" fill="white" font-size="12">.task / Task</text>
+                    <!-- 箭头 -->
+                    <path d="M300 120 L380 120 L380 180 L420 180" stroke="#FF9800" stroke-width="3" fill="none" marker-end="url(#arrowhead)"/>
+                    <!-- Async Task -->
+                    <rect x="420" y="150" width="200" height="80" rx="10" fill="#FF9800" stroke="#EF6C00" stroke-width="2"/>
+                    <text x="520" y="195" text-anchor="middle" fill="white" font-size="16" font-weight="bold">异步任务</text>
+                    <text x="520" y="215" text-anchor="middle" fill="white" font-size="12">async/await</text>
+                    <!-- 箭头 -->
+                    <path d="M520 230 L520 300 L300 300 L300 200" stroke="#2196F3" stroke-width="3" fill="none" marker-end="url(#arrowhead)"/>
+                    <!-- State更新 -->
+                    <rect x="100" y="250" width="200" height="80" rx="10" fill="#2196F3" stroke="#1565C0" stroke-width="2"/>
+                    <text x="200" y="295" text-anchor="middle" fill="white" font-size="16" font-weight="bold">@State 更新</text>
+                    <text x="200" y="315" text-anchor="middle" fill="white" font-size="12">UI自动刷新</text>
+                    <!-- 箭头定义 -->
+                    <defs>
+                        <marker id="arrowhead" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
+                            <polygon points="0 0, 10 3.5, 0 7" fill="#FF9800"/>
+                        </marker>
+                    </defs>
+                </svg>
+            </section>
+
+            <section>
+                <h2>Task 与 .task 对比</h2>
+                <div class="comparison">
+                    <div class="comparison-item">
+                        <h3>Task { }</h3>
+                        <ul>
+                            <li><strong>手动触发</strong>：通常在按钮动作或特定事件中调用。</li>
+                            <li><strong>生命周期需手动管理</strong>：需要自己存储和取消任务。</li>
+                            <li><strong>灵活性高</strong>：可以在任何需要的地方启动。</li>
+                            <li><strong>示例</strong>：用户点击按钮后加载数据。</li>
+                        </ul>
+                    </div>
+                    <div class="comparison-item">
+                        <h3>.task 修饰符</h3>
+                        <ul>
+                            <li><strong>自动触发</strong>：在视图出现时自动执行。</li>
+                            <li><strong>自动生命周期管理</strong>：视图消失时自动取消任务。</li>
+                            <li><strong>代码更简洁</strong>：与视图生命周期紧密绑定。</li>
+                            <li><strong>示例</strong>：进入页面时自动加载初始数据。</li>
+                        </ul>
+                    </div>
+                </div>
+            </section>
+
+            <section>
+                <h2>最佳实践与注意事项</h2>
+                <div class="note">
+                    <p><strong>重要提示：</strong>SwiftUI 的 UI 更新必须在主线程上进行。使用 <code>async/await</code> 时，从后台任务返回后，系统通常会回到主线程，但必要时请使用 <code>@MainActor</code> 或 <code>MainActor.run</code>。</p>
+                </div>
+                <h3>1. 错误处理</h3>
+                <pre><code>.task {
+    do {
+        let data = try await fetchData()
+        // 处理数据
+    } catch {
+        // 显示错误信息
+        showError(error)
+    }
+}</code></pre>
+
+                <h3>2. 任务取消</h3>
+                <p>使用 <code>.task</code> 修饰符时，任务会自动取消。对于手动创建的 <code>Task</code>，可以检查 <code>Task.isCancelled</code> 或调用 <code>Task.cancel()</code>。</p>
+
+                <h3>3. 并发安全</h3>
+                <p>避免在多个任务中同时修改同一个 <code>@State</code> 属性。使用 <code>@MainActor</code> 确保 UI 更新在主线程：</p>
+                <pre><code>@MainActor
+func updateUI(with newData: Data) {
+    self.data = newData
+}</code></pre>
+            </section>
+
+            <section>
+                <h2>综合示例：异步图片加载</h2>
+                <pre><code>struct AsyncImageView: View {
+    let url: URL
+    @State private var image: UIImage?
+    @State private var isLoading = false
+
+    var body: some View {
+        Group {
+            if isLoading {
+                ProgressView()
+                    .scaleEffect(1.5)
+            } else if let image = image {
+                Image(uiImage: image)
+                    .resizable()
+                    .scaledToFit()
+                    .cornerRadius(10)
+            } else {
+                Rectangle()
+                    .fill(Color.gray.opacity(0.3))
+                    .overlay(Text("图片加载失败"))
+            }
+        }
+        .frame(width: 200, height: 200)
+        .task {
+            await loadImage()
+        }
+    }
+
+    func loadImage() async {
+        isLoading = true
+        do {
+            let (data, _) = try await URLSession.shared.data(from: url)
+            if let loadedImage = UIImage(data: data) {
+                // 更新必须在主线程
+                await MainActor.run {
+                    self.image = loadedImage
+                }
+            }
+        } catch {
+            print("图片加载失败: \(error)")
+        }
+        isLoading = false
+    }
+}</code></pre>
+            </section>
+
+            <footer>
+                <p>© 2026 SwiftUI从入门到精通课程 | 本章内容由蓝海资料掘金营提供</p>
+                <p>公众号: 蓝海资料掘金营，微信 deep3321</p>
+                <p>更多SwiftUI高级技巧，请关注我们的持续更新。</p>
+            </footer>
+        </div>
+    </div>
+</body>
+</html>

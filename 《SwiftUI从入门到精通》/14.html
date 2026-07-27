@@ -1,0 +1,460 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SwiftUI从入门到精通 - 14、拖放操作</title>
+    <style>
+        :root {
+            --primary: #4CAF50; /* 青草绿 */
+            --secondary: #FF9800; /* 活力橙 */
+            --accent: #2196F3; /* 天空蓝 */
+            --light: #FFF9C4; /* 淡鹅黄 */
+            --background: #F5F5F5; /* 浅灰背景 */
+            --text: #333333;
+            --border: #BDBDBD;
+        }
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', 'PingFang SC', 'Microsoft YaHei', sans-serif;
+        }
+        body {
+            background-color: var(--background);
+            color: var(--text);
+            line-height: 1.6;
+            padding: 20px;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        .container {
+            background-color: white;
+            border: double 8px var(--primary);
+            border-radius: 20px;
+            padding: 40px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            position: relative;
+            overflow: hidden;
+        }
+        .container::before {
+            content: '';
+            position: absolute;
+            top: -10px;
+            left: -10px;
+            right: -10px;
+            bottom: -10px;
+            border: double 4px var(--secondary);
+            border-radius: 28px;
+            pointer-events: none;
+            z-index: -1;
+        }
+        header {
+            text-align: center;
+            margin-bottom: 40px;
+            padding-bottom: 20px;
+            border-bottom: 3px dashed var(--accent);
+        }
+        h1 {
+            color: var(--primary);
+            font-size: 2.8em;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 0px var(--light);
+        }
+        .subtitle {
+            color: var(--secondary);
+            font-size: 1.4em;
+            font-weight: 300;
+        }
+        h2 {
+            color: var(--accent);
+            border-left: 6px solid var(--secondary);
+            padding-left: 15px;
+            margin: 30px 0 15px;
+            font-size: 1.8em;
+        }
+        h3 {
+            color: var(--primary);
+            margin: 20px 0 10px;
+            font-size: 1.4em;
+        }
+        p {
+            margin-bottom: 15px;
+            text-align: justify;
+        }
+        .highlight-box {
+            background-color: var(--light);
+            border-left: 5px solid var(--secondary);
+            padding: 15px;
+            margin: 20px 0;
+            border-radius: 0 10px 10px 0;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 25px 0;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.05);
+        }
+        th, td {
+            border: 2px solid var(--border);
+            padding: 12px 15px;
+            text-align: left;
+        }
+        th {
+            background-color: var(--primary);
+            color: white;
+            font-weight: bold;
+        }
+        tr:nth-child(even) {
+            background-color: #f9f9f9;
+        }
+        tr:hover {
+            background-color: #e8f5e9;
+        }
+        ul, ol {
+            margin-left: 25px;
+            margin-bottom: 20px;
+        }
+        li {
+            margin-bottom: 8px;
+        }
+        code, pre {
+            font-family: 'Courier New', monospace;
+            background-color: #f4f4f4;
+            border-radius: 5px;
+        }
+        pre {
+            padding: 20px;
+            overflow-x: auto;
+            border: 2px solid #ddd;
+            margin: 20px 0;
+            background-color: #f8f8f8;
+            line-height: 1.4;
+            white-space: pre-wrap;
+        }
+        .code-block {
+            position: relative;
+        }
+        .code-title {
+            background-color: var(--accent);
+            color: white;
+            padding: 5px 15px;
+            border-radius: 5px 5px 0 0;
+            display: inline-block;
+            font-size: 0.9em;
+            margin-bottom: -2px;
+        }
+        .svg-container {
+            display: flex;
+            justify-content: center;
+            margin: 30px 0;
+        }
+        .architecture-svg {
+            width: 100%;
+            max-width: 800px;
+            height: auto;
+        }
+        .key-points {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+            margin: 30px 0;
+        }
+        .point-card {
+            background: linear-gradient(145deg, #ffffff, #e6f7e9);
+            border: 2px solid var(--primary);
+            border-radius: 15px;
+            padding: 20px;
+            box-shadow: 5px 5px 15px rgba(0,0,0,0.05);
+        }
+        .point-card h4 {
+            color: var(--secondary);
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+        }
+        .point-card h4 svg {
+            margin-right: 10px;
+        }
+        footer {
+            text-align: center;
+            margin-top: 50px;
+            padding-top: 20px;
+            border-top: 3px double var(--border);
+            color: #666;
+            font-size: 1.1em;
+            font-weight: bold;
+        }
+        .steps {
+            counter-reset: step-counter;
+            list-style-type: none;
+        }
+        .steps li {
+            counter-increment: step-counter;
+            margin-bottom: 25px;
+            padding-left: 50px;
+            position: relative;
+        }
+        .steps li::before {
+            content: counter(step-counter);
+            background-color: var(--accent);
+            color: white;
+            font-weight: bold;
+            width: 35px;
+            height: 35px;
+            border-radius: 50%;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            position: absolute;
+            left: 0;
+            top: 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>第14章：拖放操作</h1>
+            <p class="subtitle">实现iOS内的拖放功能（Drag and Drop）</p>
+            <svg width="200" height="10" xmlns="http://www.w3.org/2000/svg">
+                <line x1="0" y1="5" x2="200" y2="5" stroke="#FF9800" stroke-width="4" stroke-dasharray="10,5"/>
+            </svg>
+        </header>
+
+        <section>
+            <h2>本章概述</h2>
+            <p>拖放（Drag and Drop）是现代iOS应用中提升用户体验的核心交互之一。从iOS 11开始，Apple在UIKit和SwiftUI中引入了强大的原生拖放支持。本章将深入讲解如何在SwiftUI应用中实现直观、高效的拖放功能，涵盖从简单元素拖动到复杂数据传递的全过程。</p>
+
+            <div class="highlight-box">
+                <strong>学习目标：</strong> 掌握SwiftUI中<code>.draggable()</code>与<code>.dropDestination()</code>修饰符的使用，理解拖放数据传递机制，并能够构建支持跨应用拖放的复杂界面。
+            </div>
+        </section>
+
+        <section>
+            <h2>核心概念与API</h2>
+            <p>SwiftUI的拖放系统建立在几个关键修饰符和协议之上，下表列出了主要组件：</p>
+
+            <table>
+                <thead>
+                    <tr>
+                        <th>修饰符/协议</th>
+                        <th>用途</th>
+                        <th>关键特性</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><code>.draggable()</code></td>
+                        <td>使视图可被拖动</td>
+                        <td>支持传递Transferable数据、自定义预览图</td>
+                    </tr>
+                    <tr>
+                        <td><code>.dropDestination()</code></td>
+                        <td>定义可接收拖放内容的区域</td>
+                        <td>支持类型过滤、动作处理、视觉反馈</td>
+                    </tr>
+                    <tr>
+                        <td><code>Transferable</code>协议</td>
+                        <td>定义可传输的数据类型</td>
+                        <td>String、URL、Image、Data及自定义类型</td>
+                    </tr>
+                    <tr>
+                        <td><code>DropInfo</code></td>
+                        <td>提供拖放过程中的信息</td>
+                        <td>位置、数据项、建议操作等</td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <div class="svg-container">
+                <svg class="architecture-svg" viewBox="0 0 800 300" xmlns="http://www.w3.org/2000/svg">
+                    <rect x="50" y="50" width="200" height="60" rx="10" fill="#4CAF50" stroke="#2E7D32" stroke-width="2"/>
+                    <text x="150" y="85" text-anchor="middle" fill="white" font-weight="bold" font-size="16">可拖动视图</text>
+                    <text x="150" y="105" text-anchor="middle" fill="#E8F5E9" font-size="12">.draggable()</text>
+
+                    <rect x="350" y="50" width="100" height="40" rx="8" fill="#FF9800" stroke="#EF6C00" stroke-width="2"/>
+                    <text x="400" y="75" text-anchor="middle" fill="white" font-weight="bold" font-size="14">拖拽数据</text>
+
+                    <rect x="550" y="50" width="200" height="60" rx="10" fill="#2196F3" stroke="#1565C0" stroke-width="2"/>
+                    <text x="650" y="85" text-anchor="middle" fill="white" font-weight="bold" font-size="16">放置目标区域</text>
+                    <text x="650" y="105" text-anchor="middle" fill="#E3F2FD" font-size="12">.dropDestination()</text>
+
+                    <path d="M250 80 L350 70" stroke="#9E9E9E" stroke-width="3" stroke-dasharray="5,5" fill="none"/>
+                    <path d="M450 70 L550 80" stroke="#9E9E9E" stroke-width="3" stroke-dasharray="5,5" fill="none"/>
+
+                    <circle cx="350" cy="70" r="8" fill="#FF9800"/>
+                    <circle cx="450" cy="70" r="8" fill="#FF9800"/>
+
+                    <text x="400" y="150" text-anchor="middle" fill="#666" font-size="18" font-weight="bold">SwiftUI 拖放架构流程</text>
+
+                    <rect x="100" y="200" width="600" height="80" rx="15" fill="#FFF9C4" stroke="#FFD54F" stroke-width="3"/>
+                    <text x="400" y="235" text-anchor="middle" fill="#333" font-size="16" font-weight="bold">数据传递层 (Transferable协议)</text>
+                    <text x="400" y="260" text-anchor="middle" fill="#666" font-size="14">支持String, URL, Image, Data, 自定义类型</text>
+                </svg>
+            </div>
+        </section>
+
+        <section>
+            <h2>实现步骤详解</h2>
+            <ol class="steps">
+                <li>
+                    <h3>使视图可拖动</h3>
+                    <p>使用<code>.draggable()</code>修饰符，并提供一个符合<code>Transferable</code>协议的数据源。</p>
+                    <div class="code-block">
+                        <div class="code-title">SwiftUI 代码示例</div>
+                        <pre><code>import SwiftUI
+
+struct DraggableItemView: View {
+    let item: String
+
+    var body: some View {
+        Text(item)
+            .padding()
+            .background(Color.orange.opacity(0.3))
+            .cornerRadius(10)
+            // 关键：使视图可拖动，并传递字符串数据
+            .draggable(item) {
+                // 可选：自定义拖动时的预览视图
+                RoundedRectangle(cornerRadius: 8)
+                    .fill(Color.orange)
+                    .frame(width: 100, height: 50)
+                    .overlay(Text("拖动 \(item)"))
+            }
+    }
+}</code></pre>
+                    </div>
+                </li>
+                <li>
+                    <h3>创建放置目标</h3>
+                    <p>使用<code>.dropDestination()</code>修饰符定义可以接收拖放数据的区域，并处理放置事件。</p>
+                    <div class="code-block">
+                        <div class="code-title">SwiftUI 代码示例</div>
+                        <pre><code>struct DropZoneView: View {
+    @State private var droppedItems: [String] = []
+
+    var body: some View {
+        VStack {
+            Text("放置区域")
+                .font(.headline)
+            RoundedRectangle(cornerRadius: 15)
+                .fill(droppedItems.isEmpty ? Color.gray.opacity(0.2) : Color.green.opacity(0.2))
+                .frame(height: 200)
+                .overlay(
+                    VStack {
+                        if droppedItems.isEmpty {
+                            Image(systemName: "arrow.down.doc.fill")
+                                .font(.largeTitle)
+                                .foregroundColor(.blue)
+                            Text("将项目拖放到此处")
+                        } else {
+                            Text("已接收项目:")
+                            ForEach(droppedItems, id: \.self) { item in
+                                Text(item)
+                            }
+                        }
+                    }
+                )
+                // 关键：定义放置目标，接收String类型数据
+                .dropDestination(for: String.self) { items, location in
+                    droppedItems.append(contentsOf: items)
+                    return true // 返回true表示处理成功
+                }
+        }
+        .padding()
+    }
+}</code></pre>
+                    </div>
+                </li>
+                <li>
+                    <h3>组合与交互</h3>
+                    <p>将可拖动视图和放置目标组合在一个界面中，实现完整的拖放交互。</p>
+                    <div class="code-block">
+                        <div class="code-title">SwiftUI 代码示例</div>
+                        <pre><code>struct ContentView: View {
+    let items = ["苹果", "香蕉", "橙子", "葡萄", "西瓜"]
+
+    var body: some View {
+        VStack(spacing: 30) {
+            Text("水果拖放示例")
+                .font(.largeTitle)
+                .foregroundColor(.green)
+
+            HStack(spacing: 15) {
+                ForEach(items, id: \.self) { fruit in
+                    DraggableItemView(item: fruit)
+                }
+            }
+
+            DropZoneView()
+
+            Spacer()
+        }
+        .padding()
+    }
+}</code></pre>
+                    </div>
+                </li>
+            </ol>
+        </section>
+
+        <section>
+            <h2>高级技巧与最佳实践</h2>
+            <div class="key-points">
+                <div class="point-card">
+                    <h4>
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <circle cx="12" cy="12" r="10" stroke="#FF9800" stroke-width="2"/>
+                            <path d="M12 8V12L14 14" stroke="#FF9800" stroke-width="2" stroke-linecap="round"/>
+                        </svg>
+                        自定义拖放预览
+                    </h4>
+                    <p>通过<code>.draggable()</code>的第二个参数提供自定义视图，可以控制拖动时跟随手指的预览效果，提升视觉反馈。</p>
+                </div>
+                <div class="point-card">
+                    <h4>
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <rect x="4" y="4" width="16" height="16" rx="3" stroke="#2196F3" stroke-width="2"/>
+                            <path d="M8 12H16M12 8V16" stroke="#2196F3" stroke-width="2" stroke-linecap="round"/>
+                        </svg>
+                        支持多种数据类型
+                    </h4>
+                    <p>一个放置区域可以通过多个<code>.dropDestination()</code>修饰符或条件判断，同时接收多种类型的数据（如图片、文本、URL）。</p>
+                </div>
+                <div class="point-card">
+                    <h4>
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M5 12H19M12 5V19" stroke="#4CAF50" stroke-width="2" stroke-linecap="round"/>
+                            <circle cx="12" cy="12" r="9" stroke="#4CAF50" stroke-width="2"/>
+                        </svg>
+                        跨应用拖放
+                    </h4>
+                    <p>通过使用系统标准数据类型（如<code>UTType.image</code>），可以实现应用间的拖放，例如从照片应用拖动图片到你的应用。</p>
+                </div>
+            </div>
+
+            <div class="highlight-box">
+                <strong>性能提示：</strong> 对于大量可拖动项目，考虑使用<code>LazyVGrid</code>或<code>LazyHGrid</code>进行懒加载，避免一次性创建所有视图导致性能下降。同时，复杂数据的传输应考虑使用<code>NSItemProvider</code>进行优化。
+            </div>
+        </section>
+
+        <section>
+            <h2>常见问题与调试</h2>
+            <ul>
+                <li><strong>拖放无反应：</strong> 检查<code>.draggable()</code>和<code>.dropDestination()</code>是否应用在正确的视图层级，并确认数据类型匹配。</li>
+                <li><strong>预览图不正确：</strong> 自定义预览视图的大小不宜过大，且应避免复杂动画。</li>
+                <li><strong>数据接收失败：</strong> 确保自定义类型正确实现了<code>Transferable</code>协议的所有要求，特别是<code>transferRepresentation</code>属性。</li>
+                <li><strong>交互冲突：</strong> 当视图同时有点击和拖放操作时，使用<code>.simultaneousGesture()</code>或调整手势优先级。</li>
+            </ul>
+        </section>
+
+        <footer>
+            <p>公众号: 蓝海资料掘金营，微信 deep3321</p>
+            <svg width="150" height="2" xmlns="http://www.w3.org/2000/svg">
+                <line x1="0" y1="1" x2="150" y2="1" stroke="#BDBDBD" stroke-width="2"/>
+            </svg>
+            <p style="margin-top: 10px; font-size: 0.9em; color: #888;">SwiftUI从入门到精通 · 第14章 · 拖放操作</p>
+        </footer>
+    </div>
+</body>
+</html>

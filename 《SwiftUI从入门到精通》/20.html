@@ -1,0 +1,616 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SwiftUI从入门到精通 - Core Data集成</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Helvetica Neue', 'Segoe UI', 'PingFang SC', 'Microsoft YaHei', sans-serif;
+        }
+        body {
+            background: linear-gradient(135deg, #f5f7fa 0%, #e4edf5 100%);
+            color: #333;
+            line-height: 1.6;
+            padding: 20px;
+            min-height: 100vh;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background-color: rgba(255, 255, 255, 0.92);
+            border-radius: 20px;
+            border: 8px double #4a9cdb;
+            box-shadow: 0 15px 35px rgba(74, 156, 219, 0.15);
+            overflow: hidden;
+            padding: 30px;
+            position: relative;
+        }
+        .container::before {
+            content: '';
+            position: absolute;
+            top: 5px;
+            left: 5px;
+            right: 5px;
+            bottom: 5px;
+            border: 2px solid #ffb347;
+            border-radius: 15px;
+            pointer-events: none;
+        }
+        header {
+            text-align: center;
+            padding: 30px 20px;
+            background: linear-gradient(90deg, #6ecbf5 0%, #059ee3 100%);
+            margin: -30px -30px 30px -30px;
+            border-bottom: 5px solid #ff9e5d;
+            color: white;
+            position: relative;
+        }
+        header h1 {
+            font-size: 2.8rem;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.2);
+        }
+        header .subtitle {
+            font-size: 1.4rem;
+            opacity: 0.95;
+            font-weight: 300;
+        }
+        .chapter-title {
+            color: #059ee3;
+            border-left: 6px solid #ff9e5d;
+            padding-left: 15px;
+            margin: 40px 0 25px;
+            font-size: 2.2rem;
+        }
+        .content-section {
+            background: #f9fdff;
+            border-radius: 12px;
+            padding: 25px;
+            margin-bottom: 30px;
+            border: 2px solid #c2e6ff;
+            box-shadow: 0 5px 15px rgba(194, 230, 255, 0.5);
+        }
+        h2 {
+            color: #ff7c35;
+            margin-bottom: 15px;
+            font-size: 1.8rem;
+            display: flex;
+            align-items: center;
+        }
+        h2 svg {
+            margin-right: 10px;
+        }
+        h3 {
+            color: #4a9cdb;
+            margin: 20px 0 10px;
+            font-size: 1.4rem;
+        }
+        p {
+            margin-bottom: 15px;
+            font-size: 1.1rem;
+        }
+        ul, ol {
+            margin-left: 25px;
+            margin-bottom: 20px;
+        }
+        li {
+            margin-bottom: 8px;
+            padding-left: 5px;
+        }
+        .highlight {
+            background-color: #e6f7ff;
+            border-left: 4px solid #059ee3;
+            padding: 15px;
+            border-radius: 0 8px 8px 0;
+            margin: 20px 0;
+        }
+        pre {
+            background: #2d3a4b;
+            color: #e6f7ff;
+            padding: 20px;
+            border-radius: 10px;
+            overflow-x: auto;
+            margin: 20px 0;
+            border: 2px solid #5d7a9c;
+            font-family: 'Menlo', 'Monaco', 'Courier New', monospace;
+            font-size: 0.95rem;
+            line-height: 1.5;
+        }
+        code {
+            font-family: 'Menlo', 'Monaco', 'Courier New', monospace;
+            background-color: #e6f7ff;
+            padding: 2px 6px;
+            border-radius: 4px;
+            color: #d6336c;
+            font-size: 0.95rem;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 25px 0;
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+        }
+        th {
+            background: linear-gradient(90deg, #6ecbf5, #4a9cdb);
+            color: white;
+            padding: 15px;
+            text-align: left;
+            font-weight: 600;
+        }
+        td {
+            padding: 15px;
+            border-bottom: 1px solid #e1f0ff;
+            background-color: white;
+        }
+        tr:nth-child(even) td {
+            background-color: #f5fbff;
+        }
+        .architecture {
+            display: flex;
+            justify-content: center;
+            margin: 40px 0;
+        }
+        .architecture svg {
+            max-width: 100%;
+            height: auto;
+            border-radius: 10px;
+            background: white;
+            padding: 20px;
+            border: 3px solid #ffb347;
+            box-shadow: 0 10px 25px rgba(255, 179, 71, 0.2);
+        }
+        .key-point {
+            background: linear-gradient(135deg, #fff9db, #ffecb3);
+            border: 2px dashed #ffb347;
+            border-radius: 12px;
+            padding: 20px;
+            margin: 25px 0;
+        }
+        footer {
+            text-align: center;
+            margin-top: 50px;
+            padding: 25px;
+            background: linear-gradient(90deg, #059ee3, #4a9cdb);
+            color: white;
+            border-radius: 12px;
+            font-size: 1.2rem;
+            font-weight: bold;
+            border-top: 5px solid #ff9e5d;
+            margin: 30px -30px -30px -30px;
+        }
+        .note {
+            background-color: #fff0f6;
+            border: 1px solid #ffadd2;
+            border-left: 5px solid #eb2f96;
+            padding: 15px;
+            border-radius: 0 8px 8px 0;
+            margin: 20px 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>SwiftUI从入门到精通</h1>
+            <div class="subtitle">第20章：Core Data集成 - @FetchRequest与ManagedObjectContext</div>
+        </header>
+
+        <section class="content-section">
+            <h1 class="chapter-title">Core Data在SwiftUI中的集成与数据绑定</h1>
+            <p>本章将深入探讨如何在SwiftUI应用中集成Core Data，利用<code>@FetchRequest</code>属性包装器和<code>ManagedObjectContext</code>环境对象实现数据的自动获取、绑定与持久化。这是构建数据驱动型SwiftUI应用的核心技能。</p>
+        </section>
+
+        <section class="content-section">
+            <h2>
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M12 2L2 7L12 12L22 7L12 2Z" stroke="#ff7c35" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                    <path d="M2 17L12 22L22 17" stroke="#ff7c35" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                    <path d="M2 12L12 17L22 12" stroke="#ff7c35" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+                核心概念
+            </h2>
+            <p>Core Data是Apple提供的对象图管理和持久化框架。在SwiftUI中，它通过几个关键组件无缝集成：</p>
+            <ul>
+                <li><strong>@FetchRequest</strong>：自动获取并绑定Core Data查询结果到视图的属性包装器。</li>
+                <li><strong>ManagedObjectContext</strong>：管理对象生命周期的“暂存区”，所有更改都在此进行。</li>
+                <li><strong>Environment</strong>：通过<code>.environment(\.managedObjectContext, context)</code>将上下文注入视图层级。</li>
+                <li><strong>PersistenceController</strong>：通常用于设置NSPersistentContainer并管理存储栈。</li>
+            </ul>
+            <div class="highlight">
+                <p><strong>关键思想</strong>：SwiftUI的声明式UI与Core Data的响应式数据模型结合，当数据变化时，UI自动更新。</p>
+            </div>
+        </section>
+
+        <section class="content-section">
+            <h2>
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M10 20L14 4M18 8L22 12L18 16M6 16L2 12L6 8" stroke="#ff7c35" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+                @FetchRequest详解
+            </h2>
+            <p><code>@FetchRequest</code>是SwiftUI专门为Core Data设计的属性包装器。它自动执行获取请求，并将结果作为<code>FetchedResults</code>集合提供给视图。当底层数据变化时，视图会自动刷新。</p>
+            
+            <h3>基本用法</h3>
+            <pre><code>import SwiftUI
+import CoreData
+
+struct BookListView: View {
+    // 1. 声明FetchRequest
+    @FetchRequest(
+        entity: Book.entity(),
+        sortDescriptors: [NSSortDescriptor(keyPath: \Book.title, ascending: true)]
+    ) var books: FetchedResults&lt;Book&gt;
+    
+    var body: some View {
+        List(books) { book in
+            VStack(alignment: .leading) {
+                Text(book.title ?? "未知标题")
+                    .font(.headline)
+                Text("作者: \(book.author ?? "未知")")
+                    .font(.subheadline)
+                    .foregroundColor(.secondary)
+            }
+        }
+    }
+}</code></pre>
+            
+            <h3>动态谓词（Filtering）</h3>
+            <p>你可以根据状态动态改变查询条件：</p>
+            <pre><code>struct FilteredBookList: View {
+    @State private var searchText = ""
+    
+    @FetchRequest var books: FetchedResults&lt;Book&gt;
+    
+    init(searchText: String) {
+        let predicate = searchText.isEmpty 
+            ? nil 
+            : NSPredicate(format: "title CONTAINS[c] %@", searchText)
+        
+        _books = FetchRequest(
+            entity: Book.entity(),
+            sortDescriptors: [NSSortDescriptor(keyPath: \Book.title, ascending: true)],
+            predicate: predicate
+        )
+    }
+    
+    var body: some View {
+        List(books) { book in
+            Text(book.title ?? "")
+        }
+    }
+}</code></pre>
+        </section>
+
+        <section class="content-section">
+            <h2>
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <rect x="3" y="3" width="18" height="18" rx="2" stroke="#ff7c35" stroke-width="2"/>
+                    <path d="M3 9H21M9 21V9" stroke="#ff7c35" stroke-width="2" stroke-linecap="round"/>
+                </svg>
+                ManagedObjectContext的使用
+            </h2>
+            <p><code>ManagedObjectContext</code>是Core Data的工作区。在SwiftUI中，我们通过环境值访问它，并用于创建、更新、删除数据。</p>
+            
+            <h3>设置环境</h3>
+            <pre><code>import SwiftUI
+import CoreData
+
+@main
+struct MyApp: App {
+    let persistenceController = PersistenceController.shared
+    
+    var body: some Scene {
+        WindowGroup {
+            ContentView()
+                .environment(\.managedObjectContext, 
+                           persistenceController.container.viewContext)
+        }
+    }
+}</code></pre>
+            
+            <h3>在视图中使用Context</h3>
+            <pre><code>struct AddBookView: View {
+    @Environment(\.managedObjectContext) private var viewContext
+    @Environment(\.dismiss) private var dismiss
+    
+    @State private var title = ""
+    @State private var author = ""
+    
+    var body: some View {
+        NavigationView {
+            Form {
+                TextField("书名", text: $title)
+                TextField("作者", text: $author)
+                
+                Button("保存") {
+                    let newBook = Book(context: viewContext)
+                    newBook.id = UUID()
+                    newBook.title = title
+                    newBook.author = author
+                    newBook.createdAt = Date()
+                    
+                    do {
+                        try viewContext.save()
+                        dismiss()
+                    } catch {
+                        print("保存失败: \(error.localizedDescription)")
+                    }
+                }
+                .disabled(title.isEmpty)
+            }
+            .navigationTitle("添加新书")
+        }
+    }
+}</code></pre>
+            
+            <div class="key-point">
+                <h3>💡 重要提示</h3>
+                <p>所有对托管对象的修改都必须在创建它的上下文所在的线程上执行。SwiftUI的<code>@Environment(\.managedObjectContext)</code>自动提供主线程上下文，适合UI操作。</p>
+            </div>
+        </section>
+
+        <section class="content-section">
+            <h2>
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M21 16V8C21 6.89543 20.1046 6 19 6H5C3.89543 6 3 6.89543 3 8V16C3 17.1046 3.89543 18 5 18H19C20.1046 18 21 17.1046 21 16Z" stroke="#ff7c35" stroke-width="2"/>
+                    <path d="M3 10H21M7 14H11M15 14H17" stroke="#ff7c35" stroke-width="2" stroke-linecap="round"/>
+                </svg>
+                数据绑定与UI更新
+            </h2>
+            <p>SwiftUI与Core Data的强绑定能力使得数据变化自动驱动UI更新：</p>
+            
+            <h3>双向绑定示例</h3>
+            <pre><code>struct BookEditView: View {
+    @ObservedObject var book: Book  // Book是NSManagedObject子类
+    @Environment(\.managedObjectContext) private var viewContext
+    
+    var body: some View {
+        Form {
+            TextField("书名", text: Binding(
+                get: { book.title ?? "" },
+                set: { book.title = $0 }
+            ))
+            .onChange(of: book.title) { _ in
+                // 自动保存更改
+                if viewContext.hasChanges {
+                    try? viewContext.save()
+                }
+            }
+            
+            TextField("作者", text: Binding(
+                get: { book.author ?? "" },
+                set: { book.author = $0 }
+            ))
+        }
+        .navigationTitle("编辑书籍")
+    }
+}</code></pre>
+            
+            <h3>删除数据</h3>
+            <pre><code>struct BookListView: View {
+    @FetchRequest(sortDescriptors: []) var books: FetchedResults&lt;Book&gt;
+    @Environment(\.managedObjectContext) private var viewContext
+    
+    var body: some View {
+        List {
+            ForEach(books) { book in
+                BookRow(book: book)
+            }
+            .onDelete { indexSet in
+                indexSet.forEach { index in
+                    viewContext.delete(books[index])
+                }
+                
+                do {
+                    try viewContext.save()
+                } catch {
+                    print("删除失败: \(error)")
+                }
+            }
+        }
+        .toolbar {
+            EditButton()
+        }
+    }
+}</code></pre>
+        </section>
+
+        <section class="content-section">
+            <h2>
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M12 22C17.5228 22 22 17.5228 22 12C22 6.47715 17.5228 2 12 2C6.47715 2 2 6.47715 2 12C2 17.5228 6.47715 22 12 22Z" stroke="#ff7c35" stroke-width="2"/>
+                    <path d="M12 16L12 12M12 8L12.01 8" stroke="#ff7c35" stroke-width="2" stroke-linecap="round"/>
+                </svg>
+                架构图与数据流
+            </h2>
+            
+            <div class="architecture">
+                <svg width="800" height="400" viewBox="0 0 800 400" xmlns="http://www.w3.org/2000/svg">
+                    <!-- 背景 -->
+                    <rect width="800" height="400" fill="#f9fdff" rx="10"/>
+                    
+                    <!-- 标题 -->
+                    <text x="400" y="40" text-anchor="middle" font-size="22" font-weight="bold" fill="#059ee3">SwiftUI + Core Data 数据流架构</text>
+                    
+                    <!-- 持久化存储 -->
+                    <rect x="50" y="80" width="200" height="80" rx="8" fill="#6ecbf5" stroke="#059ee3" stroke-width="2"/>
+                    <text x="150" y="110" text-anchor="middle" fill="white" font-size="16" font-weight="bold">SQLite</text>
+                    <text x="150" y="135" text-anchor="middle" fill="white" font-size="14">持久化存储</text>
+                    
+                    <!-- NSPersistentContainer -->
+                    <rect x="300" y="80" width="200" height="80" rx="8" fill="#ff9e5d" stroke="#ff7c35" stroke-width="2"/>
+                    <text x="400" y="110" text-anchor="middle" fill="white" font-size="16" font-weight="bold">PersistenceController</text>
+                    <text x="400" y="135" text-anchor="middle" fill="white" font-size="14">管理存储栈</text>
+                    
+                    <!-- ManagedObjectContext -->
+                    <rect x="550" y="80" width="200" height="80" rx="8" fill="#4a9cdb" stroke="#2d7bb6" stroke-width="2"/>
+                    <text x="650" y="110" text-anchor="middle" fill="white" font-size="16" font-weight="bold">ManagedObjectContext</text>
+                    <text x="650" y="135" text-anchor="middle" fill="white" font-size="14">工作区/暂存区</text>
+                    
+                    <!-- 箭头 -->
+                    <path d="M250 120 L 300 120" stroke="#059ee3" stroke-width="3" marker-end="url(#arrow)"/>
+                    <path d="M500 120 L 550 120" stroke="#ff7c35" stroke-width="3" marker-end="url(#arrow)"/>
+                    
+                    <!-- SwiftUI视图层 -->
+                    <rect x="100" y="220" width="600" height="120" rx="10" fill="#e6f7ff" stroke="#4a9cdb" stroke-width="2"/>
+                    <text x="400" y="250" text-anchor="middle" font-size="18" font-weight="bold" fill="#059ee3">SwiftUI 视图层</text>
+                    
+                    <!-- @FetchRequest -->
+                    <rect x="150" y="280" width="150" height="40" rx="6" fill="#ffb347" stroke="#ff7c35" stroke-width="2"/>
+                    <text x="225" y="305" text-anchor="middle" fill="white" font-size="14" font-weight="bold">@FetchRequest</text>
+                    
+                    <!-- @Environment -->
+                    <rect x="325" y="280" width="150" height="40" rx="6" fill="#6ecbf5" stroke="#059ee3" stroke-width="2"/>
+                    <text x="400" y="305" text-anchor="middle" fill="white" font-size="14" font-weight="bold">@Environment</text>
+                    
+                    <!-- 数据绑定 -->
+                    <rect x="500" y="280" width="150" height="40" rx="6" fill="#9d65c9" stroke="#7b4ca5" stroke-width="2"/>
+                    <text x="575" y="305" text-anchor="middle" fill="white" font-size="14" font-weight="bold">数据绑定</text>
+                    
+                    <!-- 上下箭头 -->
+                    <path d="M650 160 L 650 220" stroke="#4a9cdb" stroke-width="3" stroke-dasharray="5,5"/>
+                    <path d="M225 160 L 225 220" stroke="#4a9cdb" stroke-width="3" stroke-dasharray="5,5"/>
+                    <path d="M400 160 L 400 220" stroke="#4a9cdb" stroke-width="3" stroke-dasharray="5,5"/>
+                    
+                    <!-- 箭头定义 -->
+                    <defs>
+                        <marker id="arrow" markerWidth="10" markerHeight="10" refX="9" refY="3" orient="auto" markerUnits="strokeWidth">
+                            <path d="M0,0 L0,6 L9,3 z" fill="#059ee3"/>
+                        </marker>
+                    </defs>
+                </svg>
+            </div>
+            
+            <p class="note">数据流：持久化存储 ↔ PersistenceController ↔ ManagedObjectContext ↔ SwiftUI视图（通过@FetchRequest和@Environment）</p>
+        </section>
+
+        <section class="content-section">
+            <h2>
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M9 12L11 14L15 10M21 12C21 16.9706 16.9706 21 12 21C7.02944 21 3 16.9706 3 12C3 7.02944 7.02944 3 12 3C16.9706 3 21 7.02944 21 12Z" stroke="#ff7c35" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+                最佳实践与常见问题
+            </h2>
+            
+            <table>
+                <thead>
+                    <tr>
+                        <th>最佳实践</th>
+                        <th>说明</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><strong>使用PersistenceController单例</strong></td>
+                        <td>集中管理Core Data栈，避免重复初始化</td>
+                    </tr>
+                    <tr>
+                        <td><strong>在主线程使用viewContext</strong></td>
+                        <td>UI相关操作必须使用主线程上下文</td>
+                    </tr>
+                    <tr>
+                        <td><strong>合理使用谓词和排序描述符</strong></td>
+                        <td>优化查询性能，只获取需要的数据</td>
+                    </tr>
+                    <tr>
+                        <td><strong>及时处理保存错误</strong></td>
+                        <td>使用do-catch包装save()调用，提供用户反馈</td>
+                    </tr>
+                    <tr>
+                        <td><strong>使用@ObservedObject绑定单个对象</strong></td>
+                        <td>编辑单个托管对象时使用@ObservedObject属性包装器</td>
+                    </tr>
+                </tbody>
+            </table>
+            
+            <h3>常见问题解决</h3>
+            <ol>
+                <li><strong>线程冲突</strong>：确保只在创建对象的上下文中访问托管对象。</li>
+                <li><strong>数据不同步</strong>：检查FetchRequest的谓词和排序描述符是否正确。</li>
+                <li><strong>性能问题</strong>：对于大量数据，使用批量获取和分页。</li>
+                <li><strong>内存泄漏</strong>：避免在视图之外强引用托管对象。</li>
+            </ol>
+        </section>
+
+        <section class="content-section">
+            <h2>
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M19 14C19 18.9706 14.9706 23 10 23C5.02944 23 1 18.9706 1 14C1 9.02944 5.02944 5 10 5C14.9706 5 19 9.02944 19 14Z" stroke="#ff7c35" stroke-width="2"/>
+                    <path d="M23 10C23 14.9706 18.9706 19 14 19C9.02944 19 5 14.9706 5 10C5 5.02944 9.02944 1 14 1C18.9706 1 23 5.02944 23 10Z" stroke="#ff7c35" stroke-width="2"/>
+                </svg>
+                完整示例：书籍管理应用
+            </h2>
+            
+            <pre><code>import SwiftUI
+import CoreData
+
+struct ContentView: View {
+    @Environment(\.managedObjectContext) private var viewContext
+    
+    @FetchRequest(
+        sortDescriptors: [NSSortDescriptor(keyPath: \Book.createdAt, ascending: false)],
+        animation: .default
+    ) private var books: FetchedResults&lt;Book&gt;
+    
+    @State private var showingAddSheet = false
+    
+    var body: some View {
+        NavigationView {
+            List {
+                ForEach(books) { book in
+                    NavigationLink(destination: BookEditView(book: book)) {
+                        VStack(alignment: .leading) {
+                            Text(book.title ?? "未知标题")
+                                .font(.headline)
+                            Text(book.author ?? "未知作者")
+                                .font(.caption)
+                                .foregroundColor(.secondary)
+                        }
+                    }
+                }
+                .onDelete(perform: deleteBooks)
+            }
+            .navigationTitle("我的书架")
+            .toolbar {
+                ToolbarItem(placement: .navigationBarTrailing) {
+                    Button(action: { showingAddSheet.toggle() }) {
+                        Label("添加", systemImage: "plus")
+                    }
+                }
+                ToolbarItem(placement: .navigationBarLeading) {
+                    EditButton()
+                }
+            }
+            .sheet(isPresented: $showingAddSheet) {
+                AddBookView()
+            }
+        }
+    }
+    
+    private func deleteBooks(offsets: IndexSet) {
+        withAnimation {
+            offsets.map { books[$0] }.forEach(viewContext.delete)
+            
+            do {
+                try viewContext.save()
+            } catch {
+                let nsError = error as NSError
+                fatalError("删除错误: \(nsError), \(nsError.userInfo)")
+            }
+        }
+    }
+}</code></pre>
+        </section>
+
+        <footer>
+            公众号: 蓝海资料掘金营，微信 deep3321
+        </footer>
+    </div>
+</body>
+</html>

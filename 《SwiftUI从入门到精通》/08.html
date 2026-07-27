@@ -1,0 +1,544 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SwiftUI动画基础 - 从入门到精通</title>
+    <style>
+        :root {
+            --primary-color: #4CAF50; /* 青草绿 */
+            --secondary-color: #FF9800; /* 活力橙 */
+            --accent-color: #2196F3; /* 天空蓝 */
+            --light-color: #FFF9C4; /* 淡鹅黄 */
+            --background-color: #E8F5E9; /* 浅绿背景 */
+            --text-color: #333333;
+            --border-color: #81C784; /* 柔和绿边框 */
+            --card-bg: #FFFFFF;
+        }
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', 'Microsoft YaHei', sans-serif;
+        }
+        body {
+            background-color: var(--background-color);
+            color: var(--text-color);
+            line-height: 1.6;
+            padding: 20px;
+            max-width: 1200px;
+            margin: 0 auto;
+            border: 8px double var(--border-color);
+            border-radius: 20px;
+            box-shadow: 0 10px 30px rgba(0, 100, 0, 0.1);
+        }
+        header {
+            text-align: center;
+            padding: 30px 20px;
+            background: linear-gradient(135deg, var(--primary-color), var(--accent-color));
+            color: white;
+            border-radius: 15px 15px 0 0;
+            margin-bottom: 30px;
+            border-bottom: 5px solid var(--secondary-color);
+        }
+        h1 {
+            font-size: 2.8rem;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.2);
+        }
+        .subtitle {
+            font-size: 1.2rem;
+            opacity: 0.9;
+        }
+        main {
+            padding: 0 20px;
+        }
+        section {
+            background-color: var(--card-bg);
+            border-radius: 15px;
+            padding: 25px;
+            margin-bottom: 30px;
+            border: 3px solid var(--border-color);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.05);
+            transition: transform 0.3s ease;
+        }
+        section:hover {
+            transform: translateY(-5px);
+        }
+        h2 {
+            color: var(--primary-color);
+            border-left: 6px solid var(--secondary-color);
+            padding-left: 15px;
+            margin-bottom: 20px;
+            font-size: 1.8rem;
+        }
+        h3 {
+            color: var(--accent-color);
+            margin: 15px 0 10px;
+            font-size: 1.4rem;
+        }
+        p {
+            margin-bottom: 15px;
+            text-align: justify;
+        }
+        ul, ol {
+            margin-left: 25px;
+            margin-bottom: 20px;
+        }
+        li {
+            margin-bottom: 8px;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+            border: 2px solid var(--border-color);
+            border-radius: 10px;
+            overflow: hidden;
+        }
+        th, td {
+            border: 1px solid var(--border-color);
+            padding: 12px 15px;
+            text-align: left;
+        }
+        th {
+            background-color: var(--light-color);
+            color: var(--text-color);
+            font-weight: bold;
+        }
+        tr:nth-child(even) {
+            background-color: rgba(129, 199, 132, 0.1);
+        }
+        pre {
+            background-color: #f5f5f5;
+            border-left: 4px solid var(--accent-color);
+            padding: 15px;
+            overflow-x: auto;
+            margin: 15px 0;
+            border-radius: 8px;
+            font-family: 'Courier New', monospace;
+            font-size: 0.95rem;
+            line-height: 1.4;
+        }
+        code {
+            background-color: #f0f0f0;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-family: 'Courier New', monospace;
+        }
+        .svg-container {
+            display: flex;
+            justify-content: center;
+            margin: 25px 0;
+        }
+        .comparison-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 25px;
+            margin: 25px 0;
+        }
+        .comparison-card {
+            background: var(--card-bg);
+            border: 2px solid var(--border-color);
+            border-radius: 12px;
+            padding: 20px;
+            text-align: center;
+        }
+        .comparison-card h4 {
+            color: var(--secondary-color);
+            margin-bottom: 15px;
+        }
+        footer {
+            text-align: center;
+            padding: 25px;
+            margin-top: 40px;
+            background: linear-gradient(to right, var(--primary-color), var(--accent-color));
+            color: white;
+            border-radius: 0 0 15px 15px;
+            font-size: 1.1rem;
+            border-top: 5px solid var(--secondary-color);
+        }
+        .keyword {
+            color: var(--primary-color);
+            font-weight: bold;
+        }
+        .tip {
+            background-color: var(--light-color);
+            border-left: 5px solid var(--secondary-color);
+            padding: 15px;
+            margin: 20px 0;
+            border-radius: 0 8px 8px 0;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>SwiftUI动画基础</h1>
+        <p class="subtitle">第八讲：隐式动画、显式动画、过渡与动画曲线</p>
+        <svg width="120" height="120" viewBox="0 0 100 100">
+            <circle cx="50" cy="50" r="45" fill="none" stroke="white" stroke-width="3" stroke-dasharray="5,5"/>
+            <rect x="30" y="30" width="40" height="40" fill="white" opacity="0.8">
+                <animate attributeName="x" values="30;20;30" dur="2s" repeatCount="indefinite"/>
+                <animate attributeName="y" values="30;40;30" dur="1.5s" repeatCount="indefinite"/>
+            </rect>
+            <circle cx="50" cy="50" r="15" fill="var(--secondary-color)" stroke="white" stroke-width="2">
+                <animate attributeName="r" values="15;25;15" dur="2s" repeatCount="indefinite"/>
+            </circle>
+            <path d="M20,50 Q50,10 80,50 T140,50" stroke="white" stroke-width="2" fill="none">
+                <animate attributeName="d" values="M20,50 Q50,10 80,50 T140,50;M20,50 Q50,90 80,50 T140,50;M20,50 Q50,10 80,50 T140,50" dur="3s" repeatCount="indefinite"/>
+            </path>
+        </svg>
+    </header>
+
+    <main>
+        <section>
+            <h2>📚 课程概述</h2>
+            <p>动画是提升用户体验的核心。SwiftUI 提供了声明式、强大的动画 API，让开发者能够轻松创建流畅的界面交互。本讲将深入探讨 SwiftUI 动画的四大基石：<span class="keyword">隐式动画</span>、<span class="keyword">显式动画</span>、<span class="keyword">过渡</span> 与 <span class="keyword">动画曲线</span>。</p>
+            <div class="svg-container">
+                <svg width="400" height="100" viewBox="0 0 400 100">
+                    <rect x="10" y="40" width="80" height="20" rx="5" fill="var(--primary-color)">
+                        <animate attributeName="width" values="80;120;80" dur="2s" repeatCount="indefinite"/>
+                    </rect>
+                    <text x="50" y="55" text-anchor="middle" fill="white" font-weight="bold">.animation</text>
+                    <rect x="110" y="40" width="80" height="20" rx="5" fill="var(--secondary-color)">
+                        <animate attributeName="y" values="40;30;40" dur="1.5s" repeatCount="indefinite"/>
+                    </rect>
+                    <text x="150" y="55" text-anchor="middle" fill="white" font-weight="bold">withAnimation</text>
+                    <rect x="210" y="40" width="80" height="20" rx="5" fill="var(--accent-color)">
+                        <animate attributeName="opacity" values="1;0.5;1" dur="2s" repeatCount="indefinite"/>
+                    </rect>
+                    <text x="250" y="55" text-anchor="middle" fill="white" font-weight="bold">transition</text>
+                    <path d="M310,50 L350,30 L390,70" stroke="var(--secondary-color)" stroke-width="3" fill="none" stroke-dasharray="5,5">
+                        <animate attributeName="d" values="M310,50 L350,30 L390,70;M310,50 L350,70 L390,30;M310,50 L350,30 L390,70" dur="2.5s" repeatCount="indefinite"/>
+                    </path>
+                    <text x="350" y="85" text-anchor="middle" fill="var(--text-color)" font-weight="bold">曲线</text>
+                </svg>
+            </div>
+        </section>
+
+        <section>
+            <h2>🎯 一、隐式动画 (.animation)</h2>
+            <p><span class="keyword">隐式动画</span> 是 SwiftUI 中最简单的动画添加方式。通过为视图修饰符添加 <code>.animation()</code> 修饰符，该视图所有可动画的属性变化都会以动画形式呈现。</p>
+            <h3>核心特性</h3>
+            <ul>
+                <li><strong>声明式</strong>：直接附加在视图上，声明动画效果。</li>
+                <li><strong>作用范围</strong>：仅作用于被修饰的视图及其子视图的特定属性变化。</li>
+                <li><strong>自动触发</strong>：当依赖的状态（@State）改变时，动画自动执行。</li>
+            </ul>
+            <h3>代码示例</h3>
+<pre><code>import SwiftUI
+
+struct ImplicitAnimationView: View {
+    @State private var isExpanded: Bool = false
+
+    var body: some View {
+        VStack {
+            // 点击时，圆形的大小和颜色会以动画方式改变
+            Circle()
+                .fill(isExpanded ? Color.orange : Color.green)
+                .frame(width: isExpanded ? 150 : 80,
+                       height: isExpanded ? 150 : 80)
+                .animation(.easeInOut(duration: 0.8), value: isExpanded) // 隐式动画
+
+            Button("切换状态") {
+                isExpanded.toggle() // 状态改变触发动画
+            }
+            .padding()
+            .background(Color.blue)
+            .foregroundColor(.white)
+            .cornerRadius(10)
+        }
+    }
+}</code></pre>
+            <div class="tip">
+                <strong>💡 提示：</strong> 在 SwiftUI 3.0+ 中，推荐使用 <code>.animation(.easeInOut, value: isExpanded)</code> 这种指定依赖值的方式，性能更优，动画更精确。
+            </div>
+        </section>
+
+        <section>
+            <h2>🚀 二、显式动画 (withAnimation)</h2>
+            <p><span class="keyword">显式动画</span> 通过 <code>withAnimation { ... }</code> 闭包包裹状态改变代码，明确指定一段代码执行时应伴随动画。它提供了更精细的控制能力。</p>
+            <h3>核心特性</h3>
+            <ul>
+                <li><strong>命令式触发</strong>：在需要的地方主动调用。</li>
+                <li><strong>作用范围</strong>：闭包内所有因状态改变而发生的视图变化都会产生动画。</li>
+                <li><strong>灵活控制</strong>：可以为不同的状态变化指定不同的动画参数。</li>
+            </ul>
+            <h3>代码示例</h3>
+<pre><code>struct ExplicitAnimationView: View {
+    @State private var offsetX: CGFloat = 0
+    @State private var rotation: Double = 0
+
+    var body: some View {
+        VStack(spacing: 30) {
+            Rectangle()
+                .fill(Color.purple)
+                .frame(width: 100, height: 100)
+                .offset(x: offsetX)
+                .rotationEffect(.degrees(rotation))
+
+            HStack {
+                Button("向右移动") {
+                    // 使用显式动画，指定弹簧效果
+                    withAnimation(.spring(response: 0.6, dampingFraction: 0.5)) {
+                        offsetX += 50
+                    }
+                }
+                .padding()
+                .background(Color.green)
+                .foregroundColor(.white)
+                .cornerRadius(8)
+
+                Button("旋转") {
+                    // 使用另一个显式动画，指定线性动画
+                    withAnimation(.linear(duration: 1.0)) {
+                        rotation += 180
+                    }
+                }
+                .padding()
+                .background(Color.blue)
+                .foregroundColor(.white)
+                .cornerRadius(8)
+            }
+        }
+    }
+}</code></pre>
+        </section>
+
+        <section>
+            <h2>🔄 三、过渡 (Transition)</h2>
+            <p><span class="keyword">过渡</span> 定义了视图如何出现和消失。它通常与条件语句（如 <code>if</code>）结合使用，控制视图的插入和移除动画。</p>
+            <h3>常用过渡效果</h3>
+            <div class="comparison-grid">
+                <div class="comparison-card">
+                    <h4>.opacity</h4>
+                    <p>淡入淡出</p>
+                </div>
+                <div class="comparison-card">
+                    <h4>.scale</h4>
+                    <p>缩放效果</p>
+                </div>
+                <div class="comparison-card">
+                    <h4>.slide</h4>
+                    <p>滑入滑出</p>
+                </div>
+                <div class="comparison-card">
+                    <h4>.move(edge:)</h4>
+                    <p>从某边移入</p>
+                </div>
+            </div>
+            <h3>代码示例</h3>
+<pre><code>struct TransitionView: View {
+    @State private var showDetails = false
+
+    var body: some View {
+        VStack {
+            Button(showDetails ? "隐藏详情" : "显示详情") {
+                withAnimation(.easeInOut(duration: 0.5)) {
+                    showDetails.toggle()
+                }
+            }
+            .padding()
+            .background(Color.orange)
+            .foregroundColor(.white)
+            .cornerRadius(10)
+
+            if showDetails {
+                Text("🎉 这里是详细的说明内容！")
+                    .padding()
+                    .frame(maxWidth: .infinity)
+                    .background(Color.yellow)
+                    .cornerRadius(10)
+                    .transition(.asymmetric( // 组合过渡：进入和退出使用不同效果
+                        insertion: .scale.combined(with: .opacity),
+                        removal: .slide.combined(with: .opacity)
+                    ))
+            }
+
+            Spacer()
+        }
+        .padding()
+    }
+}</code></pre>
+        </section>
+
+        <section>
+            <h2>📈 四、动画曲线 (Animation Curve)</h2>
+            <p><span class="keyword">动画曲线</span>（或时间函数）决定了动画过程中速度如何变化，是影响动画“感觉”的关键因素。SwiftUI 提供了丰富的内置曲线。</p>
+            <div class="svg-container">
+                <svg width="500" height="200" viewBox="0 0 500 200">
+                    <text x="30" y="30" fill="var(--text-color)" font-weight="bold">动画曲线对比</text>
+                    <!-- 坐标轴 -->
+                    <line x1="50" y1="180" x2="450" y2="180" stroke="gray" stroke-width="2"/>
+                    <line x1="50" y1="180" x2="50" y2="20" stroke="gray" stroke-width="2"/>
+                    <text x="45" y="190" fill="gray" font-size="12">时间</text>
+                    <text x="460" y="175" fill="gray" font-size="12">进度</text>
+                    <!-- linear -->
+                    <path d="M50,180 L450,20" stroke="var(--primary-color)" stroke-width="3" fill="none"/>
+                    <text x="250" y="40" fill="var(--primary-color)" font-size="14">.linear</text>
+                    <!-- easeIn -->
+                    <path d="M50,180 Q200,180 450,20" stroke="var(--secondary-color)" stroke-width="3" fill="none"/>
+                    <text x="250" y="60" fill="var(--secondary-color)" font-size="14">.easeIn</text>
+                    <!-- easeOut -->
+                    <path d="M50,180 Q300,20 450,20" stroke="var(--accent-color)" stroke-width="3" fill="none"/>
+                    <text x="250" y="80" fill="var(--accent-color)" font-size="14">.easeOut</text>
+                    <!-- easeInOut -->
+                    <path d="M50,180 C150,180 350,20 450,20" stroke="purple" stroke-width="3" fill="none"/>
+                    <text x="250" y="100" fill="purple" font-size="14">.easeInOut</text>
+                </svg>
+            </div>
+            <h3>主要曲线类型</h3>
+            <table>
+                <thead>
+                    <tr>
+                        <th>曲线类型</th>
+                        <th>描述</th>
+                        <th>适用场景</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><code>.linear</code></td>
+                        <td>匀速运动</td>
+                        <td>机械、匀速移动（如进度条）</td>
+                    </tr>
+                    <tr>
+                        <td><code>.easeIn</code></td>
+                        <td>由慢到快，加速结束</td>
+                        <td>物体从静止开始加速（如自由落体开始）</td>
+                    </tr>
+                    <tr>
+                        <td><code>.easeOut</code></td>
+                        <td>由快到慢，减速结束</td>
+                        <td>物体逐渐停止（如刹车）</td>
+                    </tr>
+                    <tr>
+                        <td><code>.easeInOut</code></td>
+                        <td>慢-快-慢，对称变化</td>
+                        <td>最自然、最常用的通用动画</td>
+                    </tr>
+                    <tr>
+                        <td><code>.spring()</code></td>
+                        <td>弹簧物理模拟</td>
+                        <td>富有弹性的、生动的交互</td>
+                    </tr>
+                </tbody>
+            </table>
+            <h3>弹簧动画示例</h3>
+<pre><code>// 自定义弹簧动画
+withAnimation(.spring(
+    response: 0.6,      // 定义弹簧的刚度（响应速度）
+    dampingFraction: 0.5, // 阻尼系数（0.0-1.0），越小弹跳越多
+    blendDuration: 0.25   // 与其他动画混合的时间
+)) {
+    // 状态改变
+    scale = 2.0
+}</code></pre>
+        </section>
+
+        <section>
+            <h2>🏗️ SwiftUI 动画架构概览</h2>
+            <p>理解 SwiftUI 动画的底层逻辑有助于更好地应用它们。下图展示了动画的核心工作流程：</p>
+            <div class="svg-container">
+                <svg width="550" height="300" viewBox="0 0 550 300">
+                    <rect x="50" y="50" width="120" height="60" rx="10" fill="var(--light-color)" stroke="var(--primary-color)" stroke-width="2"/>
+                    <text x="110" y="85" text-anchor="middle" fill="var(--text-color)" font-weight="bold">状态改变</text>
+                    <text x="110" y="100" text-anchor="middle" fill="gray" font-size="12">@State, @Binding</text>
+
+                    <path d="M170,80 L210,80" stroke="var(--text-color)" stroke-width="2" marker-end="url(#arrowhead)"/>
+                    <polygon points="210,80 200,75 200,85" fill="var(--text-color)"/>
+
+                    <rect x="210" y="50" width="120" height="60" rx="10" fill="var(--light-color)" stroke="var(--secondary-color)" stroke-width="2"/>
+                    <text x="270" y="85" text-anchor="middle" fill="var(--text-color)" font-weight="bold">动画修饰符</text>
+                    <text x="270" y="100" text-anchor="middle" fill="gray" font-size="12">.animation()</text>
+
+                    <path d="M330,80 L370,80" stroke="var(--text-color)" stroke-width="2" marker-end="url(#arrowhead)"/>
+                    <polygon points="370,80 360,75 360,85" fill="var(--text-color)"/>
+
+                    <rect x="370" y="50" width="120" height="60" rx="10" fill="var(--light-color)" stroke="var(--accent-color)" stroke-width="2"/>
+                    <text x="430" y="85" text-anchor="middle" fill="var(--text-color)" font-weight="bold">渲染引擎</text>
+                    <text x="430" y="100" text-anchor="middle" fill="gray" font-size="12">插值计算</text>
+
+                    <!-- 下方流程 -->
+                    <path d="M430,110 L430,150" stroke="var(--text-color)" stroke-width="2" marker-end="url(#arrowhead)"/>
+                    <polygon points="430,150 425,140 435,140" fill="var(--text-color)"/>
+
+                    <rect x="330" y="150" width="120" height="60" rx="10" fill="var(--light-color)" stroke="purple" stroke-width="2"/>
+                    <text x="390" y="185" text-anchor="middle" fill="var(--text-color)" font-weight="bold">过渡效果</text>
+                    <text x="390" y="200" text-anchor="middle" fill="gray" font-size="12">.transition()</text>
+
+                    <path d="M330,180 L270,180" stroke="var(--text-color)" stroke-width="2" marker-end="url(#arrowhead)"/>
+                    <polygon points="270,180 280,175 280,185" fill="var(--text-color)"/>
+
+                    <rect x="150" y="150" width="120" height="60" rx="10" fill="var(--light-color)" stroke="orange" stroke-width="2"/>
+                    <text x="210" y="185" text-anchor="middle" fill="var(--text-color)" font-weight="bold">动画曲线</text>
+                    <text x="210" y="200" text-anchor="middle" fill="gray" font-size="12">.easeInOut等</text>
+
+                    <path d="M150,180 L90,180" stroke="var(--text-color)" stroke-width="2" marker-end="url(#arrowhead)"/>
+                    <polygon points="90,180 100,175 100,185" fill="var(--text-color)"/>
+
+                    <rect x="10" y="150" width="80" height="60" rx="10" fill="var(--light-color)" stroke="green" stroke-width="2"/>
+                    <text x="50" y="185" text-anchor="middle" fill="var(--text-color)" font-weight="bold">最终视图</text>
+                    <text x="50" y="200" text-anchor="middle" fill="gray" font-size="12">平滑变化</text>
+
+                    <!-- 顶部标题 -->
+                    <text x="275" y="30" text-anchor="middle" fill="var(--primary-color)" font-size="18" font-weight="bold">SwiftUI 动画工作流程</text>
+                </svg>
+            </div>
+        </section>
+
+        <section>
+            <h2>✅ 总结与最佳实践</h2>
+            <ol>
+                <li><strong>选择合适的动画类型</strong>：
+                    <ul>
+                        <li>简单属性变化 → 使用 <strong>隐式动画</strong>。</li>
+                        <li>复杂逻辑、多个状态联动 → 使用 <strong>显式动画</strong>。</li>
+                        <li>视图的插入与移除 → 使用 <strong>过渡</strong>。</li>
+                    </ul>
+                </li>
+                <li><strong>选择合适的动画曲线</strong>：
+                    <ul>
+                        <li>追求自然 → <code>.easeInOut</code>。</li>
+                        <li>追求生动、趣味 → <code>.spring()</code>。</li>
+                        <li>保持一致性，避免一个界面中使用过多不同的曲线。</li>
+                    </ul>
+                </li>
+                <li><strong>性能优化</strong>：
+                    <ul>
+                        <li>为隐式动画指定具体的依赖值（value参数）。</li>
+                        <li>避免在每一帧都触发状态更新的动画中执行繁重操作。</li>
+                        <li>使用 <code>.animation(nil)</code> 在视图层级中局部禁用动画。</li>
+                    </ul>
+                </li>
+            </ol>
+            <div class="tip">
+                <strong>🎓 练习建议：</strong> 创建一个简单的“任务完成”庆祝界面，结合使用缩放（.scale）、旋转（.rotationEffect）、透明度（.opacity）和弹簧动画，让一个奖章图标在点击后以动画方式弹出并轻微晃动。
+            </div>
+        </section>
+    </main>
+
+    <footer>
+        <p>更多SwiftUI高级教程、实战项目与独家资料</p>
+        <p><strong>公众号：蓝海资料掘金营，微信 deep3321</strong></p>
+        <p>© 《SwiftUI从入门到精通》课程系列 - 第八讲</p>
+        <svg width="100" height="20" viewBox="0 0 100 20">
+            <circle cx="10" cy="10" r="5" fill="white">
+                <animate attributeName="fill" values="white;var(--light-color);white" dur="1s" repeatCount="indefinite"/>
+            </circle>
+            <circle cx="30" cy="10" r="5" fill="white">
+                <animate attributeName="fill" values="white;var(--light-color);white" dur="1s" repeatCount="indefinite" begin="0.2s"/>
+            </circle>
+            <circle cx="50" cy="10" r="5" fill="white">
+                <animate attributeName="fill" values="white;var(--light-color);white" dur="1s" repeatCount="indefinite" begin="0.4s"/>
+            </circle>
+            <circle cx="70" cy="10" r="5" fill="white">
+                <animate attributeName="fill" values="white;var(--light-color);white" dur="1s" repeatCount="indefinite" begin="0.6s"/>
+            </circle>
+            <circle cx="90" cy="10" r="5" fill="white">
+                <animate attributeName="fill" values="white;var(--light-color);white" dur="1s" repeatCount="indefinite" begin="0.8s"/>
+            </circle>
+        </svg>
+    </footer>
+</body>
+</html>

@@ -1,0 +1,359 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SwiftUI从入门到精通 - 第24课：辅助功能</title>
+    <style>
+        :root {
+            --primary-color: #4CAF50; /* 青草绿 */
+            --secondary-color: #FF9800; /* 活力橙 */
+            --accent-color: #2196F3; /* 天空蓝 */
+            --light-color: #FFF9C4; /* 淡鹅黄 */
+            --background-color: #F5F5F5; /* 浅灰背景 */
+            --text-color: #333333;
+            --border-color: #81C784; /* 浅绿边框 */
+            --card-bg: #FFFFFF;
+        }
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', 'Microsoft YaHei', sans-serif;
+        }
+        body {
+            background-color: var(--background-color);
+            color: var(--text-color);
+            line-height: 1.6;
+            padding: 20px;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        .container {
+            border: 8px double var(--border-color);
+            border-radius: 20px;
+            background-color: var(--card-bg);
+            padding: 30px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            position: relative;
+            overflow: hidden;
+        }
+        .container::before {
+            content: '';
+            position: absolute;
+            top: -10px;
+            left: -10px;
+            right: -10px;
+            bottom: -10px;
+            border: 4px solid var(--secondary-color);
+            border-radius: 28px;
+            pointer-events: none;
+            z-index: -1;
+        }
+        header {
+            text-align: center;
+            margin-bottom: 40px;
+            padding-bottom: 20px;
+            border-bottom: 3px dashed var(--primary-color);
+        }
+        h1 {
+            color: var(--primary-color);
+            font-size: 2.8rem;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 0px var(--light-color);
+        }
+        .subtitle {
+            color: var(--accent-color);
+            font-size: 1.4rem;
+            font-weight: 300;
+        }
+        h2 {
+            color: var(--secondary-color);
+            border-left: 6px solid var(--accent-color);
+            padding-left: 15px;
+            margin: 30px 0 15px;
+            font-size: 1.8rem;
+        }
+        h3 {
+            color: var(--primary-color);
+            margin: 20px 0 10px;
+            font-size: 1.4rem;
+        }
+        p {
+            margin-bottom: 15px;
+            text-align: justify;
+        }
+        .highlight-box {
+            background-color: var(--light-color);
+            border-left: 5px solid var(--secondary-color);
+            padding: 15px;
+            margin: 20px 0;
+            border-radius: 0 10px 10px 0;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 25px 0;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.05);
+        }
+        th, td {
+            border: 2px solid var(--border-color);
+            padding: 12px 15px;
+            text-align: left;
+        }
+        th {
+            background-color: var(--primary-color);
+            color: white;
+            font-weight: bold;
+        }
+        tr:nth-child(even) {
+            background-color: rgba(76, 175, 80, 0.05);
+        }
+        ul, ol {
+            margin-left: 25px;
+            margin-bottom: 20px;
+        }
+        li {
+            margin-bottom: 8px;
+        }
+        code, pre {
+            font-family: 'Courier New', monospace;
+            background-color: #f0f8f0;
+            border-radius: 5px;
+            padding: 2px 6px;
+        }
+        pre {
+            padding: 15px;
+            overflow-x: auto;
+            border-left: 4px solid var(--accent-color);
+            margin: 20px 0;
+            white-space: pre-wrap;
+            border: 1px solid #ddd;
+        }
+        .svg-container {
+            text-align: center;
+            margin: 30px 0;
+            padding: 20px;
+            background: #f9fdf9;
+            border-radius: 10px;
+            border: 2px dotted var(--border-color);
+        }
+        .architecture-svg {
+            width: 100%;
+            max-width: 800px;
+            height: auto;
+        }
+        .footer {
+            text-align: center;
+            margin-top: 50px;
+            padding-top: 20px;
+            border-top: 3px double var(--primary-color);
+            color: var(--accent-color);
+            font-size: 1.1rem;
+            font-weight: bold;
+        }
+        .note {
+            background-color: #E3F2FD;
+            padding: 15px;
+            border-radius: 10px;
+            margin: 20px 0;
+            border: 1px solid var(--accent-color);
+        }
+        .keyword {
+            color: #D81B60;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>第24课：辅助功能</h1>
+            <p class="subtitle">为SwiftUI视图添加无障碍支持（Accessibility）</p>
+        </header>
+
+        <section>
+            <h2>一、什么是辅助功能？</h2>
+            <p>辅助功能（Accessibility）旨在让应用程序对所有人（包括视力、听力、运动或认知障碍人士）都可使用。在SwiftUI中，构建无障碍应用是框架的核心设计原则之一。</p>
+            <div class="highlight-box">
+                <p><strong>核心目标：</strong>通过 VoiceOver、开关控制、缩放显示等辅助技术，确保每个用户都能平等地访问和使用你的App。</p>
+            </div>
+
+            <div class="svg-container">
+                <svg class="architecture-svg" viewBox="0 0 800 200" xmlns="http://www.w3.org/2000/svg">
+                    <rect x="50" y="80" width="150" height="60" rx="10" fill="#4CAF50" stroke="#2E7D32" stroke-width="2"/>
+                    <text x="125" y="115" text-anchor="middle" fill="white" font-size="16" font-weight="bold">SwiftUI视图</text>
+                    <path d="M230 110 L280 110" stroke="#FF9800" stroke-width="3" marker-end="url(#arrow)"/>
+                    <rect x="300" y="80" width="200" height="60" rx="10" fill="#2196F3" stroke="#1565C0" stroke-width="2"/>
+                    <text x="400" y="115" text-anchor="middle" fill="white" font-size="16" font-weight="bold">无障碍修饰符</text>
+                    <path d="M530 110 L580 110" stroke="#FF9800" stroke-width="3" marker-end="url(#arrow)"/>
+                    <rect x="600" y="80" width="150" height="60" rx="10" fill="#FF9800" stroke="#EF6C00" stroke-width="2"/>
+                    <text x="675" y="115" text-anchor="middle" fill="white" font-size="16" font-weight="bold">辅助技术</text>
+                    <defs>
+                        <marker id="arrow" markerWidth="10" markerHeight="10" refX="9" refY="3" orient="auto" markerUnits="strokeWidth">
+                            <path d="M0,0 L0,6 L9,3 z" fill="#FF9800"/>
+                        </marker>
+                    </defs>
+                </svg>
+                <p><em>SwiftUI无障碍支持架构图</em></p>
+            </div>
+        </section>
+
+        <section>
+            <h2>二、关键无障碍修饰符</h2>
+            <table>
+                <thead>
+                    <tr>
+                        <th>修饰符</th>
+                        <th>作用</th>
+                        <th>示例</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><code>.accessibilityLabel(_:)</code></td>
+                        <td>为视图提供描述性标签，VoiceOver会朗读此标签。</td>
+                        <td>“提交按钮”</td>
+                    </tr>
+                    <tr>
+                        <td><code>.accessibilityHint(_:)</code></td>
+                        <td>提供额外操作提示，解释操作结果。</td>
+                        <td>“双击以发送消息”</td>
+                    </tr>
+                    <tr>
+                        <td><code>.accessibilityValue(_:)</code></td>
+                        <td>描述视图的当前值（如滑块值、进度）。</td>
+                        <td>“50%”</td>
+                    </tr>
+                    <tr>
+                        <td><code>.accessibilityAddTraits(_:)</code></td>
+                        <td>添加无障碍特性（如按钮、标题、选中状态）。</td>
+                        <td><code>.isButton</code>, <code>.isHeader</code></td>
+                    </tr>
+                    <tr>
+                        <td><code>.accessibilityElement(children:)</code></td>
+                        <td>控制子视图的无障碍组合方式。</td>
+                        <td><code>.combine</code>, <code>.contain</code></td>
+                    </tr>
+                    <tr>
+                        <td><code>.accessibilityHidden(_:)</code></td>
+                        <td>隐藏视图，使其对辅助技术不可见。</td>
+                        <td><code>true</code> 或 <code>false</code></td>
+                    </tr>
+                </tbody>
+            </table>
+        </section>
+
+        <section>
+            <h2>三、实战代码示例</h2>
+            <h3>1. 基础按钮无障碍化</h3>
+            <pre><code>import SwiftUI
+
+struct AccessibleButtonView: View {
+    @State private var count = 0
+    
+    var body: some View {
+        VStack(spacing: 20) {
+            Text("点击次数: \(count)")
+                .font(.title)
+                .accessibilityLabel("当前点击次数")
+                .accessibilityValue("\(count) 次")
+            
+            Button(action: {
+                count += 1
+            }) {
+                Image(systemName: "plus.circle.fill")
+                Text("增加")
+            }
+            .padding()
+            .background(Color.blue)
+            .foregroundColor(.white)
+            .cornerRadius(10)
+            // 关键无障碍修饰符
+            .accessibilityLabel("增加按钮")
+            .accessibilityHint("点击此按钮将使计数加一")
+            .accessibilityAddTraits(.isButton)
+        }
+        .padding()
+    }
+}</code></pre>
+
+            <h3>2. 自定义视图组无障碍</h3>
+            <pre><code>struct ProfileView: View {
+    var body: some View {
+        VStack(alignment: .leading) {
+            HStack {
+                Image(systemName: "person.circle.fill")
+                    .font(.system(size: 50))
+                    .foregroundColor(.green)
+                VStack(alignment: .leading) {
+                    Text("小明")
+                        .font(.title)
+                        .accessibilityAddTraits(.isHeader)
+                    Text("小学生，五年级")
+                        .font(.subheadline)
+                        .foregroundColor(.secondary)
+                }
+            }
+            // 将整个HStack作为一个无障碍元素处理
+            .accessibilityElement(children: .combine)
+            .accessibilityLabel("用户资料：小明，小学生，五年级")
+            
+            Divider()
+            
+            Text("兴趣爱好：阅读、编程、足球")
+                .padding(.top)
+                .accessibilityLabel("兴趣爱好：阅读、编程、足球")
+        }
+        .padding()
+        .background(Color(.systemBackground))
+        .cornerRadius(12)
+        .shadow(radius: 2)
+    }
+}</code></pre>
+        </section>
+
+        <section>
+            <h2>四、最佳实践清单</h2>
+            <ul>
+                <li><span class="keyword">语义化标签：</span>为所有交互元素提供准确、简洁的 <code>accessibilityLabel</code>。</li>
+                <li><span class="keyword">合理分组：</span>使用 <code>.accessibilityElement(children: .combine)</code> 将逻辑相关的视图合并为一个无障碍元素。</li>
+                <li><span class="keyword">提供提示：</span>对复杂操作使用 <code>accessibilityHint</code>，但避免重复标签内容。</li>
+                <li><span class="keyword">动态值更新：</span>当视图内容变化时（如进度条、计数器），及时更新 <code>accessibilityValue</code>。</li>
+                <li><span class="keyword">隐藏装饰性内容：</span>对纯装饰性、无信息的图像使用 <code>.accessibilityHidden(true)</code>。</li>
+                <li><span class="keyword">测试：</span>始终在真机上使用 VoiceOver 和 开关控制 进行测试。</li>
+            </ul>
+        </section>
+
+        <section>
+            <h2>五、常见无障碍特性（Traits）</h2>
+            <div class="note">
+                <p>特性（Traits）帮助辅助技术正确识别和描述UI元素的角色与状态。</p>
+            </div>
+            <ol>
+                <li><strong>.isButton</strong> - 标识元素为按钮。</li>
+                <li><strong>.isHeader</strong> - 标识标题，帮助用户导航内容结构。</li>
+                <li><strong>.isLink</strong> - 标识链接元素。</li>
+                <li><strong>.isImage</strong> - 标识图像元素。</li>
+                <li><strong>.isSelected</strong> - 标识元素当前被选中。</li>
+                <li><strong>.isSearchField</strong> - 标识搜索框。</li>
+                <li><strong>.playsSound</strong> - 表示元素被激活时会播放声音。</li>
+                <li><strong>.isKeyboardKey</strong> - 标识键盘键。</li>
+            </ol>
+        </section>
+
+        <section>
+            <h2>六、调试与测试</h2>
+            <p>在Xcode中，你可以使用 <strong>无障碍检查器（Accessibility Inspector）</strong> 来预览和调试应用的无障碍属性。同时，务必在真实设备上开启 VoiceOver 进行完整的功能测试。</p>
+            <div class="highlight-box">
+                <p><strong>测试口诀：</strong>“眼看标签清不清，耳听朗读顺不顺，手控开关灵不灵，心感逻辑明不明。”</p>
+            </div>
+        </section>
+
+        <footer class="footer">
+            <p>公众号: 蓝海资料掘金营，微信 deep3321</p>
+            <p>© SwiftUI从入门到精通课程 - 让应用拥抱每一个人</p>
+        </footer>
+    </div>
+</body>
+</html>

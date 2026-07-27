@@ -1,0 +1,559 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SwiftUI从入门到精通 - 视图组合与复用</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', 'PingFang SC', 'Microsoft YaHei', sans-serif;
+        }
+        body {
+            background: linear-gradient(135deg, #f5f7fa 0%, #e4edf5 100%);
+            color: #333;
+            line-height: 1.6;
+            padding: 20px;
+            min-height: 100vh;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background-color: rgba(255, 255, 255, 0.92);
+            border-radius: 20px;
+            border: 8px double #4a9cdb;
+            box-shadow: 0 15px 35px rgba(74, 156, 219, 0.15);
+            overflow: hidden;
+            padding: 30px;
+        }
+        .header {
+            text-align: center;
+            padding: 30px 20px;
+            background: linear-gradient(90deg, #ffcc70, #6ecbf5, #a29bfe);
+            margin: -30px -30px 30px -30px;
+            border-bottom: 4px solid #ff9966;
+        }
+        h1 {
+            color: #2c3e50;
+            font-size: 2.8rem;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 0 #fff;
+        }
+        .subtitle {
+            color: #34495e;
+            font-size: 1.4rem;
+            font-weight: 300;
+        }
+        h2 {
+            color: #2980b9;
+            border-left: 6px solid #ff9966;
+            padding-left: 15px;
+            margin: 40px 0 20px;
+            font-size: 1.8rem;
+        }
+        h3 {
+            color: #16a085;
+            margin: 25px 0 15px;
+            font-size: 1.4rem;
+        }
+        p {
+            margin-bottom: 15px;
+            font-size: 1.05rem;
+        }
+        .card {
+            background: #fff;
+            border-radius: 12px;
+            padding: 20px;
+            margin: 20px 0;
+            border: 3px solid #a29bfe;
+            box-shadow: 0 5px 15px rgba(162, 155, 254, 0.1);
+        }
+        .highlight {
+            background-color: #e8f4fc;
+            border-left: 5px solid #3498db;
+            padding: 15px;
+            margin: 20px 0;
+            border-radius: 0 8px 8px 0;
+        }
+        pre {
+            background: #2d3436;
+            color: #dfe6e9;
+            padding: 20px;
+            border-radius: 10px;
+            overflow-x: auto;
+            margin: 20px 0;
+            border: 2px solid #636e72;
+            font-family: 'Courier New', monospace;
+            font-size: 0.95rem;
+            line-height: 1.5;
+        }
+        code {
+            background-color: #ffeaa7;
+            color: #d63031;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-family: 'Courier New', monospace;
+            font-size: 0.9rem;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 25px 0;
+            border: 3px solid #6ecbf5;
+            border-radius: 10px;
+            overflow: hidden;
+        }
+        th, td {
+            border: 2px solid #a29bfe;
+            padding: 15px;
+            text-align: left;
+        }
+        th {
+            background-color: #6ecbf5;
+            color: white;
+            font-weight: bold;
+        }
+        tr:nth-child(even) {
+            background-color: #f0f9ff;
+        }
+        ul, ol {
+            padding-left: 30px;
+            margin: 15px 0;
+        }
+        li {
+            margin-bottom: 8px;
+        }
+        .svg-container {
+            text-align: center;
+            margin: 30px 0;
+            padding: 20px;
+            background: #fff;
+            border-radius: 12px;
+            border: 3px dashed #ffcc70;
+        }
+        .architecture-svg {
+            width: 100%;
+            max-width: 800px;
+            height: auto;
+        }
+        .footer {
+            text-align: center;
+            margin-top: 50px;
+            padding: 25px;
+            background: linear-gradient(90deg, #6ecbf5, #a29bfe);
+            color: white;
+            border-radius: 12px;
+            font-size: 1.1rem;
+            font-weight: bold;
+            border-top: 4px solid #ff9966;
+        }
+        .note {
+            background-color: #fff9e6;
+            border: 2px solid #ffcc70;
+            padding: 15px;
+            border-radius: 8px;
+            margin: 20px 0;
+        }
+        .keyword {
+            color: #e84393;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header class="header">
+            <h1>第12讲：视图组合与复用</h1>
+            <p class="subtitle">ViewBuilder、@ViewBuilder、自定义可复用组件构建</p>
+        </header>
+
+        <section>
+            <h2>一、核心概念：为什么需要视图组合？</h2>
+            <p>在SwiftUI中，<strong>视图组合(View Composition)</strong>是将多个小型、单一的视图组合成更大、更复杂视图的技术。这遵循了“单一职责”和“关注点分离”的设计原则。</p>
+            <div class="card">
+                <h3>主要优势：</h3>
+                <ul>
+                    <li><span class="keyword">可维护性</span>：每个小组件只负责一个功能，易于理解和修改。</li>
+                    <li><span class="keyword">可复用性</span>：构建一次，可在多个地方重复使用。</li>
+                    <li><span class="keyword">可测试性</span>：小型独立视图更容易进行单元测试。</li>
+                    <li><span class="keyword">代码清晰度</span>：将复杂界面分解，使代码结构更清晰。</li>
+                </ul>
+            </div>
+        </section>
+
+        <section>
+            <h2>二、ViewBuilder：SwiftUI的声明式语法核心</h2>
+            <p><code>ViewBuilder</code>是一个<strong>结果构建器(Result Builder)</strong>，它允许我们以声明式的方式将多个视图组合成一个视图。它是SwiftUI DSL（领域特定语言）的基石。</p>
+            <div class="highlight">
+                <p><strong>关键特性：</strong> ViewBuilder 可以将多个子视图（最多10个）组织成一个返回单个 <code>some View</code> 的闭包。它支持条件判断（if/else）和有限循环（ForEach）。</p>
+            </div>
+            <pre><code>import SwiftUI
+
+// ViewBuilder 的典型使用场景：VStack, HStack, Group 等容器的内容闭包
+struct ContentView: View {
+    var isLoggedIn: Bool = true
+
+    var body: some View {
+        VStack { // 这里的闭包隐式使用了 ViewBuilder
+            Text("欢迎使用")
+                .font(.largeTitle)
+            Image(systemName: "star.fill")
+                .foregroundColor(.yellow)
+
+            if isLoggedIn {
+                Text("用户已登录")
+                    .foregroundColor(.green)
+            } else {
+                Button("点击登录") {
+                    print("登录操作")
+                }
+            }
+
+            ForEach(1...3, id: \.self) { number in
+                Text("项目 \(number)")
+            }
+        }
+    }
+}</code></pre>
+        </section>
+
+        <section>
+            <h2>三、@ViewBuilder 属性包装器</h2>
+            <p>当我们需要自定义一个接受多个视图作为参数的视图或函数时，需要使用 <code>@ViewBuilder</code> 属性包装器来标记闭包参数。</p>
+            <div class="svg-container">
+                <svg class="architecture-svg" viewBox="0 0 800 200" xmlns="http://www.w3.org/2000/svg">
+                    <rect x="50" y="80" width="200" height="60" rx="10" fill="#6ecbf5" stroke="#2980b9" stroke-width="3"/>
+                    <text x="150" y="115" text-anchor="middle" fill="white" font-size="16" font-weight="bold">父视图</text>
+                    <rect x="300" y="30" width="200" height="60" rx="10" fill="#ffcc70" stroke="#e67e22" stroke-width="3"/>
+                    <text x="400" y="65" text-anchor="middle" fill="#2c3e50" font-size="16" font-weight="bold">@ViewBuilder 闭包</text>
+                    <rect x="300" y="110" width="80" height="60" rx="8" fill="#a29bfe" stroke="#8e44ad" stroke-width="2"/>
+                    <text x="340" y="145" text-anchor="middle" fill="white" font-size="14">子视图A</text>
+                    <rect x="420" y="110" width="80" height="60" rx="8" fill="#a29bfe" stroke="#8e44ad" stroke-width="2"/>
+                    <text x="460" y="145" text-anchor="middle" fill="white" font-size="14">子视图B</text>
+                    <line x1="250" y1="110" x2="300" y2="60" stroke="#34495e" stroke-width="2" stroke-dasharray="5,5"/>
+                    <line x1="500" y1="60" x2="550" y2="110" stroke="#34495e" stroke-width="2" stroke-dasharray="5,5"/>
+                    <polygon points="550,110 545,105 555,105" fill="#34495e"/>
+                </svg>
+                <p><em>@ViewBuilder 作为父视图与多个子视图之间的桥梁</em></p>
+            </div>
+            <pre><code>// 自定义一个接受 @ViewBuilder 的容器视图
+struct CustomCard&lt;Content: View&gt;: View {
+    let title: String
+    let content: Content // 泛型 Content 代表一组视图
+
+    // 使用 @ViewBuilder 初始化 content 闭包
+    init(title: String, @ViewBuilder content: () -> Content) {
+        self.title = title
+        self.content = content()
+    }
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 10) {
+            Text(title)
+                .font(.headline)
+                .foregroundColor(.white)
+                .padding(.horizontal)
+                .frame(maxWidth: .infinity, alignment: .leading)
+                .background(Color.blue)
+
+            content // 这里放置通过 @ViewBuilder 传入的所有子视图
+                .padding()
+
+        }
+        .background(Color(.systemBackground))
+        .cornerRadius(12)
+        .shadow(radius: 3)
+    }
+}
+
+// 使用示例
+struct ExampleView: View {
+    var body: some View {
+        CustomCard(title: "学生信息卡") {
+            Text("姓名：小明")
+            Text("年龄：12岁")
+            HStack {
+                Image(systemName: "graduationcap.fill")
+                Text("五年级三班")
+            }
+            .foregroundColor(.orange)
+        }
+        .padding()
+    }
+}</code></pre>
+        </section>
+
+        <section>
+            <h2>四、构建自定义可复用组件</h2>
+            <p>将常用的UI模式和功能封装成独立的、可配置的组件，是提高开发效率的关键。</p>
+            <div class="note">
+                <p><strong>设计原则：</strong> 组件应遵循“开放-封闭”原则，对扩展开放，对修改封闭。通过参数配置组件行为，而非修改内部代码。</p>
+            </div>
+
+            <h3>4.1 可配置的按钮组件示例</h3>
+            <pre><code>struct PrimaryButton: View {
+    let title: String
+    let iconName: String?
+    let action: () -> Void
+    var backgroundColor: Color = .blue
+    var foregroundColor: Color = .white
+
+    var body: some View {
+        Button(action: action) {
+            HStack(spacing: 8) {
+                if let iconName = iconName {
+                    Image(systemName: iconName)
+                }
+                Text(title)
+                    .fontWeight(.semibold)
+            }
+            .padding(.horizontal, 20)
+            .padding(.vertical, 12)
+            .background(backgroundColor)
+            .foregroundColor(foregroundColor)
+            .cornerRadius(10)
+        }
+    }
+}
+
+// 使用
+struct ButtonDemo: View {
+    var body: some View {
+        VStack(spacing: 20) {
+            PrimaryButton(title: "提交作业", iconName: "paperplane.fill", action: {
+                print("作业已提交")
+            })
+            PrimaryButton(title: "取消", iconName: "xmark.circle", action: {},
+                         backgroundColor: .gray, foregroundColor: .white)
+        }
+    }
+}</code></pre>
+
+            <h3>4.2 复杂组合：信息面板组件</h3>
+            <pre><code>struct InfoPanel&lt;Header: View, Footer: View&gt;: View {
+    let header: Header
+    let footer: Footer
+
+    init(@ViewBuilder header: () -> Header,
+         @ViewBuilder footer: () -> Footer) {
+        self.header = header()
+        self.footer = footer()
+    }
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 0) {
+            header
+                .padding()
+                .background(Color.orange.opacity(0.2))
+
+            Divider()
+
+            footer
+                .padding()
+                .background(Color.green.opacity(0.1))
+        }
+        .cornerRadius(12)
+        .overlay(
+            RoundedRectangle(cornerRadius: 12)
+                .stroke(Color.orange, lineWidth: 2)
+        )
+    }
+}
+
+// 使用
+struct PanelDemo: View {
+    var body: some View {
+        InfoPanel {
+            HStack {
+                Image(systemName: "info.circle.fill")
+                Text("重要通知")
+                    .font(.title2)
+                    .bold()
+            }
+            .foregroundColor(.orange)
+        } footer: {
+            VStack(alignment: .leading, spacing: 10) {
+                Text("明天上午9点有数学测验。")
+                Text("请同学们带好尺子和圆规。")
+                PrimaryButton(title: "我知道了", iconName: "checkmark.circle", action: {})
+            }
+        }
+        .padding()
+    }
+}</code></pre>
+        </section>
+
+        <section>
+            <h2>五、最佳实践与对比</h2>
+            <table>
+                <thead>
+                    <tr>
+                        <th>技术</th>
+                        <th>用途</th>
+                        <th>优点</th>
+                        <th>适用场景</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><code>ViewBuilder</code> (隐式)</td>
+                        <td>SwiftUI容器（VStack等）的默认内容构建器</td>
+                        <td>无需显式声明，语法简洁</td>
+                        <td>标准布局，子视图数量明确</td>
+                    </tr>
+                    <tr>
+                        <td><code>@ViewBuilder</code> (显式)</td>
+                        <td>自定义组件接受多个视图作为参数</td>
+                        <td>极大增强组件灵活性和复用性</td>
+                        <td>构建通用容器、卡片、面板等</td>
+                    </tr>
+                    <tr>
+                        <td>自定义组件（无ViewBuilder）</td>
+                        <td>固定结构、功能单一的UI元素</td>
+                        <td>性能最优，类型安全</td>
+                        <td>按钮、标签、图标等基础元素</td>
+                    </tr>
+                    <tr>
+                        <td>泛型 + @ViewBuilder</td>
+                        <td>高度灵活、类型安全的复杂组件</td>
+                        <td>最大程度的复用和类型安全</td>
+                        <td>高级UI框架、设计系统组件</td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <div class="card">
+                <h3>关键要点总结：</h3>
+                <ol>
+                    <li>从小组件开始构建，逐步组合成复杂界面。</li>
+                    <li>善用 <code>@ViewBuilder</code> 让自定义组件像原生容器一样灵活。</li>
+                    <li>为组件提供合理的默认值，并通过参数暴露可定制点。</li>
+                    <li>使用泛型（<code>&lt;Content: View&gt;</code>）提高组件的通用性。</li>
+                    <li>为复杂组件编写使用示例和文档注释。</li>
+                </ol>
+            </div>
+        </section>
+
+        <section>
+            <h2>六、综合实战：构建一个“学生任务卡片”</h2>
+            <p>让我们运用所学，构建一个可在班级应用中复用的任务卡片组件。</p>
+            <pre><code>struct StudentTaskCard&lt;Actions: View&gt;: View {
+    let taskName: String
+    let subject: String
+    let dueDate: Date
+    let isCompleted: Bool
+    let actions: Actions
+
+    init(taskName: String,
+         subject: String,
+         dueDate: Date,
+         isCompleted: Bool = false,
+         @ViewBuilder actions: () -> Actions) {
+        self.taskName = taskName
+        self.subject = subject
+        self.dueDate = dueDate
+        self.isCompleted = isCompleted
+        self.actions = actions()
+    }
+
+    private var dueDateString: String {
+        let formatter = DateFormatter()
+        formatter.dateFormat = "MM月dd日 HH:mm"
+        return formatter.string(from: dueDate)
+    }
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 15) {
+            // 头部：科目和状态
+            HStack {
+                Circle()
+                    .fill(isCompleted ? Color.green : Color.orange)
+                    .frame(width: 12, height: 12)
+                Text(subject)
+                    .font(.caption)
+                    .fontWeight(.bold)
+                    .foregroundColor(.secondary)
+                Spacer()
+                Text(isCompleted ? "已完成" : "进行中")
+                    .font(.caption)
+                    .padding(.horizontal, 8)
+                    .padding(.vertical, 4)
+                    .background(isCompleted ? Color.green.opacity(0.2) : Color.orange.opacity(0.2))
+                    .cornerRadius(4)
+            }
+
+            // 任务名称
+            Text(taskName)
+                .font(.headline)
+
+            // 截止时间
+            Label(dueDateString, systemImage: "calendar.badge.clock")
+                .font(.subheadline)
+                .foregroundColor(.blue)
+
+            // 自定义操作区域
+            if !isCompleted {
+                Divider()
+                HStack {
+                    actions // 由使用者传入的按钮组
+                }
+            }
+        }
+        .padding()
+        .background(Color(.systemBackground))
+        .cornerRadius(16)
+        .overlay(
+            RoundedRectangle(cornerRadius: 16)
+                .stroke(isCompleted ? Color.green : Color.gray.opacity(0.3), lineWidth: 2)
+        )
+        .opacity(isCompleted ? 0.8 : 1.0)
+    }
+}
+
+// 使用示例
+struct TaskBoardView: View {
+    let tasks = [
+        (name: "完成数学练习册第5页", subject: "数学", due: Date().addingTimeInterval(86400), completed: false),
+        (name: "背诵古诗《春晓》", subject: "语文", due: Date().addingTimeInterval(172800), completed: true),
+        (name: "制作太阳系模型", subject: "科学", due: Date().addingTimeInterval(259200), completed: false)
+    ]
+
+    var body: some View {
+        ScrollView {
+            VStack(spacing: 20) {
+                ForEach(tasks, id: \.name) { task in
+                    StudentTaskCard(
+                        taskName: task.name,
+                        subject: task.subject,
+                        dueDate: task.due,
+                        isCompleted: task.completed
+                    ) {
+                        // 这里可以灵活传入任何视图作为操作按钮
+                        if !task.completed {
+                            PrimaryButton(title: "标记完成", iconName: "checkmark", action: {
+                                print("标记任务完成: \(task.name)")
+                            })
+                            .frame(maxWidth: .infinity)
+
+                            Button("请求延期") {
+                                print("请求延期: \(task.name)")
+                            }
+                            .foregroundColor(.orange)
+                        }
+                    }
+                }
+            }
+            .padding()
+        }
+    }
+}</code></pre>
+        </section>
+
+        <footer class="footer">
+            公众号:蓝海资料掘金营，微信deep3321
+        </footer>
+    </div>
+</body>
+</html>

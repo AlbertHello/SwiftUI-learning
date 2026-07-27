@@ -1,0 +1,606 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SwiftUI从入门到精通 - 测试与调试</title>
+    <style>
+        :root {
+            --primary: #4CAF50; /* 青草绿 */
+            --secondary: #FF9800; /* 活力橙 */
+            --accent: #2196F3; /* 天空蓝 */
+            --light: #FFF9C4; /* 淡鹅黄 */
+            --background: #F5F5F5; /* 浅灰背景 */
+            --text: #333333;
+            --border: #BDBDBD;
+        }
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', 'Microsoft YaHei', sans-serif;
+        }
+        body {
+            background-color: var(--background);
+            color: var(--text);
+            line-height: 1.6;
+            padding: 20px;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        .container {
+            background-color: white;
+            border: 8px double var(--primary);
+            border-radius: 20px;
+            padding: 40px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            position: relative;
+            overflow: hidden;
+        }
+        .container::before {
+            content: '';
+            position: absolute;
+            top: -5px;
+            left: -5px;
+            right: -5px;
+            bottom: -5px;
+            border: 3px solid var(--secondary);
+            border-radius: 25px;
+            pointer-events: none;
+            z-index: -1;
+        }
+        header {
+            text-align: center;
+            margin-bottom: 40px;
+            padding-bottom: 20px;
+            border-bottom: 4px dashed var(--accent);
+        }
+        h1 {
+            color: var(--primary);
+            font-size: 2.8em;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 0px var(--light);
+        }
+        .subtitle {
+            color: var(--secondary);
+            font-size: 1.4em;
+            font-weight: 300;
+        }
+        h2 {
+            color: var(--accent);
+            border-left: 6px solid var(--secondary);
+            padding-left: 15px;
+            margin: 30px 0 20px 0;
+            font-size: 1.8em;
+        }
+        h3 {
+            color: var(--primary);
+            margin: 25px 0 15px 0;
+            font-size: 1.4em;
+        }
+        p {
+            margin-bottom: 15px;
+            text-align: justify;
+        }
+        .card {
+            background: linear-gradient(135deg, #E8F5E9, #FFF3E0);
+            border: 2px solid var(--primary);
+            border-radius: 15px;
+            padding: 20px;
+            margin: 20px 0;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.05);
+        }
+        .highlight {
+            background-color: var(--light);
+            padding: 5px 10px;
+            border-radius: 5px;
+            font-weight: bold;
+            color: #d84315;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 25px 0;
+            border: 2px solid var(--accent);
+        }
+        th, td {
+            border: 1px solid var(--border);
+            padding: 12px 15px;
+            text-align: left;
+        }
+        th {
+            background-color: var(--accent);
+            color: white;
+            font-weight: bold;
+        }
+        tr:nth-child(even) {
+            background-color: #F0F7FF;
+        }
+        ul, ol {
+            padding-left: 30px;
+            margin: 15px 0;
+        }
+        li {
+            margin-bottom: 8px;
+        }
+        pre {
+            background-color: #2d2d2d;
+            color: #f8f8f2;
+            padding: 20px;
+            border-radius: 10px;
+            overflow-x: auto;
+            margin: 20px 0;
+            border-left: 5px solid var(--secondary);
+            font-family: 'Courier New', monospace;
+            font-size: 0.95em;
+            line-height: 1.4;
+        }
+        code {
+            background-color: #FFF3E0;
+            color: #E65100;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-family: 'Courier New', monospace;
+        }
+        .svg-container {
+            display: flex;
+            justify-content: center;
+            margin: 30px 0;
+        }
+        .architecture {
+            background-color: white;
+            padding: 20px;
+            border-radius: 15px;
+            border: 2px solid var(--primary);
+            margin: 30px 0;
+        }
+        footer {
+            text-align: center;
+            margin-top: 50px;
+            padding-top: 20px;
+            border-top: 4px double var(--primary);
+            color: var(--secondary);
+            font-size: 1.1em;
+            font-weight: bold;
+        }
+        .tip {
+            background-color: #E3F2FD;
+            border-left: 5px solid var(--accent);
+            padding: 15px;
+            margin: 20px 0;
+            border-radius: 0 10px 10px 0;
+        }
+        .step-list {
+            counter-reset: step-counter;
+            list-style-type: none;
+            padding-left: 0;
+        }
+        .step-list li {
+            counter-increment: step-counter;
+            margin-bottom: 25px;
+            padding-left: 50px;
+            position: relative;
+        }
+        .step-list li::before {
+            content: counter(step-counter);
+            background-color: var(--primary);
+            color: white;
+            font-weight: bold;
+            width: 35px;
+            height: 35px;
+            border-radius: 50%;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            position: absolute;
+            left: 0;
+            top: -5px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>SwiftUI 测试与调试</h1>
+            <p class="subtitle">第25章：SwiftUI视图的预览调试、单元测试与UI测试</p>
+        </header>
+
+        <section>
+            <p>在SwiftUI应用开发中，<span class="highlight">测试与调试</span>是保障应用质量、提升开发效率的关键环节。本章将系统讲解SwiftUI特有的预览调试工具、单元测试方法以及UI自动化测试实践，帮助你构建稳定可靠的应用程序。</p>
+        </section>
+
+        <div class="card">
+            <h2>本章核心要点</h2>
+            <ul>
+                <li><strong>预览调试</strong>：利用Canvas实时预览，快速迭代UI设计。</li>
+                <li><strong>单元测试</strong>：验证视图模型、业务逻辑和数据流的正确性。</li>
+                <li><strong>UI测试</strong>：模拟用户交互，确保界面行为符合预期。</li>
+                <li><strong>调试技巧</strong>：掌握SwiftUI特有的调试工具与方法。</li>
+            </ul>
+        </div>
+
+        <h2>一、SwiftUI 预览调试 (Preview Debugging)</h2>
+        <p>SwiftUI的Canvas预览是革命性的开发工具，它允许你实时查看和交互式修改UI，无需反复运行模拟器。</p>
+
+        <h3>1.1 基础预览配置</h3>
+        <pre><code>import SwiftUI
+
+struct ContentView: View {
+    @State private var username: String = ""
+    @State private var isOn: Bool = false
+
+    var body: some View {
+        VStack {
+            TextField("请输入用户名", text: $username)
+                .textFieldStyle(RoundedBorderTextFieldStyle())
+                .padding()
+
+            Toggle("启用选项", isOn: $isOn)
+                .padding()
+
+            Text("当前状态: \(isOn ? "开启" : "关闭")")
+                .foregroundColor(isOn ? .green : .gray)
+        }
+    }
+}
+
+// 预览提供器
+struct ContentView_Previews: PreviewProvider {
+    static var previews: some View {
+        ContentView()
+            .previewDevice("iPhone 14 Pro")
+            .previewDisplayName("iPhone 14 Pro")
+            .environment(\.colorScheme, .light)
+
+        ContentView()
+            .previewDevice("iPhone SE (3rd generation)")
+            .previewDisplayName("iPhone SE")
+            .environment(\.colorScheme, .dark)
+    }
+}</code></pre>
+
+        <div class="tip">
+            <strong>提示：</strong> 使用 <code>.previewLayout(.sizeThatFits)</code> 可以让预览仅占用视图本身所需的空间，便于查看组件细节。
+        </div>
+
+        <h3>1.2 动态预览与交互调试</h3>
+        <p>通过<code>@Previewable</code>宏（Xcode 15+）或自定义预览状态，可以创建可交互的预览环境。</p>
+        <pre><code>// 使用 #Preview 宏 (Xcode 15+)
+#Preview("登录界面") {
+    LoginView()
+}
+
+#Preview("深色模式") {
+    ContentView()
+        .preferredColorScheme(.dark)
+}
+
+// 模拟不同数据状态
+#Preview("空状态") {
+    UserListView(users: [])
+}
+
+#Preview("加载数据") {
+    UserListView(users: mockUsers)
+}</code></pre>
+
+        <div class="svg-container">
+            <svg width="600" height="200" viewBox="0 0 600 200">
+                <rect x="10" y="10" width="580" height="180" rx="15" fill="#E8F5E9" stroke="#4CAF50" stroke-width="3"/>
+                <rect x="40" y="40" width="120" height="40" rx="8" fill="#4CAF50" opacity="0.8"/>
+                <text x="100" y="65" text-anchor="middle" fill="white" font-weight="bold" font-size="16">Canvas</text>
+                <rect x="180" y="40" width="120" height="40" rx="8" fill="#2196F3" opacity="0.8"/>
+                <text x="240" y="65" text-anchor="middle" fill="white" font-weight="bold" font-size="16">实时预览</text>
+                <rect x="320" y="40" width="120" height="40" rx="8" fill="#FF9800" opacity="0.8"/>
+                <text x="380" y="65" text-anchor="middle" fill="white" font-weight="bold" font-size="16">交互调试</text>
+                <rect x="460" y="40" width="120" height="40" rx="8" fill="#9C27B0" opacity="0.8"/>
+                <text x="520" y="65" text-anchor="middle" fill="white" font-weight="bold" font-size="16">多设备</text>
+                <path d="M100 100 Q 200 50 300 100 T 500 100" stroke="#FF9800" stroke-width="3" fill="none"/>
+                <circle cx="100" cy="100" r="8" fill="#4CAF50"/>
+                <circle cx="300" cy="100" r="8" fill="#2196F3"/>
+                <circle cx="500" cy="100" r="8" fill="#9C27B0"/>
+                <text x="100" y="140" text-anchor="middle" fill="#333" font-size="14">设计</text>
+                <text x="300" y="140" text-anchor="middle" fill="#333" font-size="14">预览</text>
+                <text x="500" y="140" text-anchor="middle" fill="#333" font-size="14">测试</text>
+            </svg>
+        </div>
+
+        <h2>二、单元测试 (Unit Testing)</h2>
+        <p>单元测试专注于验证代码中最小可测试单元（通常是函数或方法）的正确性。在SwiftUI中，这通常意味着测试视图模型、状态管理和业务逻辑。</p>
+
+        <h3>2.1 测试视图模型 (ViewModel)</h3>
+        <pre><code>import XCTest
+@testable import YourApp
+
+class LoginViewModelTests: XCTestCase {
+
+    var viewModel: LoginViewModel!
+
+    override func setUp() {
+        super.setUp()
+        viewModel = LoginViewModel()
+    }
+
+    override func tearDown() {
+        viewModel = nil
+        super.tearDown()
+    }
+
+    // 测试有效登录
+    func testValidLogin() {
+        // 给定
+        viewModel.username = "user@example.com"
+        viewModel.password = "SecurePass123"
+
+        // 当
+        viewModel.login()
+
+        // 则
+        XCTAssertTrue(viewModel.isLoggedIn)
+        XCTAssertNil(viewModel.errorMessage)
+    }
+
+    // 测试无效密码
+    func testInvalidPassword() {
+        // 给定
+        viewModel.username = "user@example.com"
+        viewModel.password = "123" // 密码太短
+
+        // 当
+        viewModel.login()
+
+        // 则
+        XCTAssertFalse(viewModel.isLoggedIn)
+        XCTAssertEqual(viewModel.errorMessage, "密码必须至少8个字符")
+    }
+
+    // 测试异步网络请求
+    func testAsyncLogin() async throws {
+        // 给定
+        viewModel.username = "test@example.com"
+        viewModel.password = "password123"
+
+        // 当
+        await viewModel.performLogin()
+
+        // 则
+        XCTAssertTrue(viewModel.isLoggedIn)
+    }
+}</code></pre>
+
+        <h3>2.2 测试绑定与状态</h3>
+        <pre><code>class StateBindingTests: XCTestCase {
+
+    func testToggleStateBinding() {
+        // 创建可测试的视图
+        struct TestView: View {
+            @State var isOn: Bool = false
+            var body: some View {
+                EmptyView()
+            }
+        }
+
+        // 使用ViewHost进行测试 (iOS 17+)
+        // 注意：实际测试中可能需要使用测试框架的UI测试功能
+        let view = TestView()
+        // 模拟交互
+        // view.isOn.toggle()
+        // XCTAssertTrue(view.isOn)
+    }
+
+    func testPublishedProperty() {
+        class UserSettings: ObservableObject {
+            @Published var fontSize: CGFloat = 16.0
+        }
+
+        let settings = UserSettings()
+        let expectation = XCTestExpectation(description: "字体大小变化")
+
+        let cancellable = settings.$fontSize
+            .dropFirst() // 跳过初始值
+            .sink { newValue in
+                XCTAssertEqual(newValue, 18.0)
+                expectation.fulfill()
+            }
+
+        settings.fontSize = 18.0
+
+        wait(for: [expectation], timeout: 1.0)
+        cancellable.cancel()
+    }
+}</code></pre>
+
+        <div class="architecture">
+            <h3>SwiftUI 测试架构图</h3>
+            <div class="svg-container">
+                <svg width="650" height="300" viewBox="0 0 650 300">
+                    <!-- 背景 -->
+                    <rect x="0" y="0" width="650" height="300" fill="#F9FBE7" rx="10"/>
+
+                    <!-- 单元测试层 -->
+                    <rect x="50" y="40" width="180" height="80" rx="10" fill="#C8E6C9" stroke="#4CAF50" stroke-width="2"/>
+                    <text x="140" y="75" text-anchor="middle" fill="#1B5E20" font-weight="bold" font-size="16">单元测试</text>
+                    <text x="140" y="95" text-anchor="middle" fill="#2E7D32" font-size="12">ViewModel / 业务逻辑</text>
+
+                    <!-- 集成测试层 -->
+                    <rect x="260" y="40" width="180" height="80" rx="10" fill="#BBDEFB" stroke="#2196F3" stroke-width="2"/>
+                    <text x="350" y="75" text-anchor="middle" fill="#0D47A1" font-weight="bold" font-size="16">集成测试</text>
+                    <text x="350" y="95" text-anchor="middle" fill="#1565C0" font-size="12">视图组合 / 导航</text>
+
+                    <!-- UI测试层 -->
+                    <rect x="470" y="40" width="180" height="80" rx="10" fill="#FFE0B2" stroke="#FF9800" stroke-width="2"/>
+                    <text x="560" y="75" text-anchor="middle" fill="#E65100" font-weight="bold" font-size="16">UI测试</text>
+                    <text x="560" y="95" text-anchor="middle" fill="#EF6C00" font-size="12">用户交互 / 端到端</text>
+
+                    <!-- 连接线 -->
+                    <path d="M140 120 L 140 160 L 350 160 L 350 120" stroke="#9E9E9E" stroke-width="2" fill="none" stroke-dasharray="5,5"/>
+                    <path d="M350 120 L 350 160 L 560 160 L 560 120" stroke="#9E9E9E" stroke-width="2" fill="none" stroke-dasharray="5,5"/>
+
+                    <!-- 基础层 -->
+                    <rect x="150" y="180" width="380" height="80" rx="10" fill="#F5F5F5" stroke="#757575" stroke-width="2"/>
+                    <text x="340" y="215" text-anchor="middle" fill="#424242" font-weight="bold" font-size="16">SwiftUI 视图层</text>
+                    <text x="340" y="235" text-anchor="middle" fill="#616161" font-size="12">声明式UI / 状态管理</text>
+
+                    <!-- 箭头 -->
+                    <polygon points="340,260 335,250 345,250" fill="#757575"/>
+                    <text x="340" y="290" text-anchor="middle" fill="#757575" font-size="14">测试覆盖范围递增</text>
+                </svg>
+            </div>
+        </div>
+
+        <h2>三、UI 测试 (UI Testing)</h2>
+        <p>UI测试模拟用户与应用的交互，确保界面元素正确响应并产生预期行为。</p>
+
+        <h3>3.1 基础UI测试</h3>
+        <pre><code>import XCTest
+
+class LoginUITests: XCTestCase {
+
+    var app: XCUIApplication!
+
+    override func setUp() {
+        super.setUp()
+        continueAfterFailure = false
+        app = XCUIApplication()
+        app.launch()
+    }
+
+    func testSuccessfulLogin() {
+        // 定位界面元素
+        let emailTextField = app.textFields["emailTextField"]
+        let passwordSecureField = app.secureTextFields["passwordSecureField"]
+        let loginButton = app.buttons["loginButton"]
+        let welcomeText = app.staticTexts["welcomeText"]
+
+        // 操作
+        emailTextField.tap()
+        emailTextField.typeText("test@example.com")
+
+        passwordSecureField.tap()
+        passwordSecureField.typeText("Password123")
+
+        loginButton.tap()
+
+        // 断言
+        XCTAssertTrue(welcomeText.waitForExistence(timeout: 3))
+        XCTAssertEqual(welcomeText.label, "欢迎回来，test@example.com！")
+    }
+
+    func testLoginWithInvalidCredentials() {
+        let emailTextField = app.textFields["emailTextField"]
+        let passwordSecureField = app.secureTextFields["passwordSecureField"]
+        let loginButton = app.buttons["loginButton"]
+        let errorAlert = app.alerts["登录错误"]
+
+        emailTextField.tap()
+        emailTextField.typeText("invalid@email")
+
+        passwordSecureField.tap()
+        passwordSecureField.typeText("123")
+
+        loginButton.tap()
+
+        // 验证错误提示出现
+        XCTAssertTrue(errorAlert.waitForExistence(timeout: 2))
+        XCTAssertTrue(errorAlert.staticTexts["邮箱格式不正确"].exists)
+    }
+}</code></pre>
+
+        <h3>3.2 使用辅助标识符</h3>
+        <p>为SwiftUI视图添加可访问性标识符，便于UI测试定位：</p>
+        <pre><code>struct LoginView: View {
+    @State private var email: String = ""
+    @State private var password: String = ""
+
+    var body: some View {
+        VStack {
+            TextField("邮箱", text: $email)
+                .textFieldStyle(RoundedBorderTextFieldStyle())
+                .accessibilityIdentifier("emailTextField") // 关键标识符
+
+            SecureField("密码", text: $password)
+                .textFieldStyle(RoundedBorderTextFieldStyle())
+                .accessibilityIdentifier("passwordSecureField")
+
+            Button("登录") {
+                // 登录逻辑
+            }
+            .accessibilityIdentifier("loginButton")
+        }
+        .padding()
+    }
+}</code></pre>
+
+        <h2>四、调试技巧与最佳实践</h2>
+
+        <table>
+            <thead>
+                <tr>
+                    <th>调试工具</th>
+                    <th>用途</th>
+                    <th>示例/命令</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td><strong>Canvas 预览</strong></td>
+                    <td>实时查看UI变化，交互调试</td>
+                    <td>使用 <code>#Preview</code> 宏创建多场景预览</td>
+                </tr>
+                <tr>
+                    <td><strong>调试修饰符</strong></td>
+                    <td>可视化视图边界和布局</td>
+                    <td><code>.border(.red)</code>, <code>.background(.yellow.opacity(0.3))</code></td>
+                </tr>
+                <tr>
+                    <td><strong>Self._printChanges()</strong></td>
+                    <td>追踪视图更新原因</td>
+                    <td>在视图内部调用，控制台输出变化原因</td>
+                </tr>
+                <tr>
+                    <td><strong>Xcode View Debugger</strong></td>
+                    <td>3D视图层次检查</td>
+                    <td>运行应用后点击Debug View Hierarchy按钮</td>
+                </tr>
+                <tr>
+                    <td><strong>断言与前提条件</strong></td>
+                    <td>开发时验证假设</td>
+                    <td><code>assert()</code>, <code>precondition()</code>, <code>fatalError()</code></td>
+                </tr>
+            </tbody>
+        </table>
+
+        <div class="card">
+            <h3>测试金字塔实践指南</h3>
+            <ol class="step-list">
+                <li><strong>编写大量单元测试</strong>：覆盖核心业务逻辑、视图模型和工具函数。这些测试运行速度快，反馈及时。</li>
+                <li><strong>添加关键集成测试</strong>：验证视图组合、导航流和重要组件间的交互。</li>
+                <li><strong>创建精选UI测试</strong>：覆盖核心用户旅程和关键功能路径，避免过度测试UI细节。</li>
+                <li><strong>利用预览进行设计验证</strong>：在开发过程中持续使用Canvas预览，减少对完整测试的依赖。</li>
+                <li><strong>建立持续集成</strong>：自动化测试流程，确保每次代码提交都经过测试验证。</li>
+            </ol>
+        </div>
+
+        <h2>五、常见问题与解决方案</h2>
+
+        <div class="tip">
+            <strong>问题1：预览无法加载或显示错误</strong><br>
+            <strong>解决方案：</strong> 检查预览代码是否在 <code>#if DEBUG</code> 块中；确保预览提供器引用的类型可用；尝试清理构建文件夹 (Cmd+Shift+K)。
+        </div>
+
+        <div class="tip">
+            <strong>问题2：UI测试元素找不到</strong><br>
+            <strong>解决方案：</strong> 确保添加了正确的 <code>accessibilityIdentifier</code>；使用 <code>XCUIElement</code> 的 <code>waitForExistence(timeout:)</code> 方法；检查元素是否在视图层次中。
+        </div>
+
+        <div class="tip">
+            <strong>问题3：测试异步代码困难</strong><br>
+            <strong>解决方案：</strong> 使用 <code>XCTestExpectation</code> 等待异步操作完成；利用 <code>async/await</code> 语法编写异步测试；考虑使用 Combine 的 <code>Publisher</code> 进行测试。
+        </div>
+
+        <footer>
+            公众号:蓝海资料掘金营，微信deep3321
+        </footer>
+    </div>
+</body>
+</html>

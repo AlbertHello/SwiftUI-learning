@@ -1,0 +1,488 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SwiftUI从入门到精通 - 场景与窗口</title>
+    <style>
+        :root {
+            --primary-color: #4CAF50; /* 青草绿 */
+            --secondary-color: #FF9800; /* 活力橙 */
+            --accent-color: #2196F3; /* 天空蓝 */
+            --light-color: #FFF9C4; /* 淡鹅黄 */
+            --background-color: #F5F5F5; /* 浅灰背景 */
+            --text-color: #333333;
+            --border-color: #BDBDBD;
+        }
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', 'Microsoft YaHei', sans-serif;
+        }
+        body {
+            background-color: var(--background-color);
+            color: var(--text-color);
+            line-height: 1.6;
+            padding: 20px;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        .container {
+            background-color: white;
+            border: 8px double var(--primary-color);
+            border-radius: 15px;
+            padding: 30px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            position: relative;
+            overflow: hidden;
+        }
+        .container::before {
+            content: '';
+            position: absolute;
+            top: -10px;
+            left: -10px;
+            right: -10px;
+            bottom: -10px;
+            border: 4px solid var(--secondary-color);
+            border-radius: 20px;
+            pointer-events: none;
+            z-index: -1;
+        }
+        header {
+            text-align: center;
+            margin-bottom: 40px;
+            padding-bottom: 20px;
+            border-bottom: 3px dashed var(--accent-color);
+        }
+        h1 {
+            color: var(--primary-color);
+            font-size: 2.8em;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 0px var(--light-color);
+        }
+        .subtitle {
+            color: var(--secondary-color);
+            font-size: 1.4em;
+            font-weight: 300;
+        }
+        h2 {
+            color: var(--accent-color);
+            border-left: 6px solid var(--secondary-color);
+            padding-left: 15px;
+            margin: 30px 0 15px;
+            font-size: 1.8em;
+        }
+        h3 {
+            color: var(--primary-color);
+            margin: 20px 0 10px;
+            font-size: 1.4em;
+        }
+        p {
+            margin-bottom: 15px;
+            text-align: justify;
+        }
+        .highlight-box {
+            background-color: var(--light-color);
+            border-left: 5px solid var(--secondary-color);
+            padding: 15px;
+            margin: 20px 0;
+            border-radius: 0 10px 10px 0;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 25px 0;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.05);
+        }
+        th, td {
+            border: 2px solid var(--border-color);
+            padding: 12px 15px;
+            text-align: left;
+        }
+        th {
+            background-color: var(--primary-color);
+            color: white;
+            font-weight: bold;
+        }
+        tr:nth-child(even) {
+            background-color: #f9f9f9;
+        }
+        tr:hover {
+            background-color: #e8f5e8;
+        }
+        ul, ol {
+            margin-left: 25px;
+            margin-bottom: 20px;
+        }
+        li {
+            margin-bottom: 8px;
+        }
+        code, pre {
+            font-family: 'Courier New', monospace;
+            background-color: #f4f4f4;
+            border-radius: 5px;
+        }
+        code {
+            padding: 2px 6px;
+            color: #d63384;
+        }
+        pre {
+            display: block;
+            padding: 20px;
+            margin: 20px 0;
+            border-left: 5px solid var(--accent-color);
+            background-color: #f8f9fa;
+            overflow-x: auto;
+            white-space: pre-wrap;
+            border-radius: 0 8px 8px 0;
+        }
+        .svg-container {
+            display: flex;
+            justify-content: center;
+            margin: 30px 0;
+        }
+        .architecture-svg {
+            width: 100%;
+            max-width: 800px;
+            height: auto;
+        }
+        .comparison {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 30px;
+            margin: 30px 0;
+        }
+        .comparison-item {
+            flex: 1;
+            min-width: 300px;
+            background: white;
+            border: 3px solid var(--accent-color);
+            border-radius: 10px;
+            padding: 20px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.05);
+        }
+        .comparison-item h4 {
+            color: var(--primary-color);
+            text-align: center;
+            margin-bottom: 15px;
+            padding-bottom: 10px;
+            border-bottom: 2px dotted var(--secondary-color);
+        }
+        footer {
+            text-align: center;
+            margin-top: 50px;
+            padding-top: 20px;
+            border-top: 3px double var(--primary-color);
+            color: #666;
+            font-size: 1.1em;
+            font-weight: bold;
+        }
+        .note {
+            background-color: #E3F2FD;
+            border: 2px solid var(--accent-color);
+            padding: 15px;
+            border-radius: 10px;
+            margin: 20px 0;
+        }
+        .keyword {
+            color: var(--primary-color);
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>SwiftUI从入门到精通</h1>
+            <div class="subtitle">第16章：场景与窗口：App协议、WindowGroup、DocumentGroup、多窗口与场景管理</div>
+        </header>
+
+        <section>
+            <p>在SwiftUI中，应用的结构和窗口管理通过全新的声明式API进行了重构。本章将深入探讨 <span class="keyword">@main</span> 应用入口、<span class="keyword">App</span> 协议、以及用于创建多窗口和文档型应用的核心组件：<span class="keyword">WindowGroup</span> 和 <span class="keyword">DocumentGroup</span>。</p>
+
+            <div class="highlight-box">
+                <strong>核心概念：</strong> SwiftUI 2.0 引入了基于场景(Scene)的应用架构，将应用分解为多个独立的界面单元，每个单元可以独立管理自己的窗口和生命周期。
+            </div>
+        </section>
+
+        <section>
+            <h2>一、App协议与 @main 入口</h2>
+            <p>SwiftUI应用从一个符合 <code>App</code> 协议的结构体开始，并使用 <code>@main</code> 属性标记为入口点。</p>
+            <pre><code>import SwiftUI
+
+@main
+struct MyFirstApp: App {
+    var body: some Scene {
+        WindowGroup {
+            ContentView()
+        }
+    }
+}</code></pre>
+            <ul>
+                <li><strong>@main</strong>: 标识应用入口点，系统会自动调用该结构体的 <code>main()</code> 方法。</li>
+                <li><strong>App协议</strong>: 要求实现一个 <code>body</code> 属性，返回一个 <code>Scene</code>。</li>
+                <li><strong>Scene</strong>: 描述应用用户界面的一部分，通常对应一个窗口或一组窗口。</li>
+            </ul>
+        </section>
+
+        <section>
+            <h2>二、WindowGroup：多窗口应用基石</h2>
+            <p><code>WindowGroup</code> 是创建支持多窗口应用的主要场景。它为其中的视图提供一个共享的“模板”，用户可以从中创建多个窗口实例。</p>
+            <pre><code>@main
+struct MultiWindowApp: App {
+    var body: some Scene {
+        WindowGroup("我的笔记") { // 设置窗口标题
+            NoteListView()
+        }
+        .commands {
+            // 添加自定义菜单命令
+            CommandMenu("笔记") {
+                Button("新建笔记") { /* 操作 */ }
+                Button("搜索") { /* 操作 */ }
+            }
+        }
+    }
+}</code></pre>
+
+            <h3>WindowGroup 的关键特性</h3>
+            <table>
+                <thead>
+                    <tr>
+                        <th>特性</th>
+                        <th>说明</th>
+                        <th>示例/备注</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>多窗口支持</td>
+                        <td>用户可通过菜单（“文件”->“新建”）或快捷键（Cmd+N）创建新窗口</td>
+                        <td>系统自动管理窗口生命周期</td>
+                    </tr>
+                    <tr>
+                        <td>场景修饰符</td>
+                        <td>可设置窗口标题、默认大小、角色等</td>
+                        <td><code>.windowStyle(.titleBar)</code>, <code>.defaultSize(width: 400, height: 300)</code></td>
+                    </tr>
+                    <tr>
+                        <td>环境共享</td>
+                        <td>同一WindowGroup内的所有窗口共享应用状态和环境对象</td>
+                        <td>通过 <code>@EnvironmentObject</code> 传递数据模型</td>
+                    </tr>
+                    <tr>
+                        <td>命令菜单</td>
+                        <td>向菜单栏添加自定义命令</td>
+                        <td>在 <code>.commands</code> 闭包中定义</td>
+                    </tr>
+                </tbody>
+            </table>
+        </section>
+
+        <section>
+            <h2>三、DocumentGroup：文档型应用</h2>
+            <p><code>DocumentGroup</code> 专为处理文档的应用设计，它自动集成文件打开、保存、版本管理等功能。</p>
+            <pre><code>import UniformTypeIdentifiers
+
+@main
+struct TextEditorApp: App {
+    var body: some Scene {
+        DocumentGroup(newDocument: TextFile()) { file in
+            TextEditorView(document: file.$document)
+        }
+    }
+}
+
+// 定义文档模型
+struct TextFile: FileDocument {
+    static var readableContentTypes: [UTType] { [.plainText] }
+    var document: String = ""
+    
+    init(configuration: ReadConfiguration) throws {
+        if let data = configuration.file.regularFileContents {
+            document = String(decoding: data, as: UTF8.self)
+        }
+    }
+    
+    func fileWrapper(configuration: WriteConfiguration) throws -> FileWrapper {
+        let data = Data(document.utf8)
+        return FileWrapper(regularFileWithContents: data)
+    }
+}</code></pre>
+
+            <div class="comparison">
+                <div class="comparison-item">
+                    <h4>WindowGroup 适用场景</h4>
+                    <ul>
+                        <li>工具类应用（计算器、日历）</li>
+                        <li>多窗口信息展示（仪表盘）</li>
+                        <li>不需要传统“文件”概念的应用</li>
+                        <li>单视图多实例应用</li>
+                    </ul>
+                </div>
+                <div class="comparison-item">
+                    <h4>DocumentGroup 适用场景</h4>
+                    <ul>
+                        <li>文本编辑器（如TextEdit）</li>
+                        <li>图像处理软件</li>
+                        <li>任何需要“打开/保存”文件的应用</li>
+                        <li>支持自动保存和版本的应用</li>
+                    </ul>
+                </div>
+            </div>
+        </section>
+
+        <section>
+            <h2>四、多窗口与场景管理</h2>
+            <p>SwiftUI 支持在单个应用中定义多个场景，实现标签页、侧边栏等复杂界面。</p>
+
+            <div class="svg-container">
+                <svg class="architecture-svg" viewBox="0 0 800 400" xmlns="http://www.w3.org/2000/svg">
+                    <rect x="10" y="50" width="780" height="300" rx="10" fill="#E8F5E9" stroke="#4CAF50" stroke-width="3"/>
+                    <text x="400" y="30" text-anchor="middle" font-size="20" font-weight="bold" fill="#2E7D32">SwiftUI 应用场景架构</text>
+                    
+                    <!-- App Level -->
+                    <rect x="50" y="80" width="700" height="60" rx="8" fill="#FFF3E0" stroke="#FF9800" stroke-width="2"/>
+                    <text x="400" y="115" text-anchor="middle" font-size="16" fill="#EF6C00">@main struct MyApp: App</text>
+                    
+                    <!-- Scenes -->
+                    <rect x="100" y="170" width="200" height="80" rx="8" fill="#E3F2FD" stroke="#2196F3" stroke-width="2"/>
+                    <text x="200" y="210" text-anchor="middle" font-size="14" fill="#1565C0">WindowGroup("主窗口")</text>
+                    
+                    <rect x="350" y="170" width="200" height="80" rx="8" fill="#E3F2FD" stroke="#2196F3" stroke-width="2"/>
+                    <text x="450" y="210" text-anchor="middle" font-size="14" fill="#1565C0">DocumentGroup</text>
+                    
+                    <rect x="500" y="270" width="200" height="80" rx="8" fill="#F3E5F5" stroke="#9C27B0" stroke-width="2"/>
+                    <text x="600" y="310" text-anchor="middle" font-size="14" fill="#7B1FA2">Settings</text>
+                    
+                    <!-- Arrows -->
+                    <line x1="400" y1="140" x2="200" y2="170" stroke="#666" stroke-width="2" marker-end="url(#arrowhead)"/>
+                    <line x1="400" y1="140" x2="450" y2="170" stroke="#666" stroke-width="2" marker-end="url(#arrowhead)"/>
+                    <line x1="400" y1="140" x2="600" y2="270" stroke="#666" stroke-width="2" marker-end="url(#arrowhead)"/>
+                    
+                    <defs>
+                        <marker id="arrowhead" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
+                            <polygon points="0 0, 10 3.5, 0 7" fill="#666"/>
+                        </marker>
+                    </defs>
+                </svg>
+            </div>
+
+            <h3>多场景配置示例</h3>
+            <pre><code>@main
+struct ProfessionalApp: App {
+    var body: some Scene {
+        // 主窗口
+        WindowGroup("工作区", id: "main-workspace") {
+            MainWorkspaceView()
+        }
+        .defaultSize(width: 1000, height: 700)
+        
+        // 辅助工具窗口
+        WindowGroup("工具面板", id: "tool-panel") {
+            ToolPanelView()
+        }
+        .defaultSize(width: 300, height: 500)
+        
+        // 文档编辑窗口
+        DocumentGroup(newDocument: SketchDocument()) { file in
+            SketchEditorView(document: file.$document)
+        }
+        
+        // 设置窗口 (macOS)
+        #if os(macOS)
+        Settings {
+            SettingsView()
+        }
+        #endif
+    }
+}</code></pre>
+
+            <div class="note">
+                <strong>提示：</strong> 通过为每个 <code>WindowGroup</code> 指定唯一的 <code>id</code>，可以更好地控制窗口的创建和恢复。系统会记住每个场景的窗口状态，并在应用重启时恢复。
+            </div>
+        </section>
+
+        <section>
+            <h2>五、场景管理最佳实践</h2>
+            <ol>
+                <li><strong>合理划分场景</strong>：将功能独立的界面单元放在不同的场景中，便于独立管理生命周期和状态。</li>
+                <li><strong>使用环境对象共享数据</strong>：对于需要在多个窗口间共享的数据，使用 <code>@EnvironmentObject</code> 或 <code>@StateObject</code>。</li>
+                <li><strong>考虑平台差异</strong>：iOS 和 macOS 在窗口管理上有显著差异，使用条件编译（<code>#if os(macOS)</code>）处理平台特定代码。</li>
+                <li><strong>利用场景恢复</strong>：系统会自动保存和恢复窗口状态，确保应用数据结构支持 <code>Codable</code> 协议以充分利用此功能。</li>
+                <li><strong>管理窗口焦点</strong>：使用 <code>@FocusedValue</code> 或 <code>@FocusedBinding</code> 来响应当前焦点窗口的变化。</li>
+            </ol>
+
+            <h3>场景生命周期管理代码示例</h3>
+            <pre><code>// 使用ScenePhase监控场景状态
+struct MyApp: App {
+    @Environment(\.scenePhase) private var scenePhase
+    
+    var body: some Scene {
+        WindowGroup {
+            ContentView()
+        }
+        .onChange(of: scenePhase) { newPhase in
+            switch newPhase {
+            case .active:
+                print("场景激活")
+            case .inactive:
+                print("场景失活")
+            case .background:
+                print("场景进入后台")
+            @unknown default:
+                break
+            }
+        }
+    }
+}</code></pre>
+        </section>
+
+        <section>
+            <h2>六、本章总结</h2>
+            <table>
+                <thead>
+                    <tr>
+                        <th>组件/概念</th>
+                        <th>核心作用</th>
+                        <th>关键点</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><strong>App协议</strong></td>
+                        <td>定义SwiftUI应用的结构和入口</td>
+                        <td>使用@main标记，返回Scene</td>
+                    </tr>
+                    <tr>
+                        <td><strong>WindowGroup</strong></td>
+                        <td>创建支持多窗口的界面场景</td>
+                        <td>自动窗口管理，共享状态，支持菜单命令</td>
+                    </tr>
+                    <tr>
+                        <td><strong>DocumentGroup</strong></td>
+                        <td>构建文档型应用</td>
+                        <td>集成文件操作，自动实现打开/保存逻辑</td>
+                    </tr>
+                    <tr>
+                        <td><strong>多场景配置</strong></td>
+                        <td>在单个应用中定义多个界面单元</td>
+                        <td>可混合使用WindowGroup、DocumentGroup、Settings等</td>
+                    </tr>
+                    <tr>
+                        <td><strong>场景管理</strong></td>
+                        <td>监控和控制场景生命周期</td>
+                        <td>使用ScenePhase，支持状态恢复，平台适配</td>
+                    </tr>
+                </tbody>
+            </table>
+            
+            <p>SwiftUI的场景系统为现代应用开发提供了强大而灵活的架构。通过 <code>WindowGroup</code> 和 <code>DocumentGroup</code>，开发者可以轻松创建从简单工具到复杂文档编辑器的各种应用，同时享受系统级的窗口管理、状态恢复和跨平台支持。</p>
+        </section>
+
+        <footer>
+            公众号: 蓝海资料掘金营，微信 deep3321
+        </footer>
+    </div>
+</body>
+</html>

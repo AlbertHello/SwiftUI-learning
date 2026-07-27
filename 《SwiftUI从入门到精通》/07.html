@@ -1,0 +1,484 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SwiftUI从入门到精通 - 表单与用户输入</title>
+    <style>
+        :root {
+            --primary-color: #4CAF50; /* 活力绿 */
+            --secondary-color: #2196F3; /* 天空蓝 */
+            --accent-color: #FF9800; /* 阳光橙 */
+            --light-color: #F5F9FC; /* 浅天蓝 */
+            --dark-color: #333333;
+            --border-color: #BBDEFB; /* 浅蓝边框 */
+            --shadow-color: rgba(0, 150, 255, 0.1);
+        }
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', 'Microsoft YaHei', sans-serif;
+        }
+        body {
+            background: linear-gradient(135deg, var(--light-color) 0%, #E8F5E9 100%); /* 浅绿渐变 */
+            color: var(--dark-color);
+            line-height: 1.6;
+            padding: 20px;
+            min-height: 100vh;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background-color: white;
+            border-radius: 20px;
+            box-shadow: 0 15px 35px var(--shadow-color);
+            border: 8px double var(--border-color);
+            overflow: hidden;
+        }
+        .header {
+            background: linear-gradient(to right, var(--primary-color), var(--secondary-color));
+            color: white;
+            padding: 40px 30px;
+            text-align: center;
+            border-bottom: 8px double white;
+        }
+        .header h1 {
+            font-size: 2.8rem;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.2);
+        }
+        .header .subtitle {
+            font-size: 1.4rem;
+            opacity: 0.9;
+        }
+        .content {
+            padding: 40px;
+        }
+        .section {
+            margin-bottom: 50px;
+            padding: 25px;
+            border-radius: 15px;
+            background-color: #f9fdff;
+            border-left: 6px solid var(--accent-color);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.05);
+            border: 2px solid var(--border-color);
+        }
+        .section h2 {
+            color: var(--secondary-color);
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 3px dotted var(--primary-color);
+            font-size: 1.8rem;
+        }
+        .section h3 {
+            color: var(--primary-color);
+            margin: 15px 0 10px;
+            font-size: 1.4rem;
+        }
+        p {
+            margin-bottom: 15px;
+            font-size: 1.05rem;
+        }
+        ul, ol {
+            padding-left: 25px;
+            margin-bottom: 20px;
+        }
+        li {
+            margin-bottom: 8px;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+            border: 3px solid var(--border-color);
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 4px 8px var(--shadow-color);
+        }
+        th {
+            background-color: var(--secondary-color);
+            color: white;
+            padding: 15px;
+            text-align: left;
+            font-weight: bold;
+        }
+        td {
+            padding: 15px;
+            border-bottom: 2px dashed var(--border-color);
+            vertical-align: top;
+        }
+        tr:nth-child(even) {
+            background-color: #f0f9ff;
+        }
+        tr:hover {
+            background-color: #e3f2fd;
+        }
+        .code-block {
+            background-color: #2d3a4b;
+            color: #e6e6e6;
+            padding: 20px;
+            border-radius: 10px;
+            margin: 20px 0;
+            overflow-x: auto;
+            border-left: 5px solid var(--accent-color);
+            font-family: 'Courier New', monospace;
+            border: 2px solid #1a2530;
+        }
+        .code-block pre {
+            white-space: pre-wrap;
+            word-wrap: break-word;
+        }
+        .inline-code {
+            background-color: #e8f4fd;
+            color: var(--secondary-color);
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-family: monospace;
+            font-weight: bold;
+            border: 1px solid var(--border-color);
+        }
+        .svg-container {
+            text-align: center;
+            margin: 30px 0;
+            padding: 20px;
+            background: white;
+            border-radius: 15px;
+            border: 3px solid var(--border-color);
+        }
+        .footer {
+            background: linear-gradient(to right, var(--primary-color), var(--secondary-color));
+            color: white;
+            text-align: center;
+            padding: 25px;
+            font-size: 1.1rem;
+            border-top: 8px double white;
+            margin-top: 30px;
+        }
+        .footer p {
+            margin-bottom: 0;
+            font-weight: bold;
+            letter-spacing: 1px;
+        }
+        .highlight {
+            background-color: #fff9c4;
+            padding: 3px 6px;
+            border-radius: 4px;
+            font-weight: bold;
+        }
+        .note {
+            background-color: #e8f5e9;
+            border-left: 5px solid var(--primary-color);
+            padding: 15px;
+            margin: 20px 0;
+            border-radius: 0 10px 10px 0;
+        }
+        .controls-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 25px;
+            margin-top: 30px;
+        }
+        .control-card {
+            background: white;
+            padding: 20px;
+            border-radius: 12px;
+            box-shadow: 0 8px 16px var(--shadow-color);
+            border: 3px solid var(--border-color);
+            transition: transform 0.3s ease;
+        }
+        .control-card:hover {
+            transform: translateY(-5px);
+        }
+        .control-card h4 {
+            color: var(--secondary-color);
+            margin-bottom: 10px;
+            font-size: 1.3rem;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header class="header">
+            <h1>SwiftUI 从入门到精通</h1>
+            <div class="subtitle">第7章：表单与用户输入</div>
+            <div class="subtitle">Form、TextField、SecureField、TextEditor、Toggle、Picker、Slider、Stepper</div>
+        </header>
+
+        <main class="content">
+            <section class="section">
+                <h2>📝 章节概述</h2>
+                <p>在移动应用开发中，<span class="highlight">表单</span>是与用户进行交互、收集信息的关键组件。SwiftUI 提供了一系列强大、声明式的表单控件，让开发者能够轻松构建美观、响应式的用户输入界面。本章将深入讲解这些核心控件，并通过实例展示如何将它们组合起来创建功能完整的表单。</p>
+                <p>所有控件都遵循 SwiftUI 的声明式语法和状态驱动原则，通过 <span class="inline-code">@State</span>、<span class="inline-code">@Binding</span> 等属性包装器管理数据流。</p>
+
+                <div class="svg-container">
+                    <svg width="100%" height="200" xmlns="http://www.w3.org/2000/svg">
+                        <defs>
+                            <linearGradient id="grad1" x1="0%" y1="0%" x2="100%" y2="0%">
+                                <stop offset="0%" style="stop-color:#4CAF50;stop-opacity:1" />
+                                <stop offset="100%" style="stop-color:#2196F3;stop-opacity:1" />
+                            </linearGradient>
+                        </defs>
+                        <rect x="10" y="80" width="90%" height="60" rx="15" fill="url(#grad1)" stroke="#1565C0" stroke-width="3"/>
+                        <text x="50%" y="120" text-anchor="middle" fill="white" font-family="Arial" font-size="18" font-weight="bold">SwiftUI 表单控件架构</text>
+                        <circle cx="20%" cy="40" r="15" fill="#FF9800"/>
+                        <text x="20%" y="45" text-anchor="middle" fill="white" font-family="Arial" font-size="12">用户</text>
+                        <path d="M20% 55 Q30% 70, 40% 80" stroke="#FF9800" stroke-width="2" fill="none"/>
+                        <rect x="35%" y="75" width="15%" height="40" rx="5" fill="#E3F2FD" stroke="#2196F3" stroke-width="2"/>
+                        <text x="42.5%" y="100" text-anchor="middle" fill="#2196F3" font-family="Arial" font-size="14">控件</text>
+                        <path d="M50% 115 Q60% 130, 70% 140" stroke="#2196F3" stroke-width="2" fill="none"/>
+                        <circle cx="75%" cy="150" r="15" fill="#4CAF50"/>
+                        <text x="75%" y="155" text-anchor="middle" fill="white" font-family="Arial" font-size="12">@State</text>
+                        <path d="M75% 165 Q75% 180, 60% 190" stroke="#4CAF50" stroke-width="2" fill="none"/>
+                        <rect x="50%" y="185" width="15%" height="40" rx="5" fill="#F1F8E9" stroke="#4CAF50" stroke-width="2"/>
+                        <text x="57.5%" y="210" text-anchor="middle" fill="#4CAF50" font-family="Arial" font-size="14">视图</text>
+                    </svg>
+                    <p style="margin-top: 10px; color: #666;"><em>数据流：用户操作 → 控件 → @State 状态 → 视图更新</em></p>
+                </div>
+            </section>
+
+            <section class="section">
+                <h2>📋 核心控件详解</h2>
+                <p>下面表格列出了本章要讲解的所有核心表单控件及其主要用途：</p>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>控件名称</th>
+                            <th>图标</th>
+                            <th>主要用途</th>
+                            <th>关键属性/修饰符</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><strong>Form</strong></td>
+                            <td>📑</td>
+                            <td>表单容器，自动适配平台样式，对控件进行分组和布局。</td>
+                            <td><span class="inline-code">.formStyle()</span>, <span class="inline-code">Section</span></td>
+                        </tr>
+                        <tr>
+                            <td><strong>TextField</strong></td>
+                            <td>✏️</td>
+                            <td>单行文本输入框，用于输入用户名、搜索词等。</td>
+                            <td><span class="inline-code">text:</span>, <span class="inline-code">placeholder:</span>, <span class="inline-code">.textFieldStyle()</span></td>
+                        </tr>
+                        <tr>
+                            <td><strong>SecureField</strong></td>
+                            <td>🔒</td>
+                            <td>安全文本输入框，用于输入密码等敏感信息，内容隐藏。</td>
+                            <td>同 TextField，但内容掩码显示。</td>
+                        </tr>
+                        <tr>
+                            <td><strong>TextEditor</strong></td>
+                            <td>📄</td>
+                            <td>多行文本编辑区域，用于输入长文本、备注等。</td>
+                            <td><span class="inline-code">text:</span>, <span class="inline-code">.frame(minHeight:)</span></td>
+                        </tr>
+                        <tr>
+                            <td><strong>Toggle</strong></td>
+                            <td>🔘</td>
+                            <td>开关控件，用于布尔值选择（开/关）。</td>
+                            <td><span class="inline-code">isOn:</span>, <span class="inline-code">.toggleStyle()</span></td>
+                        </tr>
+                        <tr>
+                            <td><strong>Picker</strong></td>
+                            <td>📌</td>
+                            <td>选择器，用于从一组选项中选择一个值。</td>
+                            <td><span class="inline-code">selection:</span>, <span class="inline-code">.pickerStyle()</span></td>
+                        </tr>
+                        <tr>
+                            <td><strong>Slider</strong></td>
+                            <td>🎚️</td>
+                            <td>滑块，用于在一个范围内选择连续数值。</td>
+                            <td><span class="inline-code">value:in:</span>, <span class="inline-code">step:</span></td>
+                        </tr>
+                        <tr>
+                            <td><strong>Stepper</strong></td>
+                            <td>🔢</td>
+                            <td>步进器，用于以固定步长增加或减少数值。</td>
+                            <td><span class="inline-code">value:in:step:</span>, <span class="inline-code">onIncrement/decrement:</span></td>
+                        </tr>
+                    </tbody>
+                </table>
+            </section>
+
+            <section class="section">
+                <h2>🧩 控件使用示例与代码</h2>
+                <p>让我们通过一个综合的注册表单示例，来学习这些控件的具体用法。我们将创建一个包含多种输入控件的界面。</p>
+
+                <div class="code-block">
+                    <pre><code>import SwiftUI
+
+struct RegistrationFormView: View {
+    // 1. 使用 @State 管理表单数据
+    @State private var username: String = ""
+    @State private var password: String = ""
+    @State private var bio: String = "请输入个人简介..."
+    @State private var receiveNotifications: Bool = true
+    @State private var selectedColorIndex: Int = 0
+    @State private var brightness: Double = 0.5
+    @State private var age: Int = 18
+
+    let colorOptions = ["红色", "蓝色", "绿色", "黄色"]
+
+    var body: some View {
+        // 2. Form 作为容器
+        Form {
+            Section(header: Text("账户信息").font(.headline)) {
+                // 3. TextField 输入用户名
+                TextField("请输入用户名", text: $username)
+                    .textFieldStyle(RoundedBorderTextFieldStyle())
+                    .autocapitalization(.none)
+
+                // 4. SecureField 输入密码
+                SecureField("请输入密码", text: $password)
+                    .textFieldStyle(RoundedBorderTextFieldStyle())
+
+                // 5. Toggle 开关
+                Toggle("接收通知", isOn: $receiveNotifications)
+                    .toggleStyle(SwitchToggleStyle(tint: .blue))
+            }
+
+            Section(header: Text("个人资料").font(.headline)) {
+                // 6. Picker 选择颜色
+                Picker("最喜欢的颜色", selection: $selectedColorIndex) {
+                    ForEach(0 ..< colorOptions.count, id: \.self) { index in
+                        Text(colorOptions[index]).tag(index)
+                    }
+                }
+                .pickerStyle(MenuPickerStyle())
+
+                // 7. Slider 调整亮度
+                HStack {
+                    Text("界面亮度")
+                    Slider(value: $brightness, in: 0...1, step: 0.1)
+                    Text("\(brightness, specifier: "%.1f")")
+                }
+
+                // 8. Stepper 选择年龄
+                Stepper(value: $age, in: 0...120, step: 1) {
+                    Text("年龄: \(age)")
+                }
+
+                // 9. TextEditor 输入简介
+                Text("个人简介")
+                    .font(.headline)
+                TextEditor(text: $bio)
+                    .frame(minHeight: 100)
+                    .border(Color.gray.opacity(0.3), width: 1)
+                    .cornerRadius(5)
+            }
+
+            Section {
+                Button(action: submitForm) {
+                    HStack {
+                        Image(systemName: "paperplane.fill")
+                        Text("提交注册")
+                            .fontWeight(.bold)
+                    }
+                    .frame(maxWidth: .infinity)
+                }
+                .buttonStyle(.borderedProminent)
+                .controlSize(.large)
+                .disabled(username.isEmpty || password.isEmpty) // 简单验证
+            }
+        }
+        .navigationTitle("用户注册")
+        .padding()
+    }
+
+    func submitForm() {
+        print("提交数据：")
+        print("用户名: \(username)")
+        print("密码长度: \(password.count)")
+        print("颜色: \(colorOptions[selectedColorIndex])")
+        print("年龄: \(age)")
+        // 实际开发中，这里会发送网络请求
+    }
+}
+
+// 预览
+struct RegistrationFormView_Previews: PreviewProvider {
+    static var previews: some View {
+        RegistrationFormView()
+    }
+}</code></pre>
+                </div>
+
+                <div class="note">
+                    <strong>💡 关键知识点：</strong>
+                    <ul>
+                        <li><span class="inline-code">@State</span>：用于声明视图内部的可变状态，当状态改变时，视图会自动更新。</li>
+                        <li><span class="inline-code">$</span>（美元符号）：前缀用于创建与状态变量的双向绑定（Binding），将控件与数据源连接起来。</li>
+                        <li><span class="inline-code">Form</span> 和 <span class="inline-code">Section</span>：用于逻辑分组，提升表单的可读性和可访问性。</li>
+                        <li>每个控件都有丰富的修饰符（如 <span class="inline-code">.pickerStyle()</span>）用于自定义外观和行为。</li>
+                    </ul>
+                </div>
+            </section>
+
+            <section class="section">
+                <h2>🎨 控件视觉展示与特性</h2>
+                <div class="controls-grid">
+                    <div class="control-card">
+                        <h4>📑 Form & Section</h4>
+                        <p><strong>作用：</strong>表单容器与分组。</p>
+                        <p><strong>特性：</strong>自动适配 iOS/macOS 平台样式，提供清晰的视觉分隔。</p>
+                    </div>
+                    <div class="control-card">
+                        <h4>✏️ TextField</h4>
+                        <p><strong>作用：</strong>单行文本输入。</p>
+                        <p><strong>特性：</strong>支持占位符、键盘类型、自动校正等。</p>
+                    </div>
+                    <div class="control-card">
+                        <h4>🔒 SecureField</h4>
+                        <p><strong>作用：</strong>安全密码输入。</p>
+                        <p><strong>特性：</strong>输入内容显示为圆点，保护隐私。</p>
+                    </div>
+                    <div class="control-card">
+                        <h4>📄 TextEditor</h4>
+                        <p><strong>作用：</strong>多行文本编辑。</p>
+                        <p><strong>特性：</strong>可滚动，适合长文本。</p>
+                    </div>
+                    <div class="control-card">
+                        <h4>🔘 Toggle</h4>
+                        <p><strong>作用：</strong>布尔开关。</p>
+                        <p><strong>特性：</strong>多种样式（Switch, Button, Checkbox）。</p>
+                    </div>
+                    <div class="control-card">
+                        <h4>📌 Picker</h4>
+                        <p><strong>作用：</strong>从列表中选择。</p>
+                        <p><strong>特性：</strong>支持 Wheel, Segmented, Menu 等样式。</p>
+                    </div>
+                    <div class="control-card">
+                        <h4>🎚️ Slider</h4>
+                        <p><strong>作用：</strong>连续值选择。</p>
+                        <p><strong>特性：</strong>可定义范围、步长、最小/最大标签。</p>
+                    </div>
+                    <div class="control-card">
+                        <h4>🔢 Stepper</h4>
+                        <p><strong>作用：</strong>离散值步进。</p>
+                        <p><strong>特性：</strong>可自定义增减操作和范围。</p>
+                    </div>
+                </div>
+            </section>
+
+            <section class="section">
+                <h2>✅ 最佳实践与总结</h2>
+                <ol>
+                    <li><strong>状态管理是核心：</strong>始终使用 <span class="inline-code">@State</span>, <span class="inline-code">@Binding</span>, <span class="inline-code">@ObservedObject</span> 等属性包装器来管理表单数据，确保 UI 与数据同步。</li>
+                    <li><strong>合理分组：</strong>使用 <span class="inline-code">Form</span> 和 <span class="inline-code">Section</span> 将相关控件分组，使表单结构清晰，提升用户体验。</li>
+                    <li><strong>即时验证：</strong>利用 <span class="inline-code">.disabled()</span> 修饰符或条件语句，在用户输入时提供即时反馈（如提交按钮的禁用状态）。</li>
+                    <li><strong>平台适配：</strong>注意不同控件在 iOS、macOS 上的默认样式差异，使用 <span class="inline-code">.pickerStyle()</span> 等修饰符进行适当调整。</li>
+                    <li><strong>辅助功能：</strong>为控件添加 <span class="inline-code">.accessibilityLabel()</span> 等修饰符，确保应用对屏幕阅读器等辅助工具友好。</li>
+                </ol>
+                <p>通过本章的学习，你已经掌握了 SwiftUI 中构建交互式表单所需的所有基本控件。将它们组合起来，你可以创建出从简单的设置页面到复杂的数据录入界面等各种功能。</p>
+            </section>
+        </main>
+
+        <footer class="footer">
+            <p>公众号: 蓝海资料掘金营，微信 deep3321</p>
+            <p>© SwiftUI从入门到精通课程 - 第7章：表单与用户输入</p>
+        </footer>
+    </div>
+</body>
+</html>

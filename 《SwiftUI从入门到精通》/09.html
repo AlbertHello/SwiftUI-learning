@@ -1,0 +1,640 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SwiftUI从入门到精通 - 第9章：高级动画</title>
+    <style>
+        :root {
+            --primary-color: #FF9E3D; /* 活力橙 */
+            --secondary-color: #36B5B0; /* 清新青 */
+            --accent-color: #FF6B8B; /* 甜美粉 */
+            --light-color: #FFF9C4; /* 柔和黄 */
+            --dark-color: #5D6D97; /* 沉稳蓝 */
+            --text-color: #333333;
+            --bg-color: #F5F7FA;
+            --border-color: var(--primary-color);
+        }
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', 'Microsoft YaHei', sans-serif;
+        }
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            line-height: 1.6;
+            padding: 20px;
+            background-image: 
+                radial-gradient(circle at 10% 20%, rgba(255, 158, 61, 0.05) 0%, transparent 20%),
+                radial-gradient(circle at 90% 80%, rgba(54, 181, 176, 0.05) 0%, transparent 20%);
+        }
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background-color: white;
+            border: 3px double var(--border-color);
+            border-radius: 20px;
+            box-shadow: 0 15px 35px rgba(93, 109, 151, 0.15);
+            overflow: hidden;
+            position: relative;
+        }
+        .container::before {
+            content: '';
+            position: absolute;
+            top: 5px;
+            left: 5px;
+            right: 5px;
+            bottom: 5px;
+            border: 2px dashed var(--secondary-color);
+            border-radius: 15px;
+            pointer-events: none;
+            z-index: 0;
+        }
+        .content {
+            position: relative;
+            z-index: 1;
+            padding: 40px;
+            background-color: white;
+        }
+        header {
+            text-align: center;
+            padding: 30px 20px;
+            background: linear-gradient(135deg, var(--primary-color), var(--accent-color));
+            color: white;
+            margin-bottom: 30px;
+            border-bottom: 5px solid var(--light-color);
+        }
+        h1 {
+            font-size: 2.8rem;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.2);
+        }
+        .chapter-title {
+            font-size: 1.8rem;
+            color: var(--dark-color);
+            background-color: var(--light-color);
+            display: inline-block;
+            padding: 10px 25px;
+            border-radius: 50px;
+            margin-top: 10px;
+            border: 2px solid var(--primary-color);
+        }
+        h2 {
+            color: var(--secondary-color);
+            border-left: 6px solid var(--accent-color);
+            padding-left: 15px;
+            margin: 40px 0 20px;
+            font-size: 1.8rem;
+        }
+        h3 {
+            color: var(--dark-color);
+            margin: 25px 0 15px;
+            font-size: 1.4rem;
+            padding-bottom: 8px;
+            border-bottom: 2px dotted var(--secondary-color);
+        }
+        p {
+            margin-bottom: 20px;
+            font-size: 1.1rem;
+        }
+        .highlight-box {
+            background-color: #FFF9F0;
+            border-left: 5px solid var(--primary-color);
+            padding: 20px;
+            margin: 25px 0;
+            border-radius: 0 10px 10px 0;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.03);
+        }
+        .code-block {
+            background-color: #2D2D2D;
+            color: #F8F8F2;
+            padding: 20px;
+            border-radius: 10px;
+            margin: 25px 0;
+            overflow-x: auto;
+            border: 2px solid var(--dark-color);
+            font-family: 'Menlo', 'Monaco', 'Courier New', monospace;
+        }
+        pre {
+            white-space: pre-wrap;
+            word-wrap: break-word;
+            line-height: 1.5;
+        }
+        .keyword { color: #FF79C6; }
+        .type { color: #8BE9FD; }
+        .string { color: #F1FA8C; }
+        .comment { color: #6272A4; }
+        .func { color: #50FA7B; }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 25px 0;
+            border: 2px solid var(--secondary-color);
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.05);
+        }
+        th {
+            background-color: var(--secondary-color);
+            color: white;
+            padding: 15px;
+            text-align: left;
+            font-weight: 600;
+        }
+        td {
+            padding: 15px;
+            border-bottom: 1px solid #E0E0E0;
+        }
+        tr:nth-child(even) {
+            background-color: #F9FDFC;
+        }
+        tr:hover {
+            background-color: #E8F6F5;
+        }
+        ul, ol {
+            padding-left: 30px;
+            margin: 20px 0;
+        }
+        li {
+            margin-bottom: 10px;
+            font-size: 1.1rem;
+        }
+        .svg-container {
+            display: flex;
+            justify-content: center;
+            margin: 30px 0;
+        }
+        .architecture-diagram {
+            width: 100%;
+            max-width: 800px;
+            height: auto;
+            margin: 30px auto;
+            display: block;
+        }
+        .comparison {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 30px;
+            margin: 30px 0;
+        }
+        .comparison-item {
+            flex: 1;
+            min-width: 300px;
+            background: linear-gradient(to bottom right, #FFF, #F0F9FF);
+            padding: 25px;
+            border-radius: 15px;
+            border: 2px solid var(--dark-color);
+            box-shadow: 0 8px 20px rgba(0,0,0,0.08);
+        }
+        footer {
+            text-align: center;
+            padding: 30px;
+            margin-top: 50px;
+            background: linear-gradient(to right, var(--dark-color), var(--secondary-color));
+            color: white;
+            font-size: 1.2rem;
+            font-weight: bold;
+            letter-spacing: 1px;
+            border-top: 5px solid var(--light-color);
+        }
+        .tip {
+            background-color: #E8F5E9;
+            border: 2px solid #4CAF50;
+            border-radius: 10px;
+            padding: 15px;
+            margin: 20px 0;
+            display: flex;
+            align-items: flex-start;
+        }
+        .tip::before {
+            content: '💡';
+            font-size: 1.5rem;
+            margin-right: 15px;
+        }
+        .note {
+            background-color: #FFF3E0;
+            border: 2px solid #FF9800;
+            border-radius: 10px;
+            padding: 15px;
+            margin: 20px 0;
+            display: flex;
+            align-items: flex-start;
+        }
+        .note::before {
+            content: '📝';
+            font-size: 1.5rem;
+            margin-right: 15px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>SwiftUI从入门到精通</h1>
+            <div class="chapter-title">第9章：高级动画</div>
+            <p style="margin-top: 20px; color: rgba(255,255,255,0.9); font-size: 1.2rem;">Animatable协议、GeometryEffect、自定义动画与复杂动画效果实现</p>
+        </header>
+
+        <div class="content">
+            <section>
+                <h2>本章导读</h2>
+                <p>在前面的章节中，我们已经学习了SwiftUI的基础动画和过渡效果。本章将深入探讨SwiftUI的高级动画机制，让你能够创建更复杂、更精细、更独特的动画效果。我们将从<strong>Animatable协议</strong>开始，理解SwiftUI动画的底层原理，然后学习<strong>GeometryEffect</strong>这一强大的几何变换工具，最后综合运用这些知识实现自定义动画和复杂动画效果。</p>
+                
+                <div class="highlight-box">
+                    <strong>学习目标：</strong>
+                    <ul>
+                        <li>掌握Animatable协议的工作原理和实现方法</li>
+                        <li>理解并能够使用GeometryEffect创建几何变换动画</li>
+                        <li>学会创建自定义动画曲线和动画类型</li>
+                        <li>能够组合多种动画技术实现复杂的视觉效果</li>
+                        <li>理解动画性能优化和最佳实践</li>
+                    </ul>
+                </div>
+            </section>
+
+            <section>
+                <h2>一、Animatable协议：动画的数学核心</h2>
+                <p>Animatable协议是SwiftUI动画系统的数学基础。任何遵循此协议的类型都可以被动画化，因为它定义了如何对值进行插值计算。</p>
+                
+                <h3>1.1 协议定义与原理</h3>
+                <p>Animatable协议非常简单，只要求一个计算属性：</p>
+                
+                <div class="code-block">
+<pre><span class="keyword">public protocol</span> <span class="type">Animatable</span> {
+    <span class="keyword">var</span> animatableData: <span class="type">Self</span>.<span class="type">AnimatableData</span> { <span class="keyword">get set</span> }
+}
+
+<span class="keyword">public protocol</span> <span class="type">VectorArithmetic</span>: <span class="type">AdditiveArithmetic</span> {
+    <span class="keyword">func</span> <span class="func">scale</span>(by rhs: <span class="type">Double</span>)
+    <span class="keyword">var</span> magnitudeSquared: <span class="type">Double</span> { <span class="keyword">get</span> }
+}</pre>
+                </div>
+                
+                <div class="tip">
+                    <strong>核心概念：</strong> AnimatableData必须遵循VectorArithmetic协议，这意味着它必须支持加、减、缩放等数学运算，这样SwiftUI才能在两个值之间进行平滑的插值计算。
+                </div>
+                
+                <h3>1.2 实现自定义Animatable</h3>
+                <p>让我们创建一个自定义的形状，实现Animatable协议：</p>
+                
+                <div class="code-block">
+<pre><span class="keyword">struct</span> <span class="type">WavyRectangle</span>: <span class="type">Shape</span> {
+    <span class="keyword">var</span> waveOffset: <span class="type">Double</span>  <span class="comment">// 波浪偏移量</span>
+    <span class="keyword">var</span> amplitude: <span class="type">Double</span>   <span class="comment">// 振幅</span>
+    <span class="keyword">var</span> frequency: <span class="type">Double</span>   <span class="comment">// 频率</span>
+    
+    <span class="keyword">var</span> animatableData: <span class="type">AnimatablePair</span>&lt;<span class="type">Double</span>, <span class="type">AnimatablePair</span>&lt;<span class="type">Double</span>, <span class="type">Double</span>&gt;&gt; {
+        <span class="keyword">get</span> {
+            <span class="type">AnimatablePair</span>(waveOffset, <span class="type">AnimatablePair</span>(amplitude, frequency))
+        }
+        <span class="keyword">set</span> {
+            waveOffset = newValue.first
+            amplitude = newValue.second.first
+            frequency = newValue.second.second
+        }
+    }
+    
+    <span class="keyword">func</span> <span class="func">path</span>(in rect: <span class="type">CGRect</span>) -&gt; <span class="type">Path</span> {
+        <span class="keyword">var</span> path = <span class="type">Path</span>()
+        <span class="keyword">let</span> width = rect.width
+        <span class="keyword">let</span> height = rect.height
+        
+        <span class="comment">// 移动到起点</span>
+        path.move(to: <span class="type">CGPoint</span>(x: <span class="number">0</span>, y: height / <span class="number">2</span>))
+        
+        <span class="comment">// 绘制波浪线</span>
+        <span class="keyword">for</span> x <span class="keyword">in</span> stride(from: <span class="number">0</span>, through: width, by: <span class="number">1</span>) {
+            <span class="keyword">let</span> relativeX = x / width
+            <span class="keyword">let</span> y = height / <span class="number">2</span> + sin(relativeX * frequency * .pi * <span class="number">2</span> + waveOffset) * amplitude
+            path.addLine(to: <span class="type">CGPoint</span>(x: x, y: y))
+        }
+        
+        <span class="comment">// 闭合路径</span>
+        path.addLine(to: <span class="type">CGPoint</span>(x: width, y: height))
+        path.addLine(to: <span class="type">CGPoint</span>(x: <span class="number">0</span>, y: height))
+        path.closeSubpath()
+        
+        <span class="keyword">return</span> path
+    }
+}</pre>
+                </div>
+                
+                <div class="note">
+                    <strong>注意：</strong> 当有多个动画属性时，可以使用AnimatablePair、AnimatableTriplet或创建自定义的VectorArithmetic类型来组合它们。
+                </div>
+            </section>
+
+            <section>
+                <h2>二、GeometryEffect：几何变换的利器</h2>
+                <p>GeometryEffect协议允许你创建可以应用于任何视图的几何变换效果，并且这些效果可以被动画化。</p>
+                
+                <h3>2.1 GeometryEffect协议解析</h3>
+                
+                <div class="code-block">
+<pre><span class="keyword">protocol</span> <span class="type">GeometryEffect</span>: <span class="type">Animatable</span>, <span class="type">ViewModifier</span> {
+    <span class="keyword">func</span> <span class="func">effectValue</span>(size: <span class="type">CGSize</span>) -&gt; <span class="type">ProjectionTransform</span>
+}</pre>
+                </div>
+                
+                <div class="comparison">
+                    <div class="comparison-item">
+                        <h3>关键特性</h3>
+                        <ul>
+                            <li>同时遵循Animatable和ViewModifier协议</li>
+                            <li>可以修改视图的几何属性</li>
+                            <li>支持动画过渡</li>
+                            <li>可以组合使用</li>
+                            <li>性能高效</li>
+                        </ul>
+                    </div>
+                    <div class="comparison-item">
+                        <h3>常见用途</h3>
+                        <ul>
+                            <li>2D/3D旋转</li>
+                            <li>缩放和倾斜</li>
+                            <li>透视变换</li>
+                            <li>自定义扭曲效果</li>
+                            <li>路径跟随动画</li>
+                        </ul>
+                    </div>
+                </div>
+                
+                <h3>2.2 创建自定义GeometryEffect</h3>
+                <p>实现一个跳跃效果：</p>
+                
+                <div class="code-block">
+<pre><span class="keyword">struct</span> <span class="type">JumpEffect</span>: <span class="type">GeometryEffect</span> {
+    <span class="keyword">var</span> height: <span class="type">CGFloat</span>  <span class="comment">// 跳跃高度</span>
+    <span class="keyword">var</span> phase: <span class="type">CGFloat</span>   <span class="comment">// 相位 (0-1)</span>
+    
+    <span class="keyword">var</span> animatableData: <span class="type">AnimatablePair</span>&lt;<span class="type">CGFloat</span>, <span class="type">CGFloat</span>&gt; {
+        <span class="keyword">get</span> { <span class="type">AnimatablePair</span>(height, phase) }
+        <span class="keyword">set</span> {
+            height = newValue.first
+            phase = newValue.second
+        }
+    }
+    
+    <span class="keyword">func</span> <span class="func">effectValue</span>(size: <span class="type">CGSize</span>) -&gt; <span class="type">ProjectionTransform</span> {
+        <span class="comment">// 计算跳跃曲线 (抛物线)</span>
+        <span class="keyword">let</span> jumpHeight = -abs(sin(phase * .pi * <span class="number">2</span>)) * height
+        
+        <span class="comment">// 创建变换矩阵</span>
+        <span class="keyword">var</span> transform = <span class="type">CGAffineTransform</span>(translationX: <span class="number">0</span>, y: jumpHeight)
+        
+        <span class="comment">// 添加轻微旋转模拟真实跳跃</span>
+        <span class="keyword">let</span> rotation = sin(phase * .pi * <span class="number">2</span>) * <span class="number">5</span>  <span class="comment">// ±5度</span>
+        transform = transform.rotated(by: rotation * .pi / <span class="number">180</span>)
+        
+        <span class="keyword">return</span> <span class="type">ProjectionTransform</span>(transform)
+    }
+}
+
+<span class="comment">// 使用示例</span>
+<span class="keyword">struct</span> <span class="type">JumpingView</span>: <span class="type">View</span> {
+    <span class="keyword">@State private var</span> isJumping = <span class="keyword">false</span>
+    
+    <span class="keyword">var</span> body: <span class="keyword">some</span> <span class="type">View</span> {
+        <span class="type">Circle</span>()
+            .fill(<span class="type">Color</span>.<span class="type">orange</span>)
+            .frame(width: <span class="number">100</span>, height: <span class="number">100</span>)
+            .modifier(<span class="type">JumpEffect</span>(
+                height: isJumping ? <span class="number">50</span> : <span class="number">0</span>,
+                phase: isJumping ? <span class="number">1</span> : <span class="number">0</span>
+            ))
+            .onTapGesture {
+                <span class="keyword">withAnimation</span>(.<span class="type">spring</span>(response: <span class="number">0.5</span>, dampingFraction: <span class="number">0.3</span>)) {
+                    isJumping.toggle()
+                }
+            }
+    }
+}</pre>
+                </div>
+            </section>
+
+            <section>
+                <h2>三、自定义动画曲线</h2>
+                <p>SwiftUI允许你创建自定义的动画时间曲线，实现独特的动画节奏。</p>
+                
+                <h3>3.1 实现Animation协议</h3>
+                
+                <div class="code-block">
+<pre><span class="keyword">struct</span> <span class="type">BounceAnimation</span>: <span class="type">CustomAnimation</span> {
+    <span class="keyword">let</span> duration: <span class="type">TimeInterval</span>
+    <span class="keyword">let</span> bounces: <span class="type">Int</span>
+    
+    <span class="keyword">func</span> <span class="func">animate</span>(value: <span class="type">Double</span>, time: <span class="type">TimeInterval</span>) -&gt; <span class="type">Double</span>? {
+        <span class="keyword">let</span> progress = time / duration
+        
+        <span class="keyword">guard</span> progress &gt;= <span class="number">0</span> &amp;&amp; progress &lt;= <span class="number">1</span> <span class="keyword">else</span> { <span class="keyword">return nil</span> }
+        
+        <span class="comment">// 弹性曲线公式</span>
+        <span class="keyword">let</span> decay = exp(-<span class="number">3.0</span> * progress)
+        <span class="keyword">let</span> oscillation = sin(progress * .pi * <span class="number">2</span> * <span class="type">Double</span>(bounces))
+        
+        <span class="keyword">return</span> <span class="number">1</span> - decay * (<span class="number">1</span> - progress) * (<span class="number">1</span> + oscillation * <span class="number">0.3</span>)
+    }
+    
+    <span class="keyword">var</span> velocity: <span class="type">Double</span> { <span class="number">1.0</span> / duration }
+}
+
+<span class="comment">// 扩展以便使用</span>
+<span class="keyword">extension</span> <span class="type">Animation</span> {
+    <span class="keyword">static var</span> bounce: <span class="type">Animation</span> {
+        .timingCurve(<span class="number">0.68</span>, -<span class="number">0.6</span>, <span class="number">0.32</span>, <span class="number">1.6</span>, duration: <span class="number">0.8</span>)
+    }
+    
+    <span class="keyword">static func</span> <span class="func">customBounce</span>(duration: <span class="type">TimeInterval</span> = <span class="number">0.8</span>, bounces: <span class="type">Int</span> = <span class="number">3</span>) -&gt; <span class="type">Animation</span> {
+        .timingCurve(<span class="number">0.68</span>, -<span class="number">0.6</span>, <span class="number">0.32</span>, <span class="number">1.6</span>, duration: duration)
+    }
+}</pre>
+                </div>
+                
+                <h3>3.2 动画曲线对比</h3>
+                
+                <table>
+                    <thead>
+                        <tr>
+                            <th>动画类型</th>
+                            <th>曲线特征</th>
+                            <th>适用场景</th>
+                            <th>代码示例</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><strong>线性</strong></td>
+                            <td>匀速运动</td>
+                            <td>进度条、机械运动</td>
+                            <td><code>.linear(duration: 1)</code></td>
+                        </tr>
+                        <tr>
+                            <td><strong>缓入缓出</strong></td>
+                            <td>慢-快-慢</td>
+                            <td>自然物体运动</td>
+                            <td><code>.easeInOut(duration: 1)</code></td>
+                        </tr>
+                        <tr>
+                            <td><strong>弹簧</strong></td>
+                            <td>弹性振荡</td>
+                            <td>活泼的交互反馈</td>
+                            <td><code>.spring()</code></td>
+                        </tr>
+                        <tr>
+                            <td><strong>自定义</strong></td>
+                            <td>完全可控</td>
+                            <td>特殊视觉效果</td>
+                            <td><code>.timingCurve(0.5, 0, 0.5, 1)</code></td>
+                        </tr>
+                    </tbody>
+                </table>
+            </section>
+
+            <section>
+                <h2>四、复杂动画效果实现</h2>
+                <p>结合前面所学，实现一个综合的复杂动画示例。</p>
+                
+                <h3>4.1 粒子系统动画</h3>
+                
+                <div class="code-block">
+<pre><span class="keyword">struct</span> <span class="type">ParticleSystemView</span>: <span class="type">View</span> {
+    <span class="keyword">@State private var</span> isActive = <span class="keyword">false</span>
+    <span class="keyword">let</span> particleCount = <span class="number">50</span>
+    
+    <span class="keyword">var</span> body: <span class="keyword">some</span> <span class="type">View</span> {
+        <span class="type">ZStack</span> {
+            <span class="comment">// 背景</span>
+            <span class="type">RoundedRectangle</span>(cornerRadius: <span class="number">20</span>)
+                .fill(<span class="type">LinearGradient</span>(
+                    gradient: <span class="type">Gradient</span>(colors: [.<span class="type">blue</span>, .<span class="type">purple</span>]),
+                    startPoint: .topLeading,
+                    endPoint: .bottomTrailing
+                ))
+                .frame(width: <span class="number">300</span>, height: <span class="number">300</span>)
+            
+            <span class="comment">// 粒子</span>
+            <span class="type">ForEach</span>(<span class="number">0</span>..&lt;particleCount, id: \.<span class="keyword">self</span>) { index <span class="keyword">in</span>
+                <span class="type">ParticleView</span>(index: index, isActive: isActive)
+            }
+            
+            <span class="comment">// 控制按钮</span>
+            <span class="type">Button</span>(action: {
+                <span class="keyword">withAnimation</span>(.<span class="type">easeInOut</span>(duration: <span class="number">2</span>)) {
+                    isActive.toggle()
+                }
+            }) {
+                <span class="type">Text</span>(isActive ? <span class="string">"停止粒子"</span> : <span class="string">"启动粒子"</span>)
+                    .font(.headline)
+                    .foregroundColor(.white)
+                    .padding()
+                    .background(<span class="type">Capsule</span>().fill(<span class="type">Color</span>.<span class="type">orange</span>))
+            }
+            .offset(y: <span class="number">130</span>)
+        }
+    }
+}
+
+<span class="keyword">struct</span> <span class="type">ParticleView</span>: <span class="type">View</span> {
+    <span class="keyword">let</span> index: <span class="type">Int</span>
+    <span class="keyword">let</span> isActive: <span class="type">Bool</span>
+    
+    <span class="keyword">@State private var</span> scale: <span class="type">CGFloat</span> = <span class="number">0</span>
+    <span class="keyword">@State private</span> opacity: <span class="type">Double</span> = <span class="number">0</span>
+    
+    <span class="keyword">var</span> body: <span class="keyword">some</span> <span class="type">View</span> {
+        <span class="type">Circle</span>()
+            .fill(<span class="type">Color</span>.<span class="type">white</span>)
+            .frame(width: <span class="number">8</span>, height: <span class="number">8</span>)
+            .scaleEffect(scale)
+            .opacity(opacity)
+            .modifier(<span class="type">ParticleMotionEffect</span>(
+                index: index,
+                isActive: isActive
+            ))
+            .onAppear {
+                <span class="keyword">let</span> delay = <span class="type">Double</span>(index) * <span class="number">0.02</span>
+                
+                <span class="keyword">withAnimation</span>(.<span class="type">spring</span>(response: <span class="number">0.6</span>, dampingFraction: <span class="number">0.5</span>)
+                    .delay(delay)) {
+                    scale = isActive ? <span class="number">1</span> : <span class="number">0</span>
+                    opacity = isActive ? <span class="number">1</span> : <span class="number">0</span>
+                }
+            }
+            .onChange(of: isActive) { newValue <span class="keyword">in</span>
+                <span class="keyword">let</span> delay = <span class="type">Double</span>(index) * <span class="number">0.02</span>
+                
+                <span class="keyword">withAnimation</span>(.<span class="type">spring</span>(response: <span class="number">0.6</span>, dampingFraction: <span class="number">0.5</span>)
+                    .delay(newValue ? delay : <span class="number">0</span>)) {
+                    scale = newValue ? <span class="number">1</span> : <span class="number">0</span>
+                    opacity = newValue ? <span class="number">1</span> : <span class="number">0</span>
+                }
+            }
+    }
+}
+
+<span class="keyword">struct</span> <span class="type">ParticleMotionEffect</span>: <span class="type">GeometryEffect</span> {
+    <span class="keyword">let</span> index: <span class="type">Int</span>
+    <span class="keyword">let</span> isActive: <span class="type">Bool</span>
+    
+    <span class="keyword">var</span> animatableData: <span class="type">CGFloat</span> {
+        <span class="keyword">get</span> { isActive ? <span class="number">1</span> : <span class="number">0</span> }
+        <span class="keyword">set</span> { }
+    }
+    
+    <span class="keyword">func</span> <span class="func">effectValue</span>(size: <span class="type">CGSize</span>) -&gt; <span class="type">ProjectionTransform</span> {
+        <span class="keyword">let</span> angle = <span class="type">Double</span>(index) / <span class="number">50</span> * .pi * <span class="number">2</span>
+        <span class="keyword">let</span> radius: <span class="type">CGFloat</span> = isActive ? <span class="number">100</span> : <span class="number">0</span>
+        
+        <span class="keyword">let</span> x = cos(angle) * radius
+        <span class="keyword">let</span> y = sin(angle) * radius
+        
+        <span class="keyword">let</span> translation = <span class="type">CGAffineTransform</span>(translationX: x, y: y)
+        
+        <span class="comment">// 添加旋转</span>
+        <span class="keyword">let</span> rotation = <span class="type">CGAffineTransform</span>(rotationAngle: angle * <span class="number">2</span>)
+        
+        <span class="keyword">return</span> <span class="type">ProjectionTransform</span>(translation.concatenating(rotation))
+    }
+}</pre>
+                </div>
+            </section>
+
+            <section>
+                <h2>五、高级动画架构图</h2>
+                
+                <div class="svg-container">
+                    <svg class="architecture-diagram" viewBox="0 0 800 400" xmlns="http://www.w3.org/2000/svg">
+                        <!-- 背景 -->
+                        <rect x="0" y="0" width="800" height="400" fill="#F0F9FF" rx="10"/>
+                        
+                        <!-- 标题 -->
+                        <text x="400" y="40" text-anchor="middle" font-family="Arial" font-size="24" font-weight="bold" fill="#5D6D97">SwiftUI高级动画架构</text>
+                        
+                        <!-- 核心层 -->
+                        <rect x="50" y="80" width="700" height="60" rx="10" fill="#36B5B0" opacity="0.8"/>
+                        <text x="400" y="115" text-anchor="middle" font-family="Arial" font-size="18" fill="white">动画系统核心 (Core Animation Integration)</text>
+                        
+                        <!-- 协议层 -->
+                        <g transform="translate(100, 160)">
+                            <rect x="0" y="0" width="200" height="80" rx="10" fill="#FF9E3D"/>
+                            <text x="100" y="30" text-anchor="middle" font-family="Arial" font-size="16" fill="white">Animatable</text>
+                            <text x="100" y="50" text-anchor="middle" font-family="Arial" font-size="12" fill="white">协议</text>
+                        </g>
+                        
+                        <g transform="translate(300, 160)">
+                            <rect x="0" y="0" width="200" height="80" rx="10" fill="#FF6B8B"/>
+                            <text x="100" y="30" text-anchor="middle" font-family="Arial" font-size="16" fill="white">GeometryEffect</text>
+                            <text x="100" y="50" text-anchor="middle" font-family="Arial" font-size="12" fill="white">协议</text>
+                        </g>
+                        
+                        <g transform="translate(500, 160)">
+                            <rect x="0" y="0" width="200" height="80" rx="10" fill="#5D6D97"/>
+                            <text x="100" y="30" text-anchor="middle" font-family="Arial" font-size="16" fill="white">ViewModifier</text>
+                            <text x="100" y="50" text-anchor="middle" font-family="Arial" font-size="12" fill="white">协议</text>
+                        </g>
+                        
+                        <!-- 连接线 -->
+                        <line x1="150" y1="140" x2="150" y2="160" stroke="#36B5B0" stroke-width="2"/>
+                       

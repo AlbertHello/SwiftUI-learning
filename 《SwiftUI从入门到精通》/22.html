@@ -1,0 +1,802 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SwiftUI从入门到精通 - 22、自定义布局</title>
+    <style>
+        :root {
+            --primary-color: #4CAF50; /* 青草绿 */
+            --secondary-color: #FF9800; /* 活力橙 */
+            --accent-color: #2196F3; /* 天空蓝 */
+            --light-color: #FFF9C4; /* 淡鹅黄 */
+            --background-color: #F5F5F5; /* 浅灰背景 */
+            --text-color: #333333;
+            --border-color: #81C784; /* 浅绿边框 */
+        }
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', 'Microsoft YaHei', sans-serif;
+        }
+        body {
+            background-color: var(--background-color);
+            color: var(--text-color);
+            line-height: 1.6;
+            padding: 20px;
+            max-width: 1200px;
+            margin: 0 auto;
+            border: double 8px var(--border-color);
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0, 100, 0, 0.1);
+            background-image: 
+                radial-gradient(circle at 10% 20%, rgba(255, 255, 255, 0.8) 10%, transparent 20%),
+                radial-gradient(circle at 90% 80%, rgba(255, 255, 255, 0.6) 10%, transparent 20%);
+        }
+        header {
+            text-align: center;
+            padding: 30px 20px;
+            background: linear-gradient(135deg, var(--primary-color), var(--accent-color));
+            color: white;
+            border-radius: 10px 10px 0 0;
+            margin-bottom: 30px;
+            border-bottom: double 6px white;
+        }
+        h1 {
+            font-size: 2.8rem;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.2);
+        }
+        h2 {
+            color: var(--secondary-color);
+            border-left: 6px solid var(--accent-color);
+            padding-left: 15px;
+            margin: 30px 0 15px;
+            font-size: 1.8rem;
+        }
+        h3 {
+            color: var(--primary-color);
+            margin: 20px 0 10px;
+            font-size: 1.4rem;
+        }
+        .container {
+            padding: 0 25px 40px;
+        }
+        p {
+            margin-bottom: 15px;
+            text-align: justify;
+        }
+        .highlight-box {
+            background-color: var(--light-color);
+            border-left: 5px solid var(--secondary-color);
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 0 10px 10px 0;
+            box-shadow: 3px 3px 8px rgba(0,0,0,0.05);
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 25px 0;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.05);
+            border: double 4px var(--border-color);
+            border-radius: 8px;
+            overflow: hidden;
+        }
+        th, td {
+            padding: 15px;
+            text-align: left;
+            border-bottom: 1px solid #ddd;
+        }
+        th {
+            background-color: var(--primary-color);
+            color: white;
+            font-weight: bold;
+        }
+        tr:nth-child(even) {
+            background-color: rgba(255, 255, 255, 0.7);
+        }
+        tr:hover {
+            background-color: rgba(76, 175, 80, 0.1);
+        }
+        ul, ol {
+            padding-left: 30px;
+            margin: 15px 0;
+        }
+        li {
+            margin-bottom: 8px;
+        }
+        code, pre {
+            font-family: 'Courier New', monospace;
+            background-color: #2d2d2d;
+            color: #f8f8f2;
+            padding: 2px 8px;
+            border-radius: 4px;
+            font-size: 0.95rem;
+        }
+        pre {
+            padding: 20px;
+            overflow-x: auto;
+            margin: 20px 0;
+            border: 1px solid #555;
+            border-left: 5px solid var(--accent-color);
+            border-radius: 0 8px 8px 0;
+            line-height: 1.5;
+        }
+        .svg-container {
+            display: flex;
+            justify-content: center;
+            margin: 30px 0;
+            padding: 20px;
+            background-color: white;
+            border-radius: 10px;
+            border: double 4px var(--accent-color);
+        }
+        .architecture-svg {
+            width: 100%;
+            max-width: 800px;
+            height: auto;
+        }
+        .example-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+            gap: 20px;
+            margin: 25px 0;
+        }
+        .example-card {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            border: 2px solid var(--primary-color);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.05);
+        }
+        footer {
+            text-align: center;
+            padding: 25px;
+            margin-top: 40px;
+            background: linear-gradient(to right, var(--primary-color), var(--accent-color));
+            color: white;
+            border-radius: 0 0 10px 10px;
+            border-top: double 6px white;
+            font-size: 1.1rem;
+            font-weight: bold;
+            letter-spacing: 1px;
+        }
+        .note {
+            background-color: #E3F2FD;
+            border: 1px dashed var(--accent-color);
+            padding: 15px;
+            border-radius: 8px;
+            margin: 20px 0;
+        }
+        .keyword {
+            color: var(--secondary-color);
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>SwiftUI从入门到精通</h1>
+        <h2>第22课：自定义布局 - Layout协议与容器实现</h2>
+        <p>掌握SwiftUI布局系统的核心，打造独一无二的界面排列</p>
+    </header>
+
+    <div class="container">
+        <section>
+            <h2>一、课程目标</h2>
+            <p>在本课中，我们将深入探索SwiftUI强大的自定义布局能力。你将学习到：</p>
+            <ul>
+                <li>理解<code>Layout</code>协议的工作原理和生命周期</li>
+                <li>掌握实现自定义布局容器的完整步骤</li>
+                <li>亲手实现两种常见的自定义布局：<strong>流式布局</strong>和<strong>网格布局</strong></li>
+                <li>了解性能优化和最佳实践</li>
+            </ul>
+        </section>
+
+        <section>
+            <h2>二、Layout协议详解</h2>
+            <p><code>Layout</code>协议是SwiftUI 4.0引入的强大工具，允许开发者创建完全自定义的布局容器。</p>
+
+            <div class="svg-container">
+                <svg class="architecture-svg" viewBox="0 0 800 300" xmlns="http://www.w3.org/2000/svg">
+                    <rect x="50" y="50" width="700" height="200" rx="10" fill="#E8F5E9" stroke="#4CAF50" stroke-width="3"/>
+                    <text x="400" y="85" text-anchor="middle" font-size="22" font-weight="bold" fill="#2E7D32">Layout协议工作流程</text>
+                    
+                    <rect x="100" y="120" width="150" height="50" rx="8" fill="#FFECB3" stroke="#FF9800" stroke-width="2"/>
+                    <text x="175" y="150" text-anchor="middle" font-size="16" fill="#333">sizeThatFits</text>
+                    <text x="175" y="170" text-anchor="middle" font-size="12" fill="#666">计算理想尺寸</text>
+                    
+                    <rect x="300" y="120" width="150" height="50" rx="8" fill="#BBDEFB" stroke="#2196F3" stroke-width="2"/>
+                    <text x="375" y="150" text-anchor="middle" font-size="16" fill="#333">placeSubviews</text>
+                    <text x="375" y="170" text-anchor="middle" font-size="12" fill="#666">放置子视图</text>
+                    
+                    <rect x="500" y="120" width="150" height="50" rx="8" fill="#C8E6C9" stroke="#4CAF50" stroke-width="2"/>
+                    <text x="575" y="150" text-anchor="middle" font-size="16" fill="#333">explicitAlignment</text>
+                    <text x="575" y="170" text-anchor="middle" font-size="12" fill="#666">对齐方式</text>
+                    
+                    <path d="M250 145 L290 145" stroke="#666" stroke-width="2" fill="none" marker-end="url(#arrow)"/>
+                    <path d="M450 145 L490 145" stroke="#666" stroke-width="2" fill="none" marker-end="url(#arrow)"/>
+                    
+                    <defs>
+                        <marker id="arrow" markerWidth="10" markerHeight="10" refX="9" refY="3" orient="auto" markerUnits="strokeWidth">
+                            <path d="M0,0 L0,6 L9,3 z" fill="#666"/>
+                        </marker>
+                    </defs>
+                </svg>
+            </div>
+
+            <h3>核心方法</h3>
+            <table>
+                <thead>
+                    <tr>
+                        <th>方法名</th>
+                        <th>作用</th>
+                        <th>调用时机</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><code>sizeThatFits(proposal:subviews:cache:)</code></td>
+                        <td>计算布局容器的理想尺寸</td>
+                        <td>布局系统询问容器需要多大空间时</td>
+                    </tr>
+                    <tr>
+                        <td><code>placeSubviews(in:proposal:subviews:cache:)</code></td>
+                        <td>将子视图放置到指定区域</td>
+                        <td>确定容器尺寸后，安排子视图位置</td>
+                    </tr>
+                    <tr>
+                        <td><code>makeCache(subviews:)</code></td>
+                        <td>创建缓存以提高性能</td>
+                        <td>布局首次创建或子视图变化时</td>
+                    </tr>
+                    <tr>
+                        <td><code>updateCache(_:subviews:)</code></td>
+                        <td>更新缓存数据</td>
+                        <td>子视图或环境变化时</td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <div class="highlight-box">
+                <h3>💡 关键概念</h3>
+                <p><span class="keyword">提案(Proposal)</span>: SwiftUI布局系统的核心概念，父视图向子视图询问尺寸时使用的"建议尺寸"，子视图可以接受、拒绝或修改这个提案。</p>
+                <p><span class="keyword">缓存(Cache)</span>: 可选但重要的性能优化手段，用于存储计算中间结果，避免重复计算。</p>
+            </div>
+        </section>
+
+        <section>
+            <h2>三、实现自定义布局容器</h2>
+            <p>创建一个自定义布局需要遵循以下步骤：</p>
+            <ol>
+                <li>创建一个遵循<code>Layout</code>协议的结构体</li>
+                <li>实现必需的<code>sizeThatFits</code>和<code>placeSubviews</code>方法</li>
+                <li>可选实现缓存方法以优化性能</li>
+                <li>在SwiftUI视图中使用你的自定义布局</li>
+            </ol>
+
+            <h3>基础模板示例</h3>
+<pre><code>import SwiftUI
+
+struct MyCustomLayout: Layout {
+    // 1. 计算容器尺寸
+    func sizeThatFits(
+        proposal: ProposedViewSize,
+        subviews: Subviews,
+        cache: inout ()
+    ) -> CGSize {
+        // 根据子视图和提案计算并返回容器尺寸
+        let totalWidth = subviews.reduce(0) { sum, subview in
+            let size = subview.sizeThatFits(.unspecified)
+            return sum + size.width
+        }
+        let maxHeight = subviews.map { $0.sizeThatFits(.unspecified).height }.max() ?? 0
+        
+        return CGSize(width: totalWidth, height: maxHeight)
+    }
+    
+    // 2. 放置子视图
+    func placeSubviews(
+        in bounds: CGRect,
+        proposal: ProposedViewSize,
+        subviews: Subviews,
+        cache: inout ()
+    ) {
+        var x = bounds.minX
+        
+        for subview in subviews {
+            let size = subview.sizeThatFits(.unspecified)
+            let point = CGPoint(x: x, y: bounds.midY - size.height / 2)
+            
+            subview.place(at: point, anchor: .topLeading, proposal: .unspecified)
+            x += size.width
+        }
+    }
+}
+
+// 使用示例
+struct ContentView: View {
+    var body: some View {
+        MyCustomLayout {
+            Text("第一个视图")
+                .padding()
+                .background(Color.orange)
+            Text("第二个")
+                .padding()
+                .background(Color.blue)
+            Text("第三个视图")
+                .padding()
+                .background(Color.green)
+        }
+        .border(Color.gray)
+    }
+}</code></pre>
+        </section>
+
+        <section>
+            <h2>四、实战：流式布局实现</h2>
+            <p>流式布局（Flow Layout）也称为瀑布流或自动换行布局，常用于标签、关键词展示等场景。</p>
+
+            <div class="example-grid">
+                <div class="example-card">
+                    <h4>流式布局特点</h4>
+                    <ul>
+                        <li>子视图水平排列</li>
+                        <li>空间不足时自动换行</li>
+                        <li>每行高度可能不同</li>
+                        <li>常用于标签云</li>
+                    </ul>
+                </div>
+                <div class="example-card">
+                    <h4>实现要点</h4>
+                    <ul>
+                        <li>跟踪当前行位置</li>
+                        <li>计算每行最大高度</li>
+                        <li>处理换行逻辑</li>
+                        <li>支持水平和垂直间距</li>
+                    </ul>
+                </div>
+            </div>
+
+            <h3>完整实现代码</h3>
+<pre><code>struct FlowLayout: Layout {
+    var horizontalSpacing: CGFloat = 8
+    var verticalSpacing: CGFloat = 8
+    
+    func sizeThatFits(
+        proposal: ProposedViewSize,
+        subviews: Subviews,
+        cache: inout ()
+    ) -> CGSize {
+        let maxWidth = proposal.width ?? .infinity
+        var height: CGFloat = 0
+        var rowWidth: CGFloat = 0
+        var rowHeight: CGFloat = 0
+        
+        for subview in subviews {
+            let size = subview.sizeThatFits(.unspecified)
+            
+            if rowWidth + size.width > maxWidth {
+                // 需要换行
+                height += rowHeight + verticalSpacing
+                rowWidth = size.width
+                rowHeight = size.height
+            } else {
+                // 继续当前行
+                rowWidth += size.width + horizontalSpacing
+                rowHeight = max(rowHeight, size.height)
+            }
+        }
+        
+        // 加上最后一行的高度
+        height += rowHeight
+        
+        return CGSize(
+            width: proposal.width ?? rowWidth,
+            height: proposal.height ?? height
+        )
+    }
+    
+    func placeSubviews(
+        in bounds: CGRect,
+        proposal: ProposedViewSize,
+        subviews: Subviews,
+        cache: inout ()
+    ) {
+        let maxWidth = bounds.width
+        var x = bounds.minX
+        var y = bounds.minY
+        var rowHeight: CGFloat = 0
+        
+        for subview in subviews {
+            let size = subview.sizeThatFits(.unspecified)
+            
+            if x + size.width > bounds.maxX {
+                // 换行
+                x = bounds.minX
+                y += rowHeight + verticalSpacing
+                rowHeight = 0
+            }
+            
+            subview.place(
+                at: CGPoint(x: x, y: y),
+                anchor: .topLeading,
+                proposal: .unspecified
+            )
+            
+            x += size.width + horizontalSpacing
+            rowHeight = max(rowHeight, size.height)
+        }
+    }
+}
+
+// 使用示例
+struct FlowLayoutExample: View {
+    let tags = ["SwiftUI", "iOS开发", "自定义布局", "Layout协议", "流式布局", "网格布局", "UI设计", "移动应用"]
+    
+    var body: some View {
+        FlowLayout(horizontalSpacing: 10, verticalSpacing: 10) {
+            ForEach(tags, id: \.self) { tag in
+                Text(tag)
+                    .padding(.horizontal, 12)
+                    .padding(.vertical, 6)
+                    .background(Color.blue.opacity(0.2))
+                    .cornerRadius(15)
+                    .overlay(
+                        RoundedRectangle(cornerRadius: 15)
+                            .stroke(Color.blue, lineWidth: 1)
+                    )
+            }
+        }
+        .padding()
+        .frame(maxWidth: .infinity, alignment: .leading)
+    }
+}</code></pre>
+        </section>
+
+        <section>
+            <h2>五、实战：网格布局实现</h2>
+            <p>网格布局（Grid Layout）将子视图排列成规则的网格，常用于照片墙、仪表盘等场景。</p>
+
+            <div class="svg-container">
+                <svg viewBox="0 0 600 200" xmlns="http://www.w3.org/2000/svg">
+                    <rect x="10" y="10" width="580" height="180" rx="10" fill="#F3E5F5" stroke="#9C27B0" stroke-width="2"/>
+                    <text x="300" y="40" text-anchor="middle" font-size="18" font-weight="bold" fill="#7B1FA2">网格布局示意图</text>
+                    
+                    <!-- 网格线 -->
+                    <g stroke="#BA68C8" stroke-width="1.5" stroke-dasharray="5,5">
+                        <line x1="110" y1="60" x2="110" y2="170"/>
+                        <line x1="210" y1="60" x2="210" y2="170"/>
+                        <line x1="310" y1="60" x2="310" y2="170"/>
+                        <line x1="410" y1="60" x2="410" y2="170"/>
+                        <line x1="510" y1="60" x2="510" y2="170"/>
+                        
+                        <line x1="10" y1="100" x2="590" y2="100"/>
+                        <line x1="10" y1="140" x2="590" y2="140"/>
+                    </g>
+                    
+                    <!-- 网格项 -->
+                    <rect x="20" y="70" width="80" height="25" rx="5" fill="#E1BEE7"/>
+                    <rect x="120" y="70" width="80" height="25" rx="5" fill="#CE93D8"/>
+                    <rect x="220" y="70" width="80" height="25" rx="5" fill="#BA68C8"/>
+                    
+                    <rect x="20" y="110" width="80" height="25" rx="5" fill="#F8BBD0"/>
+                    <rect x="120" y="110" width="80" height="25" rx="5" fill="#F48FB1"/>
+                    <rect x="220" y="110" width="80" height="25" rx="5" fill="#EC407A"/>
+                    
+                    <rect x="20" y="150" width="80" height="25" rx="5" fill="#B3E5FC"/>
+                    <rect x="120" y="150" width="80" height="25" rx="5" fill="#81D4FA"/>
+                    <rect x="220" y="150" width="80" height="25" rx="5" fill="#4FC3F7"/>
+                    
+                    <text x="60" y="85" text-anchor="middle" font-size="12" fill="#333">Item 1</text>
+                    <text x="160" y="85" text-anchor="middle" font-size="12" fill="#333">Item 2</text>
+                    <text x="260" y="85" text-anchor="middle" font-size="12" fill="#333">Item 3</text>
+                </svg>
+            </div>
+
+            <h3>灵活网格布局实现</h3>
+<pre><code>struct FlexibleGridLayout: Layout {
+    var columns: Int
+    var spacing: CGFloat = 8
+    
+    struct CacheData {
+        var cellSize: CGSize
+        var positions: [CGPoint]
+    }
+    
+    func makeCache(subviews: Subviews) -> CacheData {
+        return CacheData(cellSize: .zero, positions: [])
+    }
+    
+    func sizeThatFits(
+        proposal: ProposedViewSize,
+        subviews: Subviews,
+        cache: inout CacheData
+    ) -> CGSize {
+        let width = proposal.width ?? 0
+        let availableWidth = width - CGFloat(columns - 1) * spacing
+        let cellWidth = availableWidth / CGFloat(columns)
+        
+        // 计算每行高度
+        var rowHeights: [CGFloat] = []
+        var currentRow = 0
+        var currentRowHeight: CGFloat = 0
+        
+        for (index, subview) in subviews.enumerated() {
+            if index % columns == 0 && index != 0 {
+                rowHeights.append(currentRowHeight)
+                currentRow += 1
+                currentRowHeight = 0
+            }
+            
+            let size = subview.sizeThatFits(
+                ProposedViewSize(width: cellWidth, height: nil)
+            )
+            currentRowHeight = max(currentRowHeight, size.height)
+        }
+        
+        // 添加最后一行
+        if !subviews.isEmpty {
+            rowHeights.append(currentRowHeight)
+        }
+        
+        // 计算总高度
+        let totalHeight = rowHeights.reduce(0, +) + 
+                         CGFloat(rowHeights.count - 1) * spacing
+        
+        // 缓存计算结果
+        cache.cellSize = CGSize(width: cellWidth, height: 0)
+        
+        // 计算每个子视图的位置
+        cache.positions = []
+        var y: CGFloat = 0
+        
+        for row in 0..<rowHeights.count {
+            let rowHeight = rowHeights[row]
+            var x: CGFloat = 0
+            
+            for col in 0..<columns {
+                let index = row * columns + col
+                if index < subviews.count {
+                    cache.positions.append(CGPoint(x: x, y: y))
+                    x += cellWidth + spacing
+                }
+            }
+            
+            y += rowHeight + spacing
+        }
+        
+        return CGSize(width: width, height: totalHeight)
+    }
+    
+    func placeSubviews(
+        in bounds: CGRect,
+        proposal: ProposedViewSize,
+        subviews: Subviews,
+        cache: inout CacheData
+    ) {
+        for (index, subview) in subviews.enumerated() {
+            if index < cache.positions.count {
+                let position = cache.positions[index]
+                let point = CGPoint(
+                    x: bounds.minX + position.x,
+                    y: bounds.minY + position.y
+                )
+                
+                subview.place(
+                    at: point,
+                    anchor: .topLeading,
+                    proposal: ProposedViewSize(
+                        width: cache.cellSize.width,
+                        height: nil
+                    )
+                )
+            }
+        }
+    }
+}
+
+// 使用示例
+struct GridLayoutExample: View {
+    let items = Array(1...12).map { "项目 \($0)" }
+    
+    var body: some View {
+        ScrollView {
+            FlexibleGridLayout(columns: 3, spacing: 12) {
+                ForEach(items, id: \.self) { item in
+                    VStack {
+                        RoundedRectangle(cornerRadius: 10)
+                            .fill(
+                                LinearGradient(
+                                    colors: [.orange, .yellow],
+                                    startPoint: .topLeading,
+                                    endPoint: .bottomTrailing
+                                )
+                            )
+                            .frame(height: 80)
+                        
+                        Text(item)
+                            .font(.caption)
+                            .foregroundColor(.secondary)
+                    }
+                    .padding(10)
+                    .background(Color.white)
+                    .cornerRadius(12)
+                    .shadow(color: .gray.opacity(0.3), radius: 3, x: 1, y: 1)
+                }
+            }
+            .padding()
+        }
+        .background(Color.gray.opacity(0.05))
+    }
+}</code></pre>
+        </section>
+
+        <section>
+            <h2>六、性能优化与最佳实践</h2>
+            
+            <div class="note">
+                <h4>📊 性能对比</h4>
+                <p>合理使用缓存可以显著提升自定义布局的性能，特别是在子视图数量多或布局复杂的情况下。</p>
+            </div>
+
+            <table>
+                <thead>
+                    <tr>
+                        <th>优化技巧</th>
+                        <th>说明</th>
+                        <th>效果</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>使用缓存</td>
+                        <td>在<code>makeCache</code>和<code>updateCache</code>中存储中间计算结果</td>
+                        <td>减少重复计算，提升性能30-50%</td>
+                    </tr>
+                    <tr>
+                        <td>批量计算</td>
+                        <td>在<code>sizeThatFits</code>中一次性计算所有位置</td>
+                        <td>避免多次遍历子视图</td>
+                    </tr>
+                    <tr>
+                        <td>合理使用提案</td>
+                        <td>根据父视图提案选择合适的计算策略</td>
+                        <td>提高布局响应速度</td>
+                    </tr>
+                    <tr>
+                        <td>避免强制布局</td>
+                        <td>只在必要时调用<code>sizeThatFits</code></td>
+                        <td>减少不必要的布局传递</td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <h3>缓存优化示例</h3>
+<pre><code>struct OptimizedFlowLayout: Layout {
+    var spacing: CGFloat = 8
+    
+    // 定义缓存类型
+    struct Cache {
+        var sizes: [CGSize]
+        var positions: [CGPoint]
+        var totalSize: CGSize
+    }
+    
+    func makeCache(subviews: Subviews) -> Cache {
+        // 初始化缓存
+        return Cache(
+            sizes: [],
+            positions: [],
+            totalSize: .zero
+        )
+    }
+    
+    func updateCache(_ cache: inout Cache, subviews: Subviews) {
+        // 只有当子视图变化时才重新计算
+        let sizes = subviews.map { $0.sizeThatFits(.unspecified) }
+        
+        // 计算布局（简化示例）
+        var positions: [CGPoint] = []
+        var x: CGFloat = 0
+        var y: CGFloat = 0
+        var maxHeight: CGFloat = 0
+        var totalWidth: CGFloat = 0
+        
+        for size in sizes {
+            if x + size.width > 300 { // 假设最大宽度300
+                x = 0
+                y += maxHeight + spacing
+                maxHeight = 0
+            }
+            
+            positions.append(CGPoint(x: x, y: y))
+            x += size.width + spacing
+            maxHeight = max(maxHeight, size.height)
+            totalWidth = max(totalWidth, x)
+        }
+        
+        let totalHeight = y + maxHeight
+        
+        // 更新缓存
+        cache.sizes = sizes
+        cache.positions = positions
+        cache.totalSize = CGSize(width: totalWidth, height: totalHeight)
+    }
+    
+    func sizeThatFits(
+        proposal: ProposedViewSize,
+        subviews: Subviews,
+        cache: inout Cache
+    ) -> CGSize {
+        // 直接使用缓存结果
+        return cache.totalSize
+    }
+    
+    func placeSubviews(
+        in bounds: CGRect,
+        proposal: ProposedViewSize,
+        subviews: Subviews,
+        cache: inout Cache
+    ) {
+        // 使用缓存的位置信息
+        for (index, subview) in subviews.enumerated() {
+            if index < cache.positions.count {
+                let position = cache.positions[index]
+                subview.place(
+                    at: CGPoint(
+                        x: bounds.minX + position.x,
+                        y: bounds.minY + position.y
+                    ),
+                    anchor: .topLeading,
+                    proposal: .unspecified
+                )
+            }
+        }
+    }
+}</code></pre>
+        </section>
+
+        <section>
+            <h2>七、总结与练习</h2>
+            
+            <div class="highlight-box">
+                <h3>🎯 本课要点回顾</h3>
+                <ul>
+                    <li><code>Layout</code>协议是SwiftUI自定义布局的核心</li>
+                    <li><code>sizeThatFits</code>计算容器尺寸，<code>placeSubviews</code>安排子视图位置</li>
+                    <li>缓存机制可以显著提升布局性能</li>
+                    <li>流式布局和网格布局是两种常见的自定义布局模式</li>
+                    <li>合理使用提案系统可以让布局更加灵活</li>
+                </ul>
+            </div>
+
+            <h3>课后练习</h3>
+            <ol>
+                <li>实现一个等间距的水平布局，所有子视图均匀分布</li>
+                <li>创建一个圆形布局，子视图围绕圆心排列</li>
+                <li>为流式布局添加动画支持，当子视图变化时平滑过渡</li>
+                <li>实现一个响应式网格布局，根据屏幕宽度自动调整列数</li>
+                <li>创建一个卡片堆叠布局，模拟卡片重叠效果</li>
+            </ol>
+
+            <div class="note">
+                <h4>💪 挑战任务</h4>
+                <p>尝试创建一个<strong>瀑布流布局</strong>，要求：</p>
+                <ul>
+                    <li>每列宽度固定</li>
+                    <li>新项目自动添加到最短的列</li>
+                    <li>支持动态添加/删除项目</li>
+                    <li>添加平滑的动画效果</li>
+                </ul>
+            </div>
+        </section>
+    </div>
+
+    <footer>
+        公众号:蓝海资料掘金营，微信deep3321
+    </footer>
+</body>
+</html>

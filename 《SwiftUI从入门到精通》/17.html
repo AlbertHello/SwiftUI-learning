@@ -1,0 +1,612 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SwiftUI从入门到精通 - 17、生命周期</title>
+    <style>
+        :root {
+            --primary-color: #4CAF50; /* 青草绿 */
+            --secondary-color: #FF9800; /* 活力橙 */
+            --accent-color: #2196F3; /* 天空蓝 */
+            --light-color: #FFF9C4; /* 淡鹅黄 */
+            --background-color: #F5F5F5; /* 浅灰背景 */
+            --text-color: #333333;
+            --border-color: #81C784; /* 浅绿边框 */
+            --card-bg: white;
+        }
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', 'Microsoft YaHei', sans-serif;
+        }
+        body {
+            background-color: var(--background-color);
+            color: var(--text-color);
+            line-height: 1.6;
+            padding: 20px;
+            max-width: 1200px;
+            margin: 0 auto;
+            border: 8px double var(--border-color);
+            border-radius: 20px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            background-image: 
+                radial-gradient(circle at 10% 20%, rgba(255, 255, 255, 0.8) 0%, transparent 20%),
+                radial-gradient(circle at 90% 80%, rgba(255, 255, 255, 0.6) 0%, transparent 20%);
+        }
+        header {
+            text-align: center;
+            padding: 30px 20px;
+            background: linear-gradient(135deg, var(--primary-color), var(--accent-color));
+            color: white;
+            border-radius: 15px 15px 0 0;
+            margin-bottom: 30px;
+            border-bottom: 5px solid var(--secondary-color);
+        }
+        h1 {
+            font-size: 2.8rem;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.2);
+        }
+        h2 {
+            color: var(--primary-color);
+            border-left: 6px solid var(--secondary-color);
+            padding-left: 15px;
+            margin: 30px 0 15px;
+            font-size: 1.8rem;
+        }
+        h3 {
+            color: var(--accent-color);
+            margin: 20px 0 10px;
+            font-size: 1.4rem;
+        }
+        .subtitle {
+            font-size: 1.2rem;
+            opacity: 0.9;
+            font-weight: 300;
+        }
+        .container {
+            padding: 0 25px 40px;
+        }
+        .card {
+            background-color: var(--card-bg);
+            border-radius: 15px;
+            padding: 25px;
+            margin-bottom: 25px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.05);
+            border: 2px solid var(--border-color);
+            transition: transform 0.3s ease;
+        }
+        .card:hover {
+            transform: translateY(-5px);
+        }
+        p {
+            margin-bottom: 15px;
+            font-size: 1.05rem;
+        }
+        ul, ol {
+            margin-left: 25px;
+            margin-bottom: 20px;
+        }
+        li {
+            margin-bottom: 8px;
+            padding-left: 5px;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 25px 0;
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.05);
+            border: 2px solid var(--border-color);
+        }
+        th {
+            background-color: var(--primary-color);
+            color: white;
+            padding: 15px;
+            text-align: left;
+            font-weight: 600;
+        }
+        td {
+            padding: 15px;
+            border-bottom: 1px solid #eee;
+        }
+        tr:nth-child(even) {
+            background-color: #f9f9f9;
+        }
+        tr:hover {
+            background-color: var(--light-color);
+        }
+        pre {
+            background-color: #2d2d2d;
+            color: #f8f8f2;
+            padding: 20px;
+            border-radius: 10px;
+            overflow-x: auto;
+            margin: 20px 0;
+            border-left: 5px solid var(--secondary-color);
+            font-family: 'Courier New', monospace;
+            font-size: 0.95rem;
+            line-height: 1.5;
+        }
+        code {
+            background-color: #e8f5e9;
+            color: var(--primary-color);
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-family: 'Courier New', monospace;
+        }
+        .svg-container {
+            display: flex;
+            justify-content: center;
+            margin: 30px 0;
+        }
+        .comparison {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 25px;
+            margin: 30px 0;
+        }
+        .comparison-item {
+            background: white;
+            border-radius: 15px;
+            padding: 25px;
+            border-top: 6px solid var(--accent-color);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.05);
+        }
+        .tip-box {
+            background-color: #E8F5E9;
+            border-left: 6px solid var(--primary-color);
+            padding: 20px;
+            margin: 25px 0;
+            border-radius: 0 10px 10px 0;
+        }
+        .warning-box {
+            background-color: #FFF3E0;
+            border-left: 6px solid var(--secondary-color);
+            padding: 20px;
+            margin: 25px 0;
+            border-radius: 0 10px 10px 0;
+        }
+        footer {
+            text-align: center;
+            padding: 25px;
+            margin-top: 40px;
+            background: linear-gradient(to right, var(--primary-color), var(--accent-color));
+            color: white;
+            border-radius: 0 0 15px 15px;
+            font-size: 1.1rem;
+            border-top: 5px solid var(--secondary-color);
+        }
+        .footer-text {
+            font-weight: bold;
+            letter-spacing: 1px;
+        }
+        .lifecycle-svg {
+            width: 100%;
+            max-width: 800px;
+            background-color: white;
+            border-radius: 10px;
+            padding: 20px;
+            border: 2px solid var(--border-color);
+        }
+        .arch-svg {
+            width: 100%;
+            max-width: 900px;
+            background-color: white;
+            border-radius: 10px;
+            padding: 20px;
+            border: 2px solid var(--border-color);
+        }
+        .keyword {
+            font-weight: bold;
+            color: var(--accent-color);
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>SwiftUI从入门到精通</h1>
+        <div class="subtitle">第17章：生命周期 - 理解SwiftUI视图的生命周期（onAppear, onDisappear）与应用生命周期</div>
+    </header>
+
+    <div class="container">
+        <section class="card">
+            <h2>本章导览</h2>
+            <p>在SwiftUI中，理解视图和应用的<span class="keyword">生命周期</span>是构建稳定、高效应用的关键。与UIKit的ViewController生命周期不同，SwiftUI采用了更声明式、更轻量级的生命周期管理方式。本章将深入探讨两个核心概念：<strong>视图生命周期</strong>（通过 <code>onAppear</code> 和 <code>onDisappear</code> 修饰符）和 <strong>应用生命周期</strong>（通过 <code>@UIApplicationDelegateAdaptor</code> 或新的 <code>App</code> 协议）。掌握这些知识，你将能更好地控制数据加载、资源管理和状态转换。</p>
+        </section>
+
+        <section class="card">
+            <h2>一、SwiftUI视图的生命周期</h2>
+            <p>SwiftUI视图是值类型（结构体），其生命周期由框架自动管理。我们无法直接控制其创建和销毁的时机，但可以通过特定的修饰符在关键时间点注入自定义行为。</p>
+
+            <h3>1.1 核心修饰符：onAppear 与 onDisappear</h3>
+            <div class="comparison">
+                <div class="comparison-item">
+                    <h4>📱 onAppear</h4>
+                    <p><strong>触发时机：</strong>当视图首次出现在屏幕上，或从不可见变为可见时。</p>
+                    <p><strong>典型用途：</strong></p>
+                    <ul>
+                        <li>发起网络请求，加载视图所需数据。</li>
+                        <li>开始动画或定时器。</li>
+                        <li>订阅外部数据源（如NotificationCenter）。</li>
+                        <li>执行一次性的初始化设置。</li>
+                    </ul>
+                    <pre><code>struct ContentView: View {
+    @State private var data: String = "加载中..."
+    
+    var body: some View {
+        Text(data)
+            .onAppear {
+                // 视图出现时，模拟网络请求
+                DispatchQueue.main.asyncAfter(deadline: .now() + 1) {
+                    data = "数据加载完成！"
+                }
+                print("ContentView 已出现在屏幕上")
+            }
+    }
+}</code></pre>
+                </div>
+                <div class="comparison-item">
+                    <h4>🚪 onDisappear</h4>
+                    <p><strong>触发时机：</strong>当视图从屏幕上消失时（例如被导航弹出、被Tab切换隐藏）。</p>
+                    <p><strong>典型用途：</strong></p>
+                    <ul>
+                        <li>取消未完成的网络请求。</li>
+                        <li>停止动画、定时器，释放资源。</li>
+                        <li>清理订阅，防止内存泄漏。</li>
+                        <li>保存临时状态或用户数据。</li>
+                    </ul>
+                    <pre><code>struct DetailView: View {
+    @State private var timer: Timer?
+    @State private var count = 0
+    
+    var body: some View {
+        VStack {
+            Text("计数: \(count)")
+        }
+        .onAppear {
+            // 视图出现时启动计时器
+            timer = Timer.scheduledTimer(withTimeInterval: 1.0, repeats: true) { _ in
+                count += 1
+            }
+        }
+        .onDisappear {
+            // 视图消失时务必停止计时器
+            timer?.invalidate()
+            timer = nil
+            print("DetailView 已从屏幕消失，计时器已清理")
+        }
+    }
+}</code></pre>
+                </div>
+            </div>
+
+            <div class="tip-box">
+                <strong>💡 重要提示：</strong> <code>onAppear</code> 和 <code>onDisappear</code> 的调用与视图的“可见性”直接相关，而非结构体实例的创建与销毁。一个视图实例可能在多次出现/消失中复用。
+            </div>
+        </section>
+
+        <section class="card">
+            <h2>二、视图生命周期流程图</h2>
+            <div class="svg-container">
+                <svg class="lifecycle-svg" viewBox="0 0 800 400" xmlns="http://www.w3.org/2000/svg">
+                    <rect x="10" y="10" width="780" height="380" rx="10" fill="white" stroke="#81C784" stroke-width="3"/>
+                    <text x="400" y="50" text-anchor="middle" font-size="24" font-weight="bold" fill="#4CAF50">SwiftUI 视图生命周期流程</text>
+                    
+                    <!-- 流程节点 -->
+                    <rect x="100" y="100" width="160" height="60" rx="10" fill="#FF9800" stroke="#F57C00" stroke-width="2"/>
+                    <text x="180" y="135" text-anchor="middle" fill="white" font-size="16" font-weight="bold">视图初始化</text>
+                    <text x="180" y="155" text-anchor="middle" fill="white" font-size="12">(init, body计算)</text>
+                    
+                    <rect x="350" y="100" width="160" height="60" rx="10" fill="#4CAF50" stroke="#388E3C" stroke-width="2"/>
+                    <text x="430" y="135" text-anchor="middle" fill="white" font-size="16" font-weight="bold">onAppear</text>
+                    <text x="430" y="155" text-anchor="middle" fill="white" font-size="12">(视图出现)</text>
+                    
+                    <rect x="550" y="220" width="160" height="60" rx="10" fill="#2196F3" stroke="#1976D2" stroke-width="2"/>
+                    <text x="630" y="255" text-anchor="middle" fill="white" font-size="16" font-weight="bold">活跃状态</text>
+                    <text x="630" y="275" text-anchor="middle" fill="white" font-size="12">(响应用户交互)</text>
+                    
+                    <rect x="350" y="300" width="160" height="60" rx="10" fill="#9C27B0" stroke="#7B1FA2" stroke-width="2"/>
+                    <text x="430" y="335" text-anchor="middle" fill="white" font-size="16" font-weight="bold">onDisappear</text>
+                    <text x="430" y="355" text-anchor="middle" fill="white" font-size="12">(视图消失)</text>
+                    
+                    <rect x="100" y="300" width="160" height="60" rx="10" fill="#757575" stroke="#616161" stroke-width="2"/>
+                    <text x="180" y="335" text-anchor="middle" fill="white" font-size="16" font-weight="bold">可能被销毁</text>
+                    <text x="180" y="355" text-anchor="middle" fill="white" font-size="12">(系统管理)</text>
+                    
+                    <!-- 箭头 -->
+                    <path d="M260 130 L 340 130" stroke="#333" stroke-width="3" fill="none" marker-end="url(#arrowhead)"/>
+                    <path d="M430 160 L 430 210" stroke="#333" stroke-width="3" fill="none" marker-end="url(#arrowhead)"/>
+                    <path d="M510 250 L 550 250" stroke="#333" stroke-width="3" fill="none" marker-end="url(#arrowhead)"/>
+                    <path d="M630 280 L 630 300" stroke="#333" stroke-width="3" fill="none" marker-end="url(#arrowhead)"/>
+                    <path d="M510 330 L 430 330" stroke="#333" stroke-width="3" fill="none" marker-end="url(#arrowhead)"/>
+                    <path d="M260 330 L 180 330" stroke="#333" stroke-width="3" fill="none" marker-end="url(#arrowhead)"/>
+                    <path d="M180 160 Q 180 230 100 230 L 100 300" stroke="#333" stroke-width="3" fill="none" stroke-dasharray="5,5" marker-end="url(#arrowhead)"/>
+                    
+                    <!-- 箭头头定义 -->
+                    <defs>
+                        <marker id="arrowhead" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
+                            <polygon points="0 0, 10 3.5, 0 7" fill="#333"/>
+                        </marker>
+                    </defs>
+                    
+                    <!-- 说明文字 -->
+                    <text x="300" y="120" text-anchor="middle" fill="#333" font-size="12">body首次计算</text>
+                    <text x="430" y="190" text-anchor="middle" fill="#333" font-size="12">加载数据/启动任务</text>
+                    <text x="590" y="250" text-anchor="middle" fill="#333" font-size="12">用户交互</text>
+                    <text x="530" y="360" text-anchor="middle" fill="#333" font-size="12">清理资源/取消任务</text>
+                    <text x="140" y="250" text-anchor="middle" fill="#666" font-size="11">可能因状态变化<br/>重新进入生命周期</text>
+                </svg>
+            </div>
+        </section>
+
+        <section class="card">
+            <h2>三、应用生命周期（App Lifecycle）</h2>
+            <p>在SwiftUI中，应用的生命周期管理也变得更加简洁。你可以使用 <code>@main</code> 和 <code>App</code> 协议来定义应用的入口和生命周期阶段。</p>
+
+            <h3>3.1 使用 App 协议</h3>
+            <p>这是SwiftUI推荐的方式，结构清晰，与视图声明风格一致。</p>
+            <pre><code>import SwiftUI
+
+@main
+struct MyApp: App {
+    // 应用级别的状态
+    @StateObject private var appModel = AppModel()
+    
+    var body: some Scene {
+        WindowGroup {
+            ContentView()
+                .environmentObject(appModel)
+        }
+        .onChange(of: scenePhase) { newPhase in
+            // 响应场景阶段变化
+            handleScenePhaseChange(newPhase)
+        }
+    }
+    
+    // 监听场景阶段
+    @Environment(\.scenePhase) private var scenePhase
+    
+    func handleScenePhaseChange(_ phase: ScenePhase) {
+        switch phase {
+        case .active:
+            print("应用处于活跃状态，用户正在交互")
+        case .inactive:
+            print("应用处于非活跃状态（例如多任务切换）")
+        case .background:
+            print("应用进入后台")
+        @unknown default:
+            print("未知阶段")
+        }
+    }
+}</code></pre>
+
+            <h3>3.2 使用 UIApplicationDelegateAdaptor（兼容UIKit）</h3>
+            <p>如果你需要访问传统的UIKit应用生命周期事件（如远程通知、后台任务），可以使用适配器。</p>
+            <pre><code>import SwiftUI
+
+class AppDelegate: NSObject, UIApplicationDelegate {
+    func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey : Any]? = nil) -> Bool {
+        print("应用完成启动")
+        return true
+    }
+    
+    func applicationWillResignActive(_ application: UIApplication) {
+        print("应用即将进入非活跃状态")
+    }
+    
+    func applicationDidEnterBackground(_ application: UIApplication) {
+        print("应用已进入后台")
+    }
+    
+    func applicationWillEnterForeground(_ application: UIApplication) {
+        print("应用即将进入前台")
+    }
+    
+    func applicationDidBecomeActive(_ application: UIApplication) {
+        print("应用已变为活跃")
+    }
+}
+
+@main
+struct MyApp: App {
+    // 将UIKit的AppDelegate适配到SwiftUI
+    @UIApplicationDelegateAdaptor(AppDelegate.self) var appDelegate
+    
+    var body: some Scene {
+        WindowGroup {
+            ContentView()
+        }
+    }
+}</code></pre>
+
+            <div class="comparison">
+                <div class="comparison-item">
+                    <h4>ScenePhase 枚举</h4>
+                    <table>
+                        <tr><th>阶段</th><th>描述</th></tr>
+                        <tr><td><code>.active</code></td><td>场景在前台，用户可交互。</td></tr>
+                        <tr><td><code>.inactive</code></td><td>场景在前台但不可交互（如控制中心下拉）。</td></tr>
+                        <tr><td><code>.background</code></td><td>场景在后台，不可见。</td></tr>
+                    </table>
+                </div>
+                <div class="comparison-item">
+                    <h4>UIKit 关键事件</h4>
+                    <table>
+                        <tr><th>方法</th><th>对应时机</th></tr>
+                        <tr><td><code>didFinishLaunching</code></td><td>应用启动完成</td></tr>
+                        <tr><td><code>willResignActive</code></td><td>即将进入非活跃状态</td></tr>
+                        <tr><td><code>didEnterBackground</code></td><td>已进入后台</td></tr>
+                        <tr><td><code>willEnterForeground</code></td><td>即将回到前台</td></tr>
+                        <tr><td><code>didBecomeActive</code></td><td>已变为活跃</td></tr>
+                    </table>
+                </div>
+            </div>
+        </section>
+
+        <section class="card">
+            <h2>四、SwiftUI应用架构与生命周期关系图</h2>
+            <div class="svg-container">
+                <svg class="arch-svg" viewBox="0 0 900 500" xmlns="http://www.w3.org/2000/svg">
+                    <rect x="10" y="10" width="880" height="480" rx="10" fill="white" stroke="#81C784" stroke-width="3"/>
+                    <text x="450" y="50" text-anchor="middle" font-size="26" font-weight="bold" fill="#4CAF50">SwiftUI 应用架构与生命周期</text>
+                    
+                    <!-- 系统层 -->
+                    <rect x="50" y="80" width="800" height="80" rx="8" fill="#E1F5FE" stroke="#4FC3F7" stroke-width="2"/>
+                    <text x="450" y="110" text-anchor="middle" font-size="20" font-weight="bold" fill="#0288D1">iOS / iPadOS / macOS 系统</text>
+                    <text x="450" y="135" text-anchor="middle" font-size="14" fill="#0288D1">管理进程、内存、事件循环</text>
+                    
+                    <!-- App 层 -->
+                    <rect x="100" y="180" width="700" height="80" rx="8" fill="#F3E5F5" stroke="#BA68C8" stroke-width="2"/>
+                    <text x="450" y="210" text-anchor="middle" font-size="20" font-weight="bold" fill="#7B1FA2">SwiftUI App (@main 协议)</text>
+                    <text x="450" y="235" text-anchor="middle" font-size="14" fill="#7B1FA2">应用入口，管理 ScenePhase</text>
+                    
+                    <!-- Scene 层 -->
+                    <rect x="150" y="280" width="600" height="80" rx="8" fill="#E8F5E9" stroke="#66BB6A" stroke-width="2"/>
+                    <text x="450" y="310" text-anchor="middle" font-size="20" font-weight="bold" fill="#388E3C">WindowGroup / Scene</text>
+                    <text x="450" y="335" text-anchor="middle" font-size="14" fill="#388E3C">窗口管理，环境变量提供者</text>
+                    
+                    <!-- View 层 -->
+                    <rect x="200" y="380" width="500" height="80" rx="8" fill="#FFF3E0" stroke="#FFB74D" stroke-width="2"/>
+                    <text x="450" y="410" text-anchor="middle" font-size="20" font-weight="bold" fill="#EF6C00">视图层级 (View Hierarchy)</text>
+                    <text x="450" y="435" text-anchor="middle" font-size="14" fill="#EF6C00">包含 onAppear / onDisappear 生命周期</text>
+                    
+                    <!-- 连接箭头 -->
+                    <path d="M450 160 L 450 180" stroke="#333" stroke-width="3" fill="none" marker-end="url(#arrow2)"/>
+                    <path d="M450 260 L 450 280" stroke="#333" stroke-width="3" fill="none" marker-end="url(#arrow2)"/>
+                    <path d="M450 360 L 450 380" stroke="#333" stroke-width="3" fill="none" marker-end="url(#arrow2)"/>
+                    
+                    <!-- 侧边标注 -->
+                    <text x="30" y="120" text-anchor="start" font-size="16" font-weight="bold" fill="#2196F3">应用生命周期</text>
+                    <text x="30" y="145" text-anchor="start" font-size="14" fill="#666">didFinishLaunching, ScenePhase</text>
+                    
+                    <text x="30" y="220" text-anchor="start" font-size="16" font-weight="bold" fill="#2196F3">场景生命周期</text>
+                    <text x="30" y="245" text-anchor="start" font-size="14" fill="#666">active, inactive, background</text>
+                    
+                    <text x="30" y="320" text-anchor="start" font-size="16" font-weight="bold" fill="#2196F3">视图生命周期</text>
+                    <text x="30" y="345" text-anchor="start" font-size="14" fill="#666">onAppear, onDisappear</text>
+                    
+                    <defs>
+                        <marker id="arrow2" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
+                            <polygon points="0 0, 10 3.5, 0 7" fill="#333"/>
+                        </marker>
+                    </defs>
+                </svg>
+            </div>
+        </section>
+
+        <section class="card">
+            <h2>五、最佳实践与常见陷阱</h2>
+            <div class="warning-box">
+                <strong>⚠️ 常见陷阱：</strong>
+                <ul>
+                    <li><strong>内存泄漏：</strong>在 <code>onAppear</code> 中订阅数据源或创建定时器，却未在 <code>onDisappear</code> 中清理。</li>
+                    <li><strong>重复触发：</strong>未考虑 <code>onAppear</code> 可能在视图复用时多次调用，导致重复的网络请求。</li>
+                    <li><strong>状态竞争：</strong>在 <code>onDisappear</code> 中修改已被销毁或即将销毁的视图状态，引发运行时错误。</li>
+                    <li><strong>忽略应用后台状态：</strong>未在应用进入后台时暂停耗时任务，影响电池寿命和应用性能。</li>
+                </ul>
+            </div>
+
+            <div class="tip-box">
+                <strong>✅ 最佳实践：</strong>
+                <ol>
+                    <li><strong>配对使用：</strong>养成习惯，在 <code>onAppear</code> 中启动的任务，一定要在对应的 <code>onDisappear</code> 中清理。</li>
+                    <li><strong>使用任务标识：</strong>对于可能重复触发的任务，使用标识符（如 <code>@State</code> 布尔值）确保只执行一次。</li>
+                    <li><strong>响应应用状态：</strong>结合 <code>ScenePhase</code> 管理应用级别的资源（如暂停游戏、停止音频播放）。</li>
+                    <li><strong>数据驱动：</strong>尽可能使用 <code>@StateObject</code>、<code>ObservableObject</code> 来管理数据，让视图随数据自动更新，减少手动生命周期管理。</li>
+                    <li><strong>测试验证：</strong>在模拟器或真机上测试应用切换、中断等场景，确保生命周期回调按预期工作。</li>
+                </ol>
+            </div>
+
+            <h3>示例：安全的网络请求与清理</h3>
+            <pre><code>struct UserProfileView: View {
+    @StateObject private var viewModel = UserProfileViewModel()
+    @State private var isLoading = false
+    
+    var body: some View {
+        VStack {
+            if isLoading {
+                ProgressView()
+            } else {
+                Text(viewModel.userName)
+                // ... 其他用户信息
+            }
+        }
+        .onAppear {
+            // 使用Task来支持异步
+            Task {
+                isLoading = true
+                await viewModel.fetchUserData()
+                isLoading = false
+            }
+        }
+        .onDisappear {
+            // 取消ViewModel中可能正在进行的任务
+            viewModel.cancelPendingRequests()
+        }
+    }
+}
+
+class UserProfileViewModel: ObservableObject {
+    @Published var userName = ""
+    private var dataTask: URLSessionDataTask?
+    
+    func fetchUserData() async {
+        // 模拟网络请求
+        dataTask = URLSession.shared.dataTask(with: ...) { data, _, _ in
+            // 处理数据，更新 @Published 属性
+            DispatchQueue.main.async {
+                self.userName = "蓝海"
+            }
+        }
+        dataTask?.resume()
+    }
+    
+    func cancelPendingRequests() {
+        dataTask?.cancel()
+        dataTask = nil
+        print("已取消未完成的网络请求")
+    }
+}</code></pre>
+        </section>
+
+        <section class="card">
+            <h2>六、本章总结</h2>
+            <table>
+                <tr>
+                    <th>概念</th>
+                    <th>关键点</th>
+                    <th>对应修饰符/协议</th>
+                </tr>
+                <tr>
+                    <td><strong>视图生命周期</strong></td>
+                    <td>由视图的可见性驱动，非创建/销毁。用于管理视图专属的资源与任务。</td>
+                    <td><code>.onAppear</code>, <code>.onDisappear</code></td>
+                </tr>
+                <tr>
+                    <td><strong>应用生命周期</strong></td>
+                    <td>管理整个应用的状态转换（前台、后台、非活跃）。用于全局资源与状态管理。</td>
+                    <td><code>App</code> 协议, <code>ScenePhase</code>, <code>@UIApplicationDelegateAdaptor</code></td>
+                </tr>
+                <tr>
+                    <td><strong>核心原则</strong></td>
+                    <td colspan="2">“有始有终” - 在 <code>onAppear</code> 启动的任务，必须在 <code>onDisappear</code> 或相应的应用状态回调中清理，防止内存泄漏和资源浪费。</td>
+                </tr>
+                <tr>
+                    <td><strong>设计哲学</strong></td>
+                    <td colspan="2">SwiftUI 的生命周期更声明式、更轻量。开发者应专注于“在什么时机做什么事”，而将视图的创建、复用和销毁交给框架优化。</td>
+                </tr>
+            </table>
+            <p style="margin-top: 20px;">掌握生命周期是成为高级SwiftUI开发者的必经之路。它让你能构建出响应迅速、资源管理得当、用户体验流畅的应用程序。在接下来的章节中，我们将结合状态管理（State Management）和数据流（Data Flow），进一步深化对SwiftUI响应式架构的理解。</p>
+        </section>
+    </div>
+
+    <footer>
+        <div class="footer-text">公众号: 蓝海资料掘金营，微信 deep3321</div>
+        <div style="margin-top: 10px; font-size: 0.9rem; opacity: 0.9;">SwiftUI从入门到精通 · 第17章 · 生命周期</div>
+    </footer>
+</body>
+</html>

@@ -1,0 +1,497 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SwiftUI从入门到精通 - 网络请求与数据</title>
+    <style>
+        /* 中小学生色系：明快、活泼、柔和 */
+        :root {
+            --primary-blue: #4A90E2; /* 主色调蓝 */
+            --secondary-green: #7ED321; /* 辅助绿 */
+            --accent-yellow: #F8E71C; /* 强调黄 */
+            --background-light: #F5F7FA; /* 背景浅灰蓝 */
+            --card-white: #FFFFFF; /* 卡片白 */
+            --text-dark: #2C3E50; /* 正文深蓝灰 */
+            --text-light: #7F8C8D; /* 辅助文字灰 */
+            --border-color: #D1D9E6; /* 边框色 */
+        }
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', 'PingFang SC', 'Microsoft YaHei', sans-serif;
+        }
+        body {
+            background-color: var(--background-light);
+            color: var(--text-dark);
+            line-height: 1.6;
+            padding: 20px;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        /* 双边框设计 */
+        .double-border-container {
+            border: 3px solid var(--primary-blue);
+            border-radius: 20px;
+            padding: 5px;
+            background-color: var(--card-white);
+            box-shadow: 0 10px 30px rgba(74, 144, 226, 0.1);
+        }
+        .double-border-inner {
+            border: 2px dashed var(--secondary-green);
+            border-radius: 15px;
+            padding: 30px;
+        }
+        header {
+            text-align: center;
+            margin-bottom: 40px;
+            padding-bottom: 20px;
+            border-bottom: 3px solid var(--accent-yellow);
+        }
+        h1 {
+            color: var(--primary-blue);
+            font-size: 2.8rem;
+            margin-bottom: 10px;
+        }
+        .subtitle {
+            color: var(--text-light);
+            font-size: 1.2rem;
+            font-weight: normal;
+        }
+        h2 {
+            color: var(--secondary-green);
+            border-left: 5px solid var(--primary-blue);
+            padding-left: 15px;
+            margin: 30px 0 15px;
+            font-size: 1.8rem;
+        }
+        h3 {
+            color: var(--primary-blue);
+            margin: 20px 0 10px;
+            font-size: 1.4rem;
+        }
+        p {
+            margin-bottom: 15px;
+            text-align: justify;
+        }
+        ul, ol {
+            margin-left: 25px;
+            margin-bottom: 20px;
+        }
+        li {
+            margin-bottom: 8px;
+        }
+        .card {
+            background-color: var(--card-white);
+            border-radius: 12px;
+            padding: 20px;
+            margin: 20px 0;
+            border: 1px solid var(--border-color);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.03);
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 25px 0;
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.05);
+        }
+        th {
+            background-color: var(--primary-blue);
+            color: white;
+            padding: 15px;
+            text-align: left;
+        }
+        td {
+            padding: 15px;
+            border-bottom: 1px solid var(--border-color);
+        }
+        tr:nth-child(even) {
+            background-color: #f9f9f9;
+        }
+        tr:hover {
+            background-color: rgba(126, 211, 33, 0.1);
+        }
+        pre {
+            background-color: #2C3E50;
+            color: #ECF0F1;
+            padding: 20px;
+            border-radius: 10px;
+            overflow-x: auto;
+            margin: 20px 0;
+            border-left: 5px solid var(--secondary-green);
+            font-family: 'Courier New', monospace;
+            white-space: pre-wrap;
+            word-wrap: break-word;
+        }
+        code {
+            background-color: rgba(74, 144, 226, 0.1);
+            color: var(--primary-blue);
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-family: 'Courier New', monospace;
+        }
+        .architecture-svg {
+            width: 100%;
+            height: auto;
+            margin: 30px 0;
+            background-color: #f9fdf0;
+            border-radius: 12px;
+            padding: 20px;
+        }
+        .tip-box {
+            background-color: rgba(248, 231, 28, 0.15);
+            border-left: 5px solid var(--accent-yellow);
+            padding: 15px;
+            margin: 20px 0;
+            border-radius: 0 8px 8px 0;
+        }
+        footer {
+            text-align: center;
+            margin-top: 50px;
+            padding-top: 20px;
+            border-top: 2px solid var(--border-color);
+            color: var(--text-light);
+            font-size: 0.9rem;
+        }
+        .footer-content {
+            background-color: var(--primary-blue);
+            color: white;
+            padding: 15px;
+            border-radius: 10px;
+            display: inline-block;
+        }
+        .keyword {
+            font-weight: bold;
+            color: var(--primary-blue);
+        }
+        .flex-container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 20px;
+            margin: 20px 0;
+        }
+        .flex-item {
+            flex: 1;
+            min-width: 250px;
+            background: rgba(126, 211, 33, 0.08);
+            padding: 15px;
+            border-radius: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div class="double-border-container">
+        <div class="double-border-inner">
+            <header>
+                <h1>第18章：网络请求与数据</h1>
+                <p class="subtitle">结合URLSession、Combine在SwiftUI中进行网络数据获取与展示</p>
+                <svg width="200" height="10" style="display:block; margin:10px auto;">
+                    <line x1="0" y1="5" x2="200" y2="5" stroke="#4A90E2" stroke-width="3" stroke-dasharray="10,5"/>
+                </svg>
+            </header>
+
+            <section>
+                <h2>本章概述</h2>
+                <p>在现代移动应用开发中，<span class="keyword">网络数据获取</span>是核心功能之一。SwiftUI 作为声明式UI框架，与 Apple 原生的 <code>URLSession</code> 和响应式编程框架 <code>Combine</code> 相结合，能够构建出高效、可维护的网络数据流。本章将深入讲解如何利用这三者构建稳健的数据层，并在 SwiftUI 视图中优雅地展示数据。</p>
+
+                <div class="tip-box">
+                    <strong>学习目标：</strong>掌握在 SwiftUI 应用中发起网络请求、处理响应、管理状态以及展示数据的最佳实践。
+                </div>
+            </section>
+
+            <section>
+                <h2>核心技术栈</h2>
+                <div class="flex-container">
+                    <div class="flex-item">
+                        <h3>1. URLSession</h3>
+                        <p>Apple 提供的用于网络数据传输的任务类。它是进行 HTTP/HTTPS 请求的基础。</p>
+                    </div>
+                    <div class="flex-item">
+                        <h3>2. Combine</h3>
+                        <p>Apple 的响应式编程框架，用于处理随时间变化的值流（事件流）。</p>
+                    </div>
+                    <div class="flex-item">
+                        <h3>3. SwiftUI</h3>
+                        <p>声明式UI框架，通过状态驱动视图更新，与 Combine 的发布者天然契合。</p>
+                    </div>
+                </div>
+            </section>
+
+            <section>
+                <h2>架构流程图</h2>
+                <svg class="architecture-svg" viewBox="0 0 800 400" xmlns="http://www.w3.org/2000/svg">
+                    <!-- 背景 -->
+                    <rect width="800" height="400" fill="#F9FDF0" rx="10"/>
+                    <!-- 标题 -->
+                    <text x="400" y="40" text-anchor="middle" font-size="20" fill="#2C3E50" font-weight="bold">SwiftUI 网络数据流架构</text>
+
+                    <!-- 节点 -->
+                    <rect x="50" y="100" width="140" height="60" rx="10" fill="#4A90E2" stroke="#2C3E50" stroke-width="2"/>
+                    <text x="120" y="135" text-anchor="middle" fill="white" font-size="16">SwiftUI 视图</text>
+
+                    <rect x="250" y="100" width="140" height="60" rx="10" fill="#7ED321" stroke="#2C3E50" stroke-width="2"/>
+                    <text x="320" y="135" text-anchor="middle" fill="white" font-size="16">视图模型</text>
+                    <text x="320" y="155" text-anchor="middle" fill="white" font-size="12">(ObservableObject)</text>
+
+                    <rect x="450" y="100" width="140" height="60" rx="10" fill="#F8E71C" stroke="#2C3E50" stroke-width="2"/>
+                    <text x="520" y="135" text-anchor="middle" fill="#2C3E50" font-size="16">数据服务层</text>
+
+                    <rect x="650" y="100" width="140" height="60" rx="10" fill="#FF6B6B" stroke="#2C3E50" stroke-width="2"/>
+                    <text x="720" y="135" text-anchor="middle" fill="white" font-size="16">URLSession</text>
+                    <text x="720" y="155" text-anchor="middle" fill="white" font-size="12">网络请求</text>
+
+                    <!-- 数据流箭头 -->
+                    <path d="M190 130 L250 130" stroke="#2C3E50" stroke-width="3" fill="none" marker-end="url(#arrowhead)"/>
+                    <path d="M390 130 L450 130" stroke="#2C3E50" stroke-width="3" fill="none" marker-end="url(#arrowhead)"/>
+                    <path d="M590 130 L650 130" stroke="#2C3E50" stroke-width="3" fill="none" marker-end="url(#arrowhead)"/>
+
+                    <!-- 响应流箭头（虚线） -->
+                    <path d="M650 160 L590 160" stroke="#2C3E50" stroke-width="2" stroke-dasharray="5,5" fill="none" marker-end="url(#arrowhead)"/>
+                    <path d="M450 160 L390 160" stroke="#2C3E50" stroke-width="2" stroke-dasharray="5,5" fill="none" marker-end="url(#arrowhead)"/>
+                    <path d="M250 160 L190 160" stroke="#2C3E50" stroke-width="2" stroke-dasharray="5,5" fill="none" marker-end="url(#arrowhead)"/>
+
+                    <!-- 箭头标记定义 -->
+                    <defs>
+                        <marker id="arrowhead" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
+                            <polygon points="0 0, 10 3.5, 0 7" fill="#2C3E50"/>
+                        </marker>
+                    </defs>
+
+                    <!-- 说明文字 -->
+                    <text x="220" y="90" text-anchor="middle" fill="#7F8C8D" font-size="14">发送 Action</text>
+                    <text x="580" y="90" text-anchor="middle" fill="#7F8C8D" font-size="14">发起请求</text>
+                    <text x="580" y="200" text-anchor="middle" fill="#7F8C8D" font-size="14">返回数据/错误</text>
+                    <text x="220" y="200" text-anchor="middle" fill="#7F8C8D" font-size="14">更新 @Published 状态</text>
+                </svg>
+                <p class="tip-box">该架构遵循 <strong>MVVM（Model-View-ViewModel）</strong> 模式，利用 Combine 的发布者将网络数据流绑定到 SwiftUI 视图的状态上，实现单向数据流，使代码更清晰、更易测试。</p>
+            </section>
+
+            <section>
+                <h2>关键步骤与代码实现</h2>
+
+                <h3>1. 定义数据模型 (Model)</h3>
+                <p>首先，根据 API 返回的 JSON 结构定义对应的 Swift Codable 模型。</p>
+                <pre><code>import Foundation
+
+// 示例：从 JSONPlaceholder 获取帖子数据
+struct Post: Codable, Identifiable {
+    let id: Int
+    let userId: Int
+    let title: String
+    let body: String
+}</code></pre>
+
+                <h3>2. 创建网络服务层 (Network Service)</h3>
+                <p>使用 <code>URLSession</code> 和 <code>Combine</code> 封装可复用的网络请求方法。</p>
+                <pre><code>import Foundation
+import Combine
+
+class NetworkService {
+    static let shared = NetworkService()
+    private let baseURL = "https://jsonplaceholder.typicode.com"
+    private var cancellables = Set&lt;AnyCancellable&gt;()
+
+    private init() {}
+
+    // 泛型方法，用于获取并解码 JSON 数据
+    func fetch&lt;T: Decodable&gt;(_ endpoint: String) -> AnyPublisher&lt;T, Error&gt; {
+        let url = URL(string: baseURL + endpoint)!
+        return URLSession.shared.dataTaskPublisher(for: url)
+            .map(\.data) // 提取数据
+            .decode(type: T.self, decoder: JSONDecoder()) // 解码为模型
+            .receive(on: DispatchQueue.main) // 在主线程接收
+            .eraseToAnyPublisher() // 类型擦除，便于返回
+    }
+
+    // 示例：获取帖子列表
+    func fetchPosts() -> AnyPublisher&lt;[Post], Error&gt; {
+        return fetch("/posts")
+    }
+}</code></pre>
+
+                <h3>3. 构建视图模型 (ViewModel)</h3>
+                <p>视图模型负责管理状态、调用网络服务，并通过 <code>@Published</code> 属性通知视图更新。</p>
+                <pre><code>import Foundation
+import Combine
+
+class PostViewModel: ObservableObject {
+    @Published var posts: [Post] = []
+    @Published var isLoading = false
+    @Published var errorMessage: String?
+
+    private let networkService = NetworkService.shared
+    private var cancellables = Set&lt;AnyCancellable&gt;()
+
+    func loadPosts() {
+        isLoading = true
+        errorMessage = nil
+
+        networkService.fetchPosts()
+            .sink(receiveCompletion: { [weak self] completion in
+                self?.isLoading = false
+                if case .failure(let error) = completion {
+                    self?.errorMessage = error.localizedDescription
+                }
+            }, receiveValue: { [weak self] fetchedPosts in
+                self?.posts = fetchedPosts
+            })
+            .store(in: &cancellables) // 存储订阅，管理生命周期
+    }
+}</code></pre>
+
+                <h3>4. 构建 SwiftUI 视图 (View)</h3>
+                <p>视图订阅视图模型中的 <code>@Published</code> 属性，并根据状态展示不同的UI。</p>
+                <pre><code>import SwiftUI
+
+struct PostListView: View {
+    @StateObject private var viewModel = PostViewModel()
+
+    var body: some View {
+        NavigationView {
+            VStack {
+                if viewModel.isLoading {
+                    ProgressView("加载中...")
+                        .scaleEffect(1.5)
+                        .padding()
+                } else if let error = viewModel.errorMessage {
+                    VStack {
+                        Image(systemName: "exclamationmark.triangle")
+                            .font(.largeTitle)
+                            .foregroundColor(.orange)
+                        Text("出错啦")
+                            .font(.headline)
+                        Text(error)
+                            .font(.caption)
+                            .foregroundColor(.gray)
+                            .multilineTextAlignment(.center)
+                        Button("重试") {
+                            viewModel.loadPosts()
+                        }
+                        .padding()
+                        .background(Color.blue)
+                        .foregroundColor(.white)
+                        .cornerRadius(8)
+                    }
+                    .padding()
+                } else {
+                    List(viewModel.posts) { post in
+                        VStack(alignment: .leading, spacing: 8) {
+                            Text(post.title)
+                                .font(.headline)
+                                .foregroundColor(.primary)
+                            Text(post.body)
+                                .font(.body)
+                                .foregroundColor(.secondary)
+                                .lineLimit(2)
+                        }
+                        .padding(.vertical, 5)
+                    }
+                    .listStyle(PlainListStyle())
+                }
+            }
+            .navigationTitle("帖子列表")
+            .toolbar {
+                ToolbarItem(placement: .navigationBarTrailing) {
+                    Button(action: {
+                        viewModel.loadPosts()
+                    }) {
+                        Image(systemName: "arrow.clockwise")
+                    }
+                    .disabled(viewModel.isLoading)
+                }
+            }
+            .onAppear {
+                if viewModel.posts.isEmpty {
+                    viewModel.loadPosts()
+                }
+            }
+        }
+    }
+}</code></pre>
+            </section>
+
+            <section>
+                <h2>Combine 操作符速查表</h2>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>操作符</th>
+                            <th>功能描述</th>
+                            <th>使用场景</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><code>map</code></td>
+                            <td>转换发布者输出的值。</td>
+                            <td>从 <code>DataTaskPublisher.Output</code> 中提取 <code>data</code>。</td>
+                        </tr>
+                        <tr>
+                            <td><code>decode</code></td>
+                            <td>将数据解码为指定类型的模型。</td>
+                            <td>将 JSON <code>Data</code> 解码为 <code>Post</code> 数组。</td>
+                        </tr>
+                        <tr>
+                            <td><code>catch</code></td>
+                            <td>捕获错误并返回一个新的发布者。</td>
+                            <td>网络错误时返回一个空数组或默认值。</td>
+                        </tr>
+                        <tr>
+                            <td><code>receive(on:)</code></td>
+                            <td>指定接收结果的调度队列。</td>
+                            <td>确保 UI 更新在主线程 <code>DispatchQueue.main</code>。</td>
+                        </tr>
+                        <tr>
+                            <td><code>sink</code></td>
+                            <td>订阅发布者，接收完成事件和值。</td>
+                            <td>在视图模型中接收网络数据或错误。</td>
+                        </tr>
+                        <tr>
+                            <td><code>store(in:)</code></td>
+                            <td>存储订阅，管理其生命周期。</td>
+                            <td>防止订阅被提前释放，通常存储在 <code>Set&lt;AnyCancellable&gt;</code> 中。</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </section>
+
+            <section>
+                <h2>最佳实践与注意事项</h2>
+                <ul>
+                    <li><strong>错误处理：</strong>务必使用 <code>catch</code> 或 <code>sink</code> 的 <code>receiveCompletion</code> 处理网络错误，给用户友好提示。</li>
+                    <li><strong>内存管理：</strong>使用 <code>store(in: &cancellables)</code> 妥善管理 Combine 订阅，避免内存泄漏。</li>
+                    <li><strong>线程安全：</strong>使用 <code>receive(on:)</code> 确保 UI 更新发生在主线程。</li>
+                    <li><strong>状态管理：</strong>在视图模型中清晰定义加载、成功、失败等状态，驱动视图正确显示。</li>
+                    <li><strong>可测试性：</strong>通过依赖注入（如将 <code>NetworkService</code> 作为协议注入视图模型）可以方便地编写单元测试。</li>
+                    <li><strong>用户体验：</strong>在加载时显示进度指示器，提供下拉刷新或重试按钮。</li>
+                </ul>
+            </section>
+
+            <section>
+                <h2>本章总结</h2>
+                <div class="card">
+                    <p>通过本章学习，我们掌握了在 SwiftUI 应用中集成网络功能的完整方案：</p>
+                    <ol>
+                        <li>使用 <strong>URLSession.dataTaskPublisher</strong> 发起网络请求。</li>
+                        <li>利用 <strong>Combine</strong> 框架以声明式和响应式的方式处理异步数据流和错误。</li>
+                        <li>遵循 <strong>MVVM</strong> 模式，构建清晰的数据流（视图 → 视图模型 → 服务层 → 网络）。</li>
+                        <li>在 SwiftUI 视图中，通过 <strong>@StateObject</strong> 和 <strong>@Published</strong> 实现数据与UI的自动绑定与更新。</li>
+                    </ol>
+                    <p>这套组合拳使得网络请求代码更简洁、更健壮，并且与 SwiftUI 的声明式特性完美融合，是开发现代 iOS/macOS 应用的必备技能。</p>
+                </div>
+            </section>
+
+            <footer>
+                <p>更多精彩内容与实战项目，请关注</p>
+                <div class="footer-content">
+                    公众号: 蓝海资料掘金营，微信 deep3321
+                </div>
+                <p style="margin-top: 15px;">© 《SwiftUI从入门到精通》课程版权所有</p>
+            </footer>
+        </div>
+    </div>
+</body>
+</html>

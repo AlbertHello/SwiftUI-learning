@@ -1,0 +1,407 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>28、App Clip开发：开发轻量级的App Clip应用 - SwiftUI从入门到精通</title>
+    <style>
+        :root {
+            --primary: #4CAF50; /* 青草绿 */
+            --secondary: #FF9800; /* 活力橙 */
+            --accent: #2196F3; /* 天空蓝 */
+            --light: #FFF9C4; /* 淡鹅黄 */
+            --background: #F5F5F5; /* 浅灰背景 */
+            --text: #333333;
+            --border: #BDBDBD;
+        }
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', 'Microsoft YaHei', sans-serif;
+        }
+        body {
+            background-color: var(--background);
+            color: var(--text);
+            line-height: 1.6;
+            padding: 20px;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        .container {
+            background-color: white;
+            border: 8px double var(--primary);
+            border-radius: 20px;
+            padding: 40px;
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.1);
+            position: relative;
+            overflow: hidden;
+        }
+        .container::before {
+            content: '';
+            position: absolute;
+            top: -10px;
+            left: -10px;
+            right: -10px;
+            bottom: -10px;
+            border: 4px solid var(--secondary);
+            border-radius: 28px;
+            pointer-events: none;
+            z-index: -1;
+        }
+        header {
+            text-align: center;
+            margin-bottom: 40px;
+            padding-bottom: 25px;
+            border-bottom: 3px dashed var(--accent);
+        }
+        h1 {
+            color: var(--primary);
+            font-size: 2.8rem;
+            margin-bottom: 15px;
+            text-shadow: 2px 2px 0px var(--light);
+        }
+        .subtitle {
+            color: var(--secondary);
+            font-size: 1.4rem;
+            font-weight: 300;
+        }
+        h2 {
+            color: var(--accent);
+            border-left: 6px solid var(--secondary);
+            padding-left: 15px;
+            margin: 30px 0 20px;
+            font-size: 1.8rem;
+        }
+        h3 {
+            color: var(--primary);
+            margin: 25px 0 15px;
+            font-size: 1.4rem;
+        }
+        p {
+            margin-bottom: 18px;
+            text-align: justify;
+        }
+        ul, ol {
+            margin-left: 25px;
+            margin-bottom: 25px;
+        }
+        li {
+            margin-bottom: 10px;
+            padding-left: 5px;
+        }
+        .highlight {
+            background-color: var(--light);
+            padding: 3px 8px;
+            border-radius: 5px;
+            font-weight: bold;
+            color: #d84315;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 25px 0;
+            border: 3px solid var(--primary);
+            border-radius: 10px;
+            overflow: hidden;
+        }
+        th {
+            background-color: var(--primary);
+            color: white;
+            padding: 15px;
+            text-align: left;
+            font-size: 1.1rem;
+        }
+        td {
+            padding: 15px;
+            border-bottom: 1px solid var(--border);
+            vertical-align: top;
+        }
+        tr:nth-child(even) {
+            background-color: #f9f9f9;
+        }
+        tr:hover {
+            background-color: #E8F5E9;
+        }
+        .code-block {
+            background-color: #2d2d2d;
+            color: #f8f8f2;
+            padding: 20px;
+            border-radius: 10px;
+            margin: 25px 0;
+            overflow-x: auto;
+            border-left: 5px solid var(--secondary);
+            font-family: 'Courier New', monospace;
+        }
+        .architecture {
+            display: flex;
+            justify-content: center;
+            margin: 40px 0;
+        }
+        .architecture svg {
+            max-width: 100%;
+            height: auto;
+            border-radius: 10px;
+            background-color: white;
+            padding: 20px;
+            border: 3px solid var(--accent);
+        }
+        .tip-box {
+            background-color: #E3F2FD;
+            border-left: 5px solid var(--accent);
+            padding: 20px;
+            margin: 25px 0;
+            border-radius: 0 10px 10px 0;
+        }
+        .tip-box h4 {
+            color: var(--accent);
+            margin-bottom: 10px;
+        }
+        footer {
+            text-align: center;
+            margin-top: 50px;
+            padding-top: 25px;
+            border-top: 3px dashed var(--primary);
+            color: #666;
+            font-size: 1.1rem;
+            font-weight: bold;
+        }
+        .step-list {
+            counter-reset: step-counter;
+            list-style-type: none;
+        }
+        .step-list li {
+            counter-increment: step-counter;
+            margin-bottom: 25px;
+            padding-left: 50px;
+            position: relative;
+        }
+        .step-list li::before {
+            content: counter(step-counter);
+            background-color: var(--secondary);
+            color: white;
+            font-weight: bold;
+            width: 35px;
+            height: 35px;
+            border-radius: 50%;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            position: absolute;
+            left: 0;
+            top: 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>第28章：App Clip开发</h1>
+            <p class="subtitle">开发轻量级的App Clip应用</p>
+        </header>
+
+        <section>
+            <p>欢迎来到《SwiftUI从入门到精通》课程的第28章！本章我们将探索一个非常有趣且实用的主题——<span class="highlight">App Clip</span>。App Clip是苹果生态系统中一种轻量级的应用体验，它允许用户在需要时快速访问应用的核心功能，而无需下载完整的应用程序。这就像应用的“试吃版”，小巧、快速、即用即走。</p>
+        </section>
+
+        <section>
+            <h2>什么是App Clip？</h2>
+            <p>App Clip是iOS 14及更高版本引入的一项功能。它是一个轻量级应用（通常小于10MB），旨在为用户提供快速、情境化的体验。用户可以通过NFC标签、扫描二维码、点击Safari中的智能应用横幅或地图中的地点卡来触发App Clip。</p>
+
+            <div class="architecture">
+                <svg viewBox="0 0 800 300" xmlns="http://www.w3.org/2000/svg">
+                    <rect x="50" y="50" width="200" height="80" rx="10" fill="#4CAF50" stroke="#2E7D32" stroke-width="2"/>
+                    <text x="150" y="95" text-anchor="middle" fill="white" font-size="18" font-weight="bold">用户触点</text>
+                    <text x="150" y="130" text-anchor="middle" fill="white" font-size="14">(NFC/二维码/链接)</text>
+
+                    <path d="M250 90 L350 90" stroke="#FF9800" stroke-width="3" marker-end="url(#arrow)"/>
+                    <rect x="350" y="50" width="200" height="80" rx="10" fill="#2196F3" stroke="#1565C0" stroke-width="2"/>
+                    <text x="450" y="95" text-anchor="middle" fill="white" font-size="18" font-weight="bold">App Clip</text>
+                    <text x="450" y="130" text-anchor="middle" fill="white" font-size="14">(轻量级体验)</text>
+
+                    <path d="M550 90 L650 90" stroke="#FF9800" stroke-width="3" marker-end="url(#arrow)"/>
+                    <rect x="650" y="50" width="100" height="80" rx="10" fill="#9C27B0" stroke="#6A1B9A" stroke-width="2"/>
+                    <text x="700" y="95" text-anchor="middle" fill="white" font-size="18" font-weight="bold">主App</text>
+                    <text x="700" y="130" text-anchor="middle" fill="white" font-size="14">(可选升级)</text>
+
+                    <defs>
+                        <marker id="arrow" markerWidth="10" markerHeight="10" refX="9" refY="3" orient="auto" markerUnits="strokeWidth">
+                            <path d="M0,0 L0,6 L9,3 z" fill="#FF9800"/>
+                        </marker>
+                    </defs>
+                </svg>
+            </div>
+
+            <div class="tip-box">
+                <h4>💡 核心概念</h4>
+                <p>App Clip不是独立的应用程序，而是与主应用共享同一个Bundle Identifier的扩展。它拥有独立的Target和代码，但最终会打包在主应用的IPA文件中。</p>
+            </div>
+        </section>
+
+        <section>
+            <h2>App Clip的核心特性与限制</h2>
+            <table>
+                <thead>
+                    <tr>
+                        <th>特性/方面</th>
+                        <th>说明</th>
+                        <th>注意事项</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><strong>大小限制</strong></td>
+                        <td>编译后体积必须 <strong>&lt; 10MB</strong></td>
+                        <td>需精心设计资源，优先使用系统字体和SF Symbols</td>
+                    </tr>
+                    <tr>
+                        <td><strong>生命周期</strong></td>
+                        <td>短暂，系统可能在8小时后或内存紧张时清理</td>
+                        <td>状态应及时保存，考虑使用<code>AppClipConfiguration</code></td>
+                    </tr>
+                    <tr>
+                        <td><strong>功能范围</strong></td>
+                        <td>聚焦单一、明确的任务（如点餐、支付、租车）</td>
+                        <td>避免复杂导航和过多功能</td>
+                    </tr>
+                    <tr>
+                        <td><strong>网络权限</strong></td>
+                        <td>默认有网络访问权限</td>
+                        <td>需处理首次启动时的网络请求</td>
+                    </tr>
+                    <tr>
+                        <td><strong>数据存储</strong></td>
+                        <td>可使用<code>UserDefaults</code>、<code>Keychain</code>（共享组）和<code>onDeviceInvocation</code></td>
+                        <td>数据可能被系统清除</td>
+                    </tr>
+                </tbody>
+            </table>
+        </section>
+
+        <section>
+            <h2>开发一个App Clip的步骤</h2>
+            <ol class="step-list">
+                <li>
+                    <h3>在Xcode项目中添加App Clip Target</h3>
+                    <p>通过 <strong>File → New → Target...</strong> 选择 <strong>App Clip</strong> 模板。确保其Bundle Identifier是主App的Bundle Identifier加上 <code>.Clip</code> 后缀。</p>
+                </li>
+                <li>
+                    <h3>设计轻量级UI</h3>
+                    <p>使用SwiftUI构建一个简洁、专注的界面。移除所有非核心元素，优先使用系统组件。</p>
+                    <div class="code-block">
+<pre><code>import SwiftUI
+
+struct OrderCoffeeView: View {
+    @State private var coffeeType = "拿铁"
+    @State private var size = "中杯"
+    let coffeeTypes = ["美式", "拿铁", "卡布奇诺", "摩卡"]
+
+    var body: some View {
+        NavigationView {
+            Form {
+                Picker("咖啡类型", selection: $coffeeType) {
+                    ForEach(coffeeTypes, id: \ .self) { type in
+                        Text(type)
+                    }
+                }
+                Picker("规格", selection: $size) {
+                    Text("小杯").tag("小杯")
+                    Text("中杯").tag("中杯")
+                    Text("大杯").tag("大杯")
+                }
+                Section {
+                    Button("立即下单") {
+                        // 处理下单逻辑
+                        placeOrder()
+                    }
+                    .frame(maxWidth: .infinity)
+                    .foregroundColor(.white)
+                    .padding()
+                    .background(Color.orange)
+                    .cornerRadius(10)
+                }
+            }
+            .navigationTitle("快速点咖啡")
+        }
+    }
+
+    func placeOrder() {
+        // 网络请求等
+    }
+}</code></pre>
+                    </div>
+                </li>
+                <li>
+                    <h3>配置关联的域名 (Associated Domains)</h3>
+                    <p>在Signing & Capabilities中为App Clip Target添加 <code>Associated Domains</code> 能力。格式为：<code>appclips:yourdomain.com</code>。这是触发App Clip的关键。</p>
+                </li>
+                <li>
+                    <h3>创建并部署Apple App Site Association (AASA) 文件</h3>
+                    <p>在你的网站 <code>https://yourdomain.com/.well-known/apple-app-site-association</code> 放置一个JSON文件，将你的App Clip与URL关联起来。</p>
+                    <div class="code-block">
+<pre><code>{
+  "appclips": {
+    "apps": ["ABCED12345.com.yourcompany.app.clip"]
+  }
+}</code></pre>
+                    </div>
+                </li>
+                <li>
+                    <h3>处理传入的URL</h3>
+                    <p>在App Clip的 <code>App</code> 结构中，使用 <code>onContinueUserActivity</code> 或 <code>openURL</code> 上下文来处理启动时传入的数据。</p>
+                    <div class="code-block">
+<pre><code>@main
+struct MyAppClip: App {
+    @StateObject private var orderModel = OrderModel()
+
+    var body: some Scene {
+        WindowGroup {
+            ContentView()
+                .environmentObject(orderModel)
+                .onContinueUserActivity(NSUserActivityTypeBrowsingWeb) { userActivity in
+                    guard let incomingURL = userActivity.webpageURL,
+                          let components = URLComponents(url: incomingURL, resolvingAgainstBaseURL: true),
+                          let queryItems = components.queryItems else {
+                        return
+                    }
+                    // 解析URL参数，例如 productId=123
+                    if let productItem = queryItems.first(where: { $0.name == "productId" }),
+                       let productId = productItem.value {
+                        orderModel.selectedProductId = productId
+                    }
+                }
+        }
+    }
+}</code></pre>
+                    </div>
+                </li>
+                <li>
+                    <h3>测试与分发</h3>
+                    <p>使用Xcode的本地体验（Local Experience）功能进行测试，或通过TestFlight分发。确保测试各种触发方式（如URL、NFC）。</p>
+                </li>
+            </ol>
+        </section>
+
+        <section>
+            <h2>最佳实践与设计原则</h2>
+            <ul>
+                <li><strong>单一任务原则：</strong> 一个App Clip只做一件事，并且要做好。例如，一个餐厅的App Clip只用于快速点外卖，而不是浏览完整菜单和写评论。</li>
+                <li><strong>极速启动：</strong> 优化代码和资源，确保启动时间在几秒内。避免复杂的初始化逻辑。</li>
+                <li><strong>清晰的升级路径：</strong> 在适当的位置（如完成任务后）提供“获取完整应用”的提示，引导用户下载主App。</li>
+                <li><strong>情境化设计：</strong> UI和流程应根据触发它的具体情境来设计。例如，通过扫描共享单车二维码触发的App Clip，界面应直接显示开锁和付款。</li>
+                <li><strong>隐私优先：</strong> 明确告知用户数据使用方式，仅在必要时请求权限。App Clip可以使用 <code>Sign in with Apple</code> 进行快速、安全的身份验证。</li>
+            </ul>
+        </section>
+
+        <section>
+            <h2>总结</h2>
+            <p>App Clip是连接物理世界与数字服务的强大桥梁，它通过提供即时、无摩擦的体验，极大地降低了用户的使用门槛。作为SwiftUI开发者，掌握App Clip开发意味着你能为用户创造更便捷、更友好的接触点。记住，成功的App Clip在于 <span class="highlight">“小、快、准”</span>——体积小、启动快、功能精准。现在，就尝试为你自己的应用设计一个精彩的App Clip吧！</p>
+        </section>
+
+        <footer>
+            <p>公众号: 蓝海资料掘金营，微信 deep3321</p>
+            <p>《SwiftUI从入门到精通》课程 · 第28章</p>
+        </footer>
+    </div>
+</body>
+</html>
